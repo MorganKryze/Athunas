@@ -3,3 +3,6 @@
 
 # Python
 __pycache__/
+
+# KiCad
+KiCad/Rpi_matrix_adapter/Rpi_matrix_adapter-backups/*
