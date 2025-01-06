@@ -1,96 +1,76 @@
-# Athunas
+![screenshot](./docs/assets/img/screenshot.png)
 
-## Wiring
+## Overview
 
-A plat le wiring de la matrice ressemble à:
+> Athunas is a matrix led project, controlled by a Raspberry Pi zero.
 
-| Gauche | Droite |
-| :----: | :----: |
-|   R1   |   G1   |
-|   B1   |  GND   |
-|   R2   |   G2   |
-|   B2   |  GND   |
-|   A    |   B    |
-|   C    |   D    |
-|  CLK   | STROBE |
-|  OE-   |  GND   |
+The purpose of the project is to provide a framework to add apps and functionality to the "product" (the matrix led + raspberry & accessories).
 
-Back Pi pinout is:
+## Getting Started
 
-| Connection | Pin | Pin | Connection |
-| ---------: | :-: | :-: | :--------- |
-|          - |  2  |  1  | -          |
-|          - |  4  |  3  | -          |
-|    **GND** |  6  |  5  | -          |
-|          - |  8  |  7  | **strobe** |
-|          - | 10  |  9  | -          |
-|    **OE-** | 12  | 11  | **clock**  |
-|          - | 14  | 13  | **G1**     |
-|      **B** | 16  | 15  | **A**      |
-|      **C** | 18  | 17  | -          |
-|          - | 20  | 19  | **B2**     |
-|      **D** | 22  | 21  | **G2**     |
-|     **R2** | 24  | 23  | **R1**     |
-|     **B1** | 26  | 25  | -          |
-|          - | 28  | 27  | -          |
-|          - | 30  | 29  | -          |
-|          - | 32  | 31  | -          |
-|    **GND** | 34  | 33  | -          |
-|          - | 36  | 35  | -          |
-|          - | 38  | 37  | -          |
-|          - | 40  | 39  | **GND**    |
+- [Overview](#overview)
+- [Getting Started](#getting-started)
+  - [Documentation](#documentation)
+  - [Setting up](#setting-up)
+    - [Prerequisites](#prerequisites)
+    - [Install](#install)
+  - [Troubleshooting](#troubleshooting)
+  - [Future improvements](#future-improvements)
+  - [Contributing](#contributing)
+  - [License](#license)
 
-Front Pi pinout is:
+### Documentation
 
-| Connection | Pin | Pin | Connection |
-| ---------: | :-: | :-: | :--------- |
-|          - |  1  |  2  | -          |
-|          - |  3  |  4  | -          |
-|          - |  5  |  6  | **GND**    |
-| **strobe** |  7  |  8  | -          |
-|          - |  9  | 10  | **E**      |
-|  **clock** | 11  | 12  | **OE-**    |
-|     **G1** | 13  | 14  | -          |
-|      **A** | 15  | 16  | **B**      |
-|          - | 17  | 18  | **C**      |
-|     **B2** | 19  | 20  | -          |
-|     **G2** | 21  | 22  | **D**      |
-|     **R1** | 23  | 24  | **R2**     |
-|          - | 25  | 26  | **B1**     |
-|          - | 27  | 28  | -          |
-|          - | 29  | 30  | -          |
-|          - | 31  | 32  | -          |
-|          - | 33  | 34  | **GND**    |
-|          - | 35  | 36  | -          |
-|          - | 37  | 38  | -          |
-|    **GND** | 39  | 40  | -          |
+Provide where to find to the documentation of the project. (ex: [Structure of the project](./docs/STRUCTURE.md))
 
-After the wiring, type:
+It may include a link to an important [reference](https://example.com).
 
-install git
+### Setting up
+
+#### Prerequisites
+
+- Matrix led (price, link, etc.);
+- Raspberry Pi zero
+- Power supply
+- SD card
+- Raspberry pi imager
+- Encoder
+- ...
+
+#### Install
+
+First, follow the wiring instructions in the [wiring](./docs/wiring.md)guide.
+
+---
+
+[WIP]
+
+Then, from on hand, you may install the project by running this command on the Raspberry Pi:
 
 ```bash
-sudo apt-get install git
+curl -sSL https://raw.githubusercontent.com/MorganKryze/Athunas/refs/heads/main/installation.sh | bash
 ```
 
-install the lib:
+---
 
-```bash
-git clone https://github.com/hzeller/rpi-rgb-led-matrix.git
-cd rpi-rgb-led-matrix
-make -C examples-api-use
-```
+[RECOMMENDED]
 
-Launch a script:
+Or, on the other hand do every step manually by following the [installation guide](./docs/installation.md).
 
-```bash
-cd examples-api-use
+### Troubleshooting
 
-sudo ./demo -D 0 --led-no-hardware-pulse --led-rows=32 --led-cols=64
-```
+For any issues related to the wiring, check the [wiring](./docs/wiring.md) guide or the guide from the [rpi-rgb-led-matrix repository](https://github.com/hzeller/rpi-rgb-led-matrix/blob/master/wiring.md).
 
-If you get any error with the display:
+For any other issues, feel free to [open an issue](https://github.com/MorganKryze/Athunas/issues) on the repository.
 
-- Check the wiring;
-- Add/remove: `--led-no-hardware-pulse`;
-- Breathe in, breathe out, do it again.
+### Future improvements
+
+- ...
+
+### Contributing
+
+If you want to contribute to the project, you can follow the steps described in the [CONTRIBUTING](./.github/CONTRIBUTING) file.
+
+### License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE) file for details.
