@@ -39,7 +39,7 @@ It may include a link to an important [reference](https://example.com).
 
 #### Install
 
-First, follow the wiring instructions in the [wiring](./docs/wiring.md)guide.
+First, follow the wiring instructions in the [wiring](./docs/wiring.md) guide.
 
 ---
 

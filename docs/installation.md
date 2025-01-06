@@ -2,6 +2,8 @@
 
 > This is a step-by-step guide to install the project on your local machine.
 
+- Flash the Raspberry Pi OS Lite image to your SD card using the Raspberry Pi Imager. Then boot your Raspberry Pi Zero 2W (or any other model) with the SD card.
+
 - Connect to your machine via SSH **or** using a monitor + keyboard. Be sure to be connected to the same network.
 
 ```bash
