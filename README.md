@@ -21,9 +21,9 @@ The purpose of the project is to provide a framework to add apps and functionali
 
 ### Documentation
 
-Provide where to find to the documentation of the project. (ex: [Structure of the project](./docs/STRUCTURE.md))
+Provide where to find to the documentation of the project. (ex: [Structure of the project](...))
 
-It may include a link to an important [reference](https://example.com).
+It may include a link to an important [reference](...).
 
 ### Setting up
 
