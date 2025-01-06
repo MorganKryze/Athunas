@@ -15,6 +15,7 @@ ssh rasp@rpi.local
 ```bash
 sudo apt-get update -y
 sudo apt-get upgrade -y
+pip install --upgrade pip
 ```
 
 - Install `git`.
@@ -54,12 +55,27 @@ sudo ./examples-api-use/demo -D 0 --led-no-hardware-pulse --led-rows=32 --led-co
 > - Add/remove: `--led-no-hardware-pulse`;
 > - Breathe in, breathe out, do it again.
 
+- Install additional dependencies.
+
+```bash
+sudo apt-get install libsixel-dev python3-tk -y
+```
+
 - Install the Python dependencies and virtual environment, this may take a while.
 
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+```
+
+- Then install the `rpi-rgb-led-matrix` Python library.
+
+```bash
+cd rpi-rgb-led-matrix/
+make build-python
+make install-python
+cd ..
 ```
 
 - Finally, run the project.
