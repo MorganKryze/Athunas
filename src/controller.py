@@ -131,10 +131,12 @@ def main():
     )
     parentdir = os.path.dirname(currentdir)
     sys.path.append(parentdir + "/rpi-rgb-led-matrix/bindings/python")
-    try:
-        from rgbmatrix import RGBMatrix, RGBMatrixOptions
-    except ImportError:
-        from RGBMatrixEmulator import RGBMatrix, RGBMatrixOptions
+    # try:
+    #     from rgbmatrix import RGBMatrix, RGBMatrixOptions
+    # except ImportError:
+    #     from RGBMatrixEmulator import RGBMatrix, RGBMatrixOptions
+    
+    from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
     options = RGBMatrixOptions()
     options.rows = 32
