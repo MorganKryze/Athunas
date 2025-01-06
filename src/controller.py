@@ -40,7 +40,7 @@ from apps_v2 import (
     life,
     #spotify_player,
 )
-from modules import  notification_module#, weather_module, spotify_module
+from modules import  notification_module, weather_module#, spotify_module
 
 sw = 13
 enc_A = 5
@@ -112,7 +112,7 @@ def main():
     }
 
     modules = {
-        # "weather": weather_module.WeatherModule(config),
+        "weather": weather_module.WeatherModule(config),
         "notifications": notification_module.NotificationModule(config),
         # "spotify": spotify_module.SpotifyModule(config),
     }
