@@ -33,12 +33,12 @@ import select
 
 from apps_v2 import (
     main_screen,
-    notion_v2,
-    subcount,
+    #notion_v2,
+    #subcount,
     gif_viewer,
-    weather,
+    #weather,
     life,
-    spotify_player,
+    #spotify_player,
 )
 from modules import weather_module, notification_module, spotify_module
 

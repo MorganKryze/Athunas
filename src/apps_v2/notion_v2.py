@@ -190,7 +190,7 @@ def fetchNotionAsync(queue, token, databaseID):
         }
 
         res = requests.request("POST", queryURL, headers=headers, data = json.dumps(query_params))
-        if res.status_code is not 200:
+        if res.status_code != 200:
             print("[Notion] Status Returned is " + str(res.status_code))
             print(res.json())
         else:
