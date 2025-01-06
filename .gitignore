@@ -8,6 +8,7 @@ __pycache__/
 KiCad/Rpi_matrix_adapter/Rpi_matrix_adapter-backups/*
 
 # Compiled source
+rpi-rgb-led-matrix/bindings/
 *.o
 
 # Venv folder
