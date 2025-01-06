@@ -42,3 +42,4 @@ wheel==0.43.0
 yfinance==0.2.40
 zope.event==5.0
 zope.interface==6.4.post2
+lgpio==0.2.2.0
