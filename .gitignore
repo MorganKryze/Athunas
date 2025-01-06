@@ -6,3 +6,9 @@ __pycache__/
 
 # KiCad
 KiCad/Rpi_matrix_adapter/Rpi_matrix_adapter-backups/*
+
+# Compiled source
+*.o
+
+# Venv folder
+venv/
