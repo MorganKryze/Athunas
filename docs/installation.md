@@ -58,7 +58,7 @@ sudo ./examples-api-use/demo -D 0 --led-no-hardware-pulse --led-rows=32 --led-co
 - Install additional dependencies.
 
 ```bash
-sudo apt-get install libsixel-dev python3-tk -y
+sudo apt-get install libsixel-dev python3-tk cython3 -y
 ```
 
 - Install the Python dependencies and virtual environment, this may take a while.

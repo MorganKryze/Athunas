@@ -23,6 +23,7 @@ options.pwm_lsb_nanoseconds = 80
 options.limit_refresh_rate_hz = 150
 options.hardware_mapping = "regular"  # If you have an Adafruit HAT: 'adafruit-hat'
 options.drop_privileges = False
+options.led_no_hardware_pulse = True  # Add this line to use the flag
 
 # Create the RGBMatrix instance
 matrix = RGBMatrix(options=options)
