@@ -9,7 +9,21 @@
 - Connect to your machine via SSH **or** using a monitor + keyboard. Be sure to be connected to the same network.
 
 ```bash
-ssh rasp@rpi.local
+ssh rasp@pi.local
+```
+
+- Reset the locale settings.
+
+```bash
+sudo dpkg-reconfigure locales
+sudo update-locale LANG=en_GB.UTF-8 LC_ALL=en_GB.UTF-8
+sudo reboot
+```
+
+- Set correct permissions:
+
+```bash
+sudo usermod -a -G gpio $USER
 ```
 
 - Update your system.
@@ -17,19 +31,13 @@ ssh rasp@rpi.local
 ```bash
 sudo apt-get update -y
 sudo apt-get upgrade -y
-pip install --upgrade pip
+sudo apt install python3-pip -y
 ```
 
 - Install `git`.
 
 ```bash
 sudo apt-get install git -y
-```
-
-- Set correct permissions:
-
-```bash
-sudo usermod -a -G gpio $USER
 ```
 
 ## Disable sound module
@@ -81,7 +89,7 @@ make -C ./rpi-rgb-led-matrix/examples-api-use
 - If you did the wiring, you may try the demo.
 
 ```bash
-sudo ./examples-api-use/demo -D 0 --led-no-hardware-pulse --led-rows=32 --led-cols=64
+sudo ./rpi-rgb-led-matrix/examples-api-use/demo -D 0 --led-no-hardware-pulse --led-rows=32 --led-cols=64
 ```
 
 > [!TIP]
@@ -97,10 +105,27 @@ sudo ./examples-api-use/demo -D 0 --led-no-hardware-pulse --led-rows=32 --led-co
 sudo apt-get install libsixel-dev python3-tk cython3 -y
 ```
 
-- Install the Python dependencies and virtual environment, this may take a while.
+- Install the Python dependencies, this may take a while.
 
 ```bash
 pip install -r requirements.txt
+```
+
+- Add the package to the path.
+
+```bash
+nano ~/.bashrc
+```
+
+```bash
+export PATH=$PATH:$HOME/.local/bin
+export PYTHONPATH=$PYTHONPATH:$HOME/.local/lib/python3.11/site-packages
+```
+
+- Then reload the file.
+
+```bash
+source ~/.bashrc
 ```
 
 - Then install the `rpi-rgb-led-matrix` Python library.
@@ -108,12 +133,12 @@ pip install -r requirements.txt
 ```bash
 cd rpi-rgb-led-matrix/
 make build-python
-make install-python
+sudo make install-python
 cd ..
 ```
 
 - Finally, run the project.
 
 ```bash
-sudo python3 ./src/controller_v3.py
+sudo -E python3 ./src/controller.py
 ```
