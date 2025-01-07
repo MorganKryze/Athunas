@@ -61,6 +61,12 @@ sudo ./examples-api-use/demo -D 0 --led-no-hardware-pulse --led-rows=32 --led-co
 sudo apt-get install libsixel-dev python3-tk cython3 -y
 ```
 
+- Set correct permissions:
+
+```bash
+sudo usermod -a -G gpio $USER
+```
+
 - Install the Python dependencies and virtual environment, this may take a while.
 
 ```bash
