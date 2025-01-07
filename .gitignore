@@ -11,5 +11,3 @@ KiCad/Rpi_matrix_adapter/Rpi_matrix_adapter-backups/*
 rpi-rgb-led-matrix/bindings/
 *.o
 
-# Venv folder
-venv/

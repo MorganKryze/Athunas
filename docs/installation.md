@@ -2,6 +2,8 @@
 
 > This is a step-by-step guide to install the project on your local machine.
 
+## Setup the Pi
+
 - Flash the Raspberry Pi OS Lite image to your SD card using the Raspberry Pi Imager. Then boot your Raspberry Pi Zero 2W (or any other model) with the SD card.
 
 - Connect to your machine via SSH **or** using a monitor + keyboard. Be sure to be connected to the same network.
@@ -24,6 +26,38 @@ pip install --upgrade pip
 sudo apt-get install git -y
 ```
 
+- Set correct permissions:
+
+```bash
+sudo usermod -a -G gpio $USER
+```
+
+## Disable sound module
+
+- Edit the file `/etc/modprobe.d/raspi-blacklist.conf` and add the following line:
+
+```bash
+sudo nano /etc/modprobe.d/blacklist-rgb-matrix.conf
+```
+
+```bash
+blacklist snd_bcm2835
+```
+
+- Update the kernel modules.
+
+```bash
+sudo update-initramfs -u
+```
+
+- Reboot the Raspberry Pi.
+
+```bash
+sudo reboot
+```
+
+## Install the project
+
 - Clone the repository.
 
 ```bash
@@ -35,6 +69,8 @@ git clone --recurse-submodules https://github.com/MorganKryze/Athunas.git
 ```bash
 cd Athunas
 ```
+
+## Install the dependencies & run the project
 
 - Build the dependencies.
 
@@ -61,17 +97,9 @@ sudo ./examples-api-use/demo -D 0 --led-no-hardware-pulse --led-rows=32 --led-co
 sudo apt-get install libsixel-dev python3-tk cython3 -y
 ```
 
-- Set correct permissions:
-
-```bash
-sudo usermod -a -G gpio $USER
-```
-
 - Install the Python dependencies and virtual environment, this may take a while.
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -87,5 +115,5 @@ cd ..
 - Finally, run the project.
 
 ```bash
-python3 ./src/controller_v3.py
+sudo python3 ./src/controller_v3.py
 ```
