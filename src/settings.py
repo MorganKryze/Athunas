@@ -1,4 +1,5 @@
 import yaml
+import logging
 from typing import Any, Dict, Optional
 
 class Settings:
@@ -6,14 +7,15 @@ class Settings:
     data: Dict[str, Any] = {}
 
     @classmethod
-    def set_file_path(cls, file_path: str) -> None:
+    def init(cls, file_path: str) -> None:
         """
-        Sets the file path for the class.
+        Reads the specified file and store its value.
 
         :param file_path: Path to the YAML file.
         """
         cls.file_path = file_path
-        cls.read_yaml()  # Automatically read the YAML file when setting the file path
+        logging.debug(f"[Settings] file path set: {cls.file_path}")
+        cls.read_yaml()
 
     @classmethod
     def read_yaml(cls) -> None:
@@ -23,10 +25,11 @@ class Settings:
         try:
             with open(cls.file_path, 'r') as file:
                 cls.data = yaml.safe_load(file)
+            logging.info(f"[Settings] loaded successfully: {cls.data}")
         except FileNotFoundError:
-            print(f"Error: The file {cls.file_path} was not found.")
+            logging.error(f"[Settings] The file '{cls.file_path}' was not found.")
         except yaml.YAMLError as e:
-            print(f"Error parsing YAML file: {e}")
+            logging.error(f"[Settings] Failed to parse YAML file: {e}")
 
     @classmethod
     def write_yaml(cls) -> None:
@@ -36,8 +39,9 @@ class Settings:
         try:
             with open(cls.file_path, 'w') as file:
                 yaml.safe_dump(cls.data, file)
+            logging.info("[Settings] saved successfully.")
         except IOError as e:
-            print(f"Error writing to file {cls.file_path}: {e}")
+            logging.error(f"[Settings] Failed to write to file: {e}")
 
     @classmethod
     def read_variable(cls, category: str, var: str) -> Optional[Any]:
@@ -48,4 +52,4 @@ class Settings:
         :param var: The variable key within the category.
         :return: The value of the variable if it exists, otherwise None.
         """
-        return cls.data.get(category, {}).get(var, None)
+        return cls.data.get(category, {}).get(var)
