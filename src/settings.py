@@ -1,4 +1,3 @@
-import sys
 import yaml
 import logging
 from enums.variable_importance import Importance
@@ -31,11 +30,11 @@ class Settings:
         except FileNotFoundError:
             logging.error(f"[Settings] The file '{cls.file_path}' was not found.")
             logging.error("[Settings] Exiting program.")
-            sys.exit()
+            raise
         except yaml.YAMLError as e:
             logging.error(f"[Settings] Failed to parse YAML file: {e}")
             logging.error("[Settings] Exiting program.")
-            sys.exit()
+            raise
 
     @classmethod
     def write_yaml(cls) -> None:
@@ -66,5 +65,5 @@ class Settings:
             if importance == Importance.CRITICAL:
                 logging.error(f"[Settings] Critical variable not found: {category} -> {var}")
                 logging.error("[Settings] Exiting program.")
-                sys.exit()
+                raise
         return value
