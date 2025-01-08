@@ -66,12 +66,12 @@ def main():
         logging.error("[System] Exiting program.")
         sys.exit()
         
-    encoder_A = Settings.read_variable('System', 'encoder_a')
-    encoder_B = Settings.read_variable('System', 'encoder_b')
-    encoder_button = Settings.read_variable('System', 'encoder_button')
-    tilt_switch = Settings.read_variable('System', 'tilt_switch')
+    encoder_A = Settings.read_variable('Pinout', 'encoder_a', Importance.CRITICAL)
+    encoder_B = Settings.read_variable('Pinout', 'encoder_b', Importance.CRITICAL)
+    encoder_button = Settings.read_variable('Pinout', 'encoder_button', Importance.CRITICAL)
+    tilt_switch = Settings.read_variable('Pinout', 'tilt_switch', Importance.CRITICAL)
         
-    brightness = Settings.read_variable('System', 'brightness')
+    brightness = Settings.read_variable('System', 'brightness') or 100
     is_display_on = True
 
     black_screen = Image.new("RGB", (screen_width, screen_height), (0, 0, 0))
