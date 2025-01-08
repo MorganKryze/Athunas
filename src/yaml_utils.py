@@ -1,35 +1,46 @@
 import yaml
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Type
 
 class YAMLUtils:
-    def __init__(self, file_path: str):
-        self.file_path: str = file_path
-        self.data: Dict[str, Any] = {}
-        self.read_yaml()
+    file_path: str = ''
+    data: Dict[str, Any] = {}
 
-    def read_yaml(self) -> None:
+    @classmethod
+    def set_file_path(cls, file_path: str) -> None:
+        """
+        Sets the file path for the class.
+
+        :param file_path: Path to the YAML file.
+        """
+        cls.file_path = file_path
+        cls.read_yaml()  # Automatically read the YAML file when setting the file path
+
+    @classmethod
+    def read_yaml(cls) -> None:
         """
         Reads a YAML file and stores its contents in the class dictionary.
         """
         try:
-            with open(self.file_path, 'r') as file:
-                self.data = yaml.safe_load(file)
+            with open(cls.file_path, 'r') as file:
+                cls.data = yaml.safe_load(file)
         except FileNotFoundError:
-            print(f"Error: The file {self.file_path} was not found.")
+            print(f"Error: The file {cls.file_path} was not found.")
         except yaml.YAMLError as e:
             print(f"Error parsing YAML file: {e}")
 
-    def write_yaml(self) -> None:
+    @classmethod
+    def write_yaml(cls) -> None:
         """
         Writes the class dictionary to a YAML file.
         """
         try:
-            with open(self.file_path, 'w') as file:
-                yaml.safe_dump(self.data, file)
+            with open(cls.file_path, 'w') as file:
+                yaml.safe_dump(cls.data, file)
         except IOError as e:
-            print(f"Error writing to file {self.file_path}: {e}")
+            print(f"Error writing to file {cls.file_path}: {e}")
 
-    def read_variable(self, category: str, var: str) -> Optional[Any]:
+    @classmethod
+    def read_variable(cls, category: str, var: str) -> Optional[Any]:
         """
         Reads a specific variable from the class dictionary.
 
@@ -37,4 +48,4 @@ class YAMLUtils:
         :param var: The variable key within the category.
         :return: The value of the variable if it exists, otherwise None.
         """
-        return self.data.get(category, {}).get(var, None)
+        return cls.data.get(category, {}).get(var, None)
