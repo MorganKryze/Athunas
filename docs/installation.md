@@ -137,6 +137,16 @@ sudo make install-python
 cd ..
 ```
 
+- Add a small flag at the end of the line to add better results:
+
+```bash
+sudo nano /boot/firmware/cmdline.txt
+```
+
+```bash
+isolcpus=3
+```
+
 - Finally, run the project.
 
 ```bash
