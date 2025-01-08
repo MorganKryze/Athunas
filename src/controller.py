@@ -130,12 +130,12 @@ def main():
 
     app_list = [
         gif_viewer.GifScreen(config, modules, callbacks),
-        main_screen.MainScreen(config, modules, callbacks),
-        notion.NotionScreen(config, modules, callbacks),
-        weather.WeatherScreen(config, modules, callbacks),
-        subcount.SubcountScreen(config, modules, callbacks),
-        life.GameOfLifeScreen(config, modules, callbacks),
-        spotify_player.SpotifyScreen(config, modules, callbacks),
+        # main_screen.MainScreen(config, modules, callbacks),
+        # notion.NotionScreen(config, modules, callbacks),
+        # weather.WeatherScreen(config, modules, callbacks),
+        # subcount.SubcountScreen(config, modules, callbacks),
+        # life.GameOfLifeScreen(config, modules, callbacks),
+        # spotify_player.SpotifyScreen(config, modules, callbacks),
     ]
 
     matrix = Utils.create_matrix(screen_height, screen_width, brightness)

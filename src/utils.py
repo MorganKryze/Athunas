@@ -1,8 +1,8 @@
-import datetime
 import os
 import sys
 import inspect
 import logging
+from datetime import datetime
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
 
