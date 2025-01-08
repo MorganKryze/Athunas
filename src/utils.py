@@ -1,3 +1,4 @@
+import datetime
 import os
 import sys
 import inspect
@@ -7,18 +8,26 @@ from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
 class Utils:
     @staticmethod
-    def set_log_level(level: int = logging.DEBUG) -> None:
+    def start_logging(level: int = logging.DEBUG) -> None:
         """
-        Sets the log level for the script to the specified level.
+        Starts logging with the specified log level.
 
         :param level: The log level (default is logging.DEBUG).
         """
+        log_dir = 'logs'
+        os.makedirs(log_dir, exist_ok=True)
+
+        log_filename = datetime.now().strftime('%Y-%m-%d') + '.log'
+        log_file_path = os.path.join(log_dir, log_filename)
+
         logging.basicConfig(
             level=level,
             format='%(asctime)s - %(levelname)s - %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S',
-            filename='debug.log',
+            filename=log_file_path,
+            filemode='a'
         )
+
         logging.debug(f"[Utils] Log level set to: {level}")
         logging.info("[Utils] Application started.")
     
@@ -30,17 +39,12 @@ class Utils:
         :param base_dir_name: The name of the base directory (default is 'Athunas').
         :return: The absolute path of the base directory.
         """
-        try:
-            current_script_path = os.path.abspath(inspect.getfile(inspect.currentframe()))
-            current_script_dir = os.path.dirname(current_script_path)
-            base_dir = os.path.abspath(os.path.join(current_script_dir, '..', '..', base_dir_name))
-            os.chdir(base_dir)
-            sys.path.append(base_dir)
-            logging.debug(f"[Utils] Base directory set to: {base_dir}")
-            return base_dir
-        except Exception as e:
-            logging.error(f"[Utils] failed to set base directory: {e}")
-            raise
+        current_script_path = os.path.abspath(inspect.getfile(inspect.currentframe()))
+        current_script_dir = os.path.dirname(current_script_path)
+        base_dir = os.path.abspath(os.path.join(current_script_dir, '..', '..', base_dir_name))
+        os.chdir(base_dir)
+        sys.path.append(base_dir)
+        return base_dir
         
     @staticmethod
     def create_matrix(screen_width: int, screen_height: int, brightness: int = 100, disable_hardware_pulsing: bool = True, hardware_mapping: str = "regular") -> RGBMatrix:
