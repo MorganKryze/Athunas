@@ -49,7 +49,7 @@ def main():
     Settings.init('config.yaml')
 
     config = configparser.ConfigParser()
-    parsed_configs = config.read("../config.ini")
+    parsed_configs = config.read("config.ini")
     if len(parsed_configs) == 0:
         print("no config file found")
         sys.exit()
