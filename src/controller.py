@@ -138,7 +138,7 @@ def main():
         # spotify_player.SpotifyScreen(config, modules, callbacks),
     ]
 
-    matrix = Utils.create_matrix(pixel_cols, pixel_rows, brightness)
+    matrix = Utils.create_matrix(pixel_rows, pixel_cols, brightness)
 
     rotation_time = math.floor(time.time())
     while True:
