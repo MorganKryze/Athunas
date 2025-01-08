@@ -2,7 +2,7 @@ import numpy as np
 from PIL import Image, ImageFont, ImageDraw
 import requests
 from io import BytesIO
-from InputStatus import InputStatusEnum
+from input_status import InputStatusEnum
 from ast import literal_eval
 
 class SpotifyScreen:

@@ -1,5 +1,5 @@
 import numpy as np
-from InputStatus import InputStatusEnum
+from input_status import InputStatusEnum
 from PIL import Image, ImageSequence, ImageDraw
 import time
 import os

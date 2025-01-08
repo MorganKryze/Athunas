@@ -1,4 +1,4 @@
-from InputStatus import InputStatusEnum
+from input_status import InputStatusEnum
 import time
 from datetime import timedelta, datetime
 from PIL import Image, ImageFont, ImageDraw

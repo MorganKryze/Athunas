@@ -1,6 +1,6 @@
 import numpy as np
 import random
-from InputStatus import InputStatusEnum
+from input_status import InputStatusEnum
 from datetime import datetime, timedelta
 from PIL import Image, ImageSequence, ImageDraw
 import os

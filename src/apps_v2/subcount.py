@@ -4,7 +4,7 @@ import json
 from PIL import Image, ImageFont, ImageDraw
 import threading
 import numpy as np
-from InputStatus import InputStatusEnum
+from input_status import InputStatusEnum
 from queue import LifoQueue
 from ast import literal_eval
 

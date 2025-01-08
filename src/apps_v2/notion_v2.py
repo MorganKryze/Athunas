@@ -2,7 +2,7 @@ import time
 from PIL import Image, ImageFont, ImageDraw
 import threading
 from queue import LifoQueue
-from InputStatus import InputStatusEnum
+from input_status import InputStatusEnum
 import requests, json
 from datetime import date
 from datetime import timedelta
