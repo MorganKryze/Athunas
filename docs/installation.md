@@ -108,7 +108,7 @@ sudo apt-get install libsixel-dev python3-tk cython3 -y
 - Install the Python dependencies, this may take a while.
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements.txt --break-system-packages
 ```
 
 - Add the package to the path.
