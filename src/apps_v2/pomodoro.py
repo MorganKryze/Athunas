@@ -1,4 +1,4 @@
-from input_status import InputStatusEnum
+from enums.input_status import InputStatus
 import time
 from datetime import timedelta, datetime
 from PIL import Image, ImageFont, ImageDraw
@@ -24,7 +24,7 @@ class PomodoroScreen:
         self.last_update_time = None
 
     def generate(self, isHorizontal, inputStatus):
-        if (inputStatus is InputStatusEnum.SINGLE_PRESS):
+        if (inputStatus is InputStatus.SINGLE_PRESS):
             self.active = not self.active
             self.last_update_time = time.time()
             if self.active and self.time_left is None:
@@ -41,9 +41,9 @@ class PomodoroScreen:
                 self.cycle_idx += 1
                 if self.cycle_idx >= len(self.cycle_order):
                     self.cycle_idx = 0
-        elif (inputStatus is InputStatusEnum.ENCODER_INCREASE):
+        elif (inputStatus is InputStatus.ENCODER_INCREASE):
             self.default_actions['switch_next_app']()
-        elif (inputStatus is InputStatusEnum.ENCODER_DECREASE):
+        elif (inputStatus is InputStatus.ENCODER_DECREASE):
             self.default_actions['switch_prev_app']()
         
         if self.active:

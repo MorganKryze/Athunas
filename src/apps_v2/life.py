@@ -1,6 +1,6 @@
 import numpy as np
 import random
-from input_status import InputStatusEnum
+from enums.input_status import InputStatus
 from datetime import datetime, timedelta
 from PIL import Image, ImageSequence, ImageDraw
 import os
@@ -22,14 +22,14 @@ class GameOfLifeScreen:
         self.state = self.init_states[self.curr_state_idx]()
 
     def generate(self, isHorizontal, inputStatus):
-        if (inputStatus is InputStatusEnum.SINGLE_PRESS or inputStatus is InputStatusEnum.LONG_PRESS):
-            if (inputStatus is InputStatusEnum.LONG_PRESS):
+        if (inputStatus is InputStatus.SINGLE_PRESS or inputStatus is InputStatus.LONG_PRESS):
+            if (inputStatus is InputStatus.LONG_PRESS):
                 self.curr_state_idx = (self.curr_state_idx + 1) % len(self.init_states)
             self.state = self.init_states[self.curr_state_idx]()
             self.color = generateNewColor()
-        elif (inputStatus is InputStatusEnum.ENCODER_INCREASE):
+        elif (inputStatus is InputStatus.ENCODER_INCREASE):
             self.default_actions['switch_next_app']()
-        elif (inputStatus is InputStatusEnum.ENCODER_DECREASE):
+        elif (inputStatus is InputStatus.ENCODER_DECREASE):
             self.default_actions['switch_prev_app']()
         
         end_time = datetime.now() + timedelta(seconds=0.1)

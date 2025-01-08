@@ -1,5 +1,5 @@
 import numpy as np
-from input_status import InputStatusEnum
+from enums.input_status import InputStatus
 from PIL import Image, ImageSequence, ImageDraw
 import time
 import os
@@ -28,22 +28,22 @@ class GifScreen:
         self.was_horizontal = True
     
     def generate(self, isHorizontal, inputStatus):
-        if (inputStatus == InputStatusEnum.LONG_PRESS):
+        if (inputStatus == InputStatus.LONG_PRESS):
             self.selectMode = not self.selectMode
     
         if self.selectMode:
-            if (inputStatus is InputStatusEnum.ENCODER_INCREASE):
+            if (inputStatus is InputStatus.ENCODER_INCREASE):
                 self.currentIdx += 1
                 self.cnt = 0
-            elif (inputStatus is InputStatusEnum.ENCODER_DECREASE):
+            elif (inputStatus is InputStatus.ENCODER_DECREASE):
                 self.currentIdx -= 1
                 self.cnt = 0
         else:
-            if (inputStatus is InputStatusEnum.SINGLE_PRESS):
+            if (inputStatus is InputStatus.SINGLE_PRESS):
                 self.default_actions['toggle_display']()
-            elif (inputStatus is InputStatusEnum.ENCODER_INCREASE):
+            elif (inputStatus is InputStatus.ENCODER_INCREASE):
                 self.default_actions['switch_next_app']()
-            elif (inputStatus is InputStatusEnum.ENCODER_DECREASE):
+            elif (inputStatus is InputStatus.ENCODER_DECREASE):
                 self.default_actions['switch_prev_app']()
     
         curr_gif = ImageSequence.Iterator(self.animations[self.currentIdx % len(self.animations)])

@@ -1,5 +1,7 @@
+import sys
 import yaml
 import logging
+from enums.variable_importance import Importance
 from typing import Any, Dict, Optional
 
 class Settings:
@@ -28,8 +30,12 @@ class Settings:
             logging.info(f"[Settings] loaded successfully: {cls.data}")
         except FileNotFoundError:
             logging.error(f"[Settings] The file '{cls.file_path}' was not found.")
+            logging.error("[Settings] Exiting program.")
+            sys.exit()
         except yaml.YAMLError as e:
             logging.error(f"[Settings] Failed to parse YAML file: {e}")
+            logging.error("[Settings] Exiting program.")
+            sys.exit()
 
     @classmethod
     def write_yaml(cls) -> None:
@@ -44,12 +50,21 @@ class Settings:
             logging.error(f"[Settings] Failed to write to file: {e}")
 
     @classmethod
-    def read_variable(cls, category: str, var: str) -> Optional[Any]:
+    def read_variable(cls, category: str, var: str, importance: Importance=Importance.NORMAL) -> Optional[Any]:
         """
         Reads a specific variable from the class dictionary.
 
         :param category: The category key in the dictionary.
         :param var: The variable key within the category.
+        :param importance: The importance level of the variable. Defaults to Importance.NORMAL.
         :return: The value of the variable if it exists, otherwise None.
         """
-        return cls.data.get(category, {}).get(var)
+        value = cls.data.get(category, {}).get(var)
+        logging.debug(f"[Settings] read variable: {category} -> {var}")
+        if value is None:
+            logging.warning(f"[Settings] variable not found: {category} -> {var}")
+            if importance == Importance.CRITICAL:
+                logging.error(f"[Settings] Critical variable not found: {category} -> {var}")
+                logging.error("[Settings] Exiting program.")
+                sys.exit()
+        return value

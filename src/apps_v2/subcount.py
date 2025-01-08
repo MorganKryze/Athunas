@@ -4,7 +4,7 @@ import json
 from PIL import Image, ImageFont, ImageDraw
 import threading
 import numpy as np
-from input_status import InputStatusEnum
+from enums.input_status import InputStatus
 from queue import LifoQueue
 from ast import literal_eval
 
@@ -39,11 +39,11 @@ class SubcountScreen:
             self.subs = self.queue.get()
             self.queue.queue.clear()
 
-        if (inputStatus is InputStatusEnum.SINGLE_PRESS):
+        if (inputStatus is InputStatus.SINGLE_PRESS):
             self.default_actions['toggle_display']()
-        elif (inputStatus is InputStatusEnum.ENCODER_INCREASE):
+        elif (inputStatus is InputStatus.ENCODER_INCREASE):
             self.default_actions['switch_next_app']()
-        elif (inputStatus is InputStatusEnum.ENCODER_DECREASE):
+        elif (inputStatus is InputStatus.ENCODER_DECREASE):
             self.default_actions['switch_prev_app']()
 
         frame = self.bg.copy()
