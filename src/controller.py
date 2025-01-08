@@ -41,7 +41,6 @@ def main():
     
     board = Board()
     matrix = Utils.create_matrix(board.pixel_rows, board.pixel_cols, board.brightness)
-    black_screen = Image.new("RGB", (board.pixel_rows, board.pixel_cols), (0, 0, 0))
     
     
 
@@ -91,7 +90,7 @@ def main():
         # spotify_player.SpotifyScreen(config, modules, callbacks),
     ]
 
-
+    black_screen = Image.new("RGB", (board.pixel_rows, board.pixel_cols), (0, 0, 0))
     rotation_time = math.floor(time.time())
     while True:
         while not board.encoderQueue.empty():
