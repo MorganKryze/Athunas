@@ -8,7 +8,7 @@ class Settings:
     data: Dict[str, Any] = {}
 
     @classmethod
-    def init(cls, file_path: str) -> None:
+    def load(cls, file_path: str) -> None:
         """
         Reads the specified file and store its value.
 
