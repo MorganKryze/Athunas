@@ -1,16 +1,31 @@
+import configparser
+from settings import Settings
+from enums.variable_importance import Importance
+from enums.input_status import InputStatus
+
+from apps import (
+    main_screen,
+    notion,
+    subcount,
+    gif_viewer,
+    weather,
+    life,
+    spotify_player,
+)
+from modules import  notification_module, weather_module, spotify_module
+
 import queue
 import math
 import sys
-import os
 import time
 import copy
-import inspect
-from InputStatus import InputStatusEnum
+import logging
+from PIL import Image
+from utils import Utils
 
 try:
     from gpiozero import Button, RotaryEncoder
 except Exception:
-
     class Button:
         def __init__(self, num, pull_up=False):
             self.num = num
@@ -26,31 +41,12 @@ except Exception:
             self.when_rotated_counter_clockwise = lambda: None
 
 
-import configparser
-from PIL import Image
-
-import select
-
-from apps_v2 import (
-    main_screen,
-    #notion_v2,
-    #subcount,
-    gif_viewer,
-    #weather,
-    life,
-    #spotify_player,
-)
-from modules import  notification_module, weather_module#, spotify_module
-
-sw = 13
-enc_A = 5
-enc_B = 6
-tilt = 19
-
-
 def main():
-    brightness = 100
-    displayOn = True
+    Utils.set_base_directory()
+    
+    Utils.start_logging()
+    
+    Settings.init('config.yaml')
 
     config = configparser.ConfigParser()
     parsed_configs = config.read("../config.ini")
@@ -58,32 +54,47 @@ def main():
         print("no config file found")
         sys.exit()
 
-    canvas_width = config.getint("System", "canvas_width", fallback=64)
-    canvas_height = config.getint("System", "canvas_height", fallback=32)
+    SCREEN_RATIO = 16
+    screen_width = Settings.read_variable('System', 'screen_width', Importance.CRITICAL)
+    if screen_width % SCREEN_RATIO != 0:
+        logging.error("[System] screen_width must be a multiple of 16 to work with the 'rpi-rgb-led-matrix' library.")
+        logging.error("[System] Exiting program.")
+        sys.exit()
+    screen_height = Settings.read_variable('System', 'screen_height', Importance.CRITICAL)
+    if screen_height % SCREEN_RATIO != 0:
+        logging.error("[System] screen_height must be a multiple of 32 to work with the 'rpi-rgb-led-matrix' library.")
+        logging.error("[System] Exiting program.")
+        sys.exit()
+        
+    encoder_A = Settings.read_variable('System', 'encoder_a')
+    encoder_B = Settings.read_variable('System', 'encoder_b')
+    encoder_button = Settings.read_variable('System', 'encoder_button')
+    tilt_switch = Settings.read_variable('System', 'tilt_switch')
+        
+    brightness = Settings.read_variable('System', 'brightness')
+    is_display_on = True
 
-    black_screen = Image.new("RGB", (canvas_width, canvas_height), (0, 0, 0))
+    black_screen = Image.new("RGB", (screen_width, screen_height), (0, 0, 0))
 
-    encButton = Button(sw, pull_up=True)
-    inputStatusDict = {"value": InputStatusEnum.NOTHING}
-    encButton.when_pressed = lambda button: encButtonFunc(button, inputStatusDict)
+    encoder_button = Button(encoder_button, pull_up=True)
+    input_status_dictionary = {"value": InputStatus.NOTHING}
+    encoder_button.when_pressed = lambda button: encoder_button_function(button, input_status_dictionary)
 
     encoderQueue = queue.Queue()
-    encoder = RotaryEncoder(enc_A, enc_B)
+    encoder = RotaryEncoder(encoder_A, encoder_B)
     encoder.when_rotated_clockwise = lambda enc: rotate_clockwise(enc, encoderQueue)
-    encoder.when_rotated_counter_clockwise = lambda enc: rotate_counter_clockwise(
-        enc, encoderQueue
-    )
+    encoder.when_rotated_counter_clockwise = lambda enc: rotate_counter_clockwise(enc, encoderQueue)
     encoder_state = 0
 
-    tilt_switch = Button(tilt, pull_up=True)
-    isHorizontalDict = {"value": True}
-    tilt_switch.when_pressed = lambda button: tilt_callback(button, isHorizontalDict)
-    tilt_switch.when_released = lambda button: tilt_callback(button, isHorizontalDict)
+    tilt_switch = Button(tilt_switch, pull_up=True)
+    is_horizontal_dictionary = {"value": True}
+    tilt_switch.when_pressed = lambda button: tilt_callback(button, is_horizontal_dictionary)
+    tilt_switch.when_released = lambda button: tilt_callback(button, is_horizontal_dictionary)
 
     def toggle_display():
-        nonlocal displayOn
-        displayOn = not displayOn
-        print("Display On: " + str(displayOn))
+        nonlocal is_display_on
+        is_display_on = not is_display_on
+        print("Display On: " + str(is_display_on))
 
     def increase_brightness():
         nonlocal brightness
@@ -114,43 +125,20 @@ def main():
     modules = {
         "weather": weather_module.WeatherModule(config),
         "notifications": notification_module.NotificationModule(config),
-        # "spotify": spotify_module.SpotifyModule(config),
+        "spotify": spotify_module.SpotifyModule(config),
     }
 
     app_list = [
         gif_viewer.GifScreen(config, modules, callbacks),
         main_screen.MainScreen(config, modules, callbacks),
-        # notion_v2.NotionScreen(config, modules, callbacks),
-        # weather.WeatherScreen(config, modules, callbacks),
-        # subcount.SubcountScreen(config, modules, callbacks),
+        notion.NotionScreen(config, modules, callbacks),
+        weather.WeatherScreen(config, modules, callbacks),
+        subcount.SubcountScreen(config, modules, callbacks),
         life.GameOfLifeScreen(config, modules, callbacks),
+        spotify_player.SpotifyScreen(config, modules, callbacks),
     ]
 
-    currentdir = os.path.dirname(
-        os.path.abspath(inspect.getfile(inspect.currentframe()))
-    )
-    parentdir = os.path.dirname(currentdir)
-    sys.path.append(parentdir + "/rpi-rgb-led-matrix/bindings/python")
-    # try:
-    #     from rgbmatrix import RGBMatrix, RGBMatrixOptions
-    # except ImportError:
-    #     from RGBMatrixEmulator import RGBMatrix, RGBMatrixOptions
-    
-    from rgbmatrix import RGBMatrix, RGBMatrixOptions
-
-    options = RGBMatrixOptions()
-    options.rows = 32
-    options.cols = 64
-    options.chain_length = 1
-    options.parallel = 1
-    options.brightness = brightness
-    options.pixel_mapper_config = "U-mapper;Rotate:180"
-    options.gpio_slowdown = 1
-    options.pwm_lsb_nanoseconds = 80
-    options.limit_refresh_rate_hz = 150
-    options.hardware_mapping = "regular"  # If you have an Adafruit HAT: 'adafruit-hat'
-    options.drop_privileges = False
-    matrix = RGBMatrix(options=options)
+    matrix = Utils.create_matrix(screen_height, screen_width, brightness)
 
     rotation_time = math.floor(time.time())
     while True:
@@ -158,17 +146,17 @@ def main():
             encoder_state += encoderQueue.get()
         if encoder_state > 1:
             print("encoder increased")
-            inputStatusDict["value"] = InputStatusEnum.ENCODER_INCREASE
+            input_status_dictionary["value"] = InputStatus.ENCODER_INCREASE
             encoder_state = 0
         elif encoder_state < -1:
             print("encoder decreased")
-            inputStatusDict["value"] = InputStatusEnum.ENCODER_DECREASE
+            input_status_dictionary["value"] = InputStatus.ENCODER_DECREASE
             encoder_state = 0
 
-        inputStatusSnapshot = copy.copy(inputStatusDict["value"])
-        inputStatusDict["value"] = InputStatusEnum.NOTHING
+        inputStatusSnapshot = copy.copy(input_status_dictionary["value"])
+        input_status_dictionary["value"] = InputStatus.NOTHING
 
-        isHorizontalSnapshot = copy.copy(isHorizontalDict["value"])
+        isHorizontalSnapshot = copy.copy(is_horizontal_dictionary["value"])
 
         new_rotation_time = math.floor(time.time())
         if new_rotation_time % 10 == 0 and new_rotation_time - rotation_time >= 10:
@@ -178,15 +166,14 @@ def main():
         frame = app_list[current_app_idx % len(app_list)].generate(
             isHorizontalSnapshot, inputStatusSnapshot
         )
-        if not displayOn:
+        if not is_display_on:
             frame = black_screen
 
-        # matrix.brightness = 100
         matrix.SetImage(frame)
         time.sleep(0.05)
 
 
-def encButtonFunc(enc_button, inputStatusDict):
+def encoder_button_function(enc_button, inputStatusDict):
     start_time = time.time()
     time_diff = 0
     hold_time = 1
@@ -196,7 +183,7 @@ def encButtonFunc(enc_button, inputStatusDict):
 
     if time_diff >= hold_time:
         print("long press detected")
-        inputStatusDict["value"] = InputStatusEnum.LONG_PRESS
+        inputStatusDict["value"] = InputStatus.LONG_PRESS
     else:
         enc_button.when_pressed = None
         start_time = time.time()
@@ -209,20 +196,20 @@ def encButtonFunc(enc_button, inputStatusDict):
                     time.sleep(0.1)
                     if enc_button.is_pressed:
                         print("triple press detected")
-                        inputStatusDict["value"] = InputStatusEnum.TRIPLE_PRESS
-                        enc_button.when_pressed = lambda button: encButtonFunc(
+                        inputStatusDict["value"] = InputStatus.TRIPLE_PRESS
+                        enc_button.when_pressed = lambda button: encoder_button_function(
                             button, inputStatusDict
                         )
                         return
                 print("double press detected")
-                inputStatusDict["value"] = InputStatusEnum.DOUBLE_PRESS
-                enc_button.when_pressed = lambda button: encButtonFunc(
+                inputStatusDict["value"] = InputStatus.DOUBLE_PRESS
+                enc_button.when_pressed = lambda button: encoder_button_function(
                     button, inputStatusDict
                 )
                 return
         print("single press detected")
-        inputStatusDict["value"] = InputStatusEnum.SINGLE_PRESS
-        enc_button.when_pressed = lambda button: encButtonFunc(button, inputStatusDict)
+        inputStatusDict["value"] = InputStatus.SINGLE_PRESS
+        enc_button.when_pressed = lambda button: encoder_button_function(button, inputStatusDict)
         return
 
 

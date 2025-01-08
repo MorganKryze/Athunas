@@ -1,0 +1,39 @@
+Pinout:
+  encoder_a: 5
+  encoder_b: 6
+  encoder_button: 13
+  tilt_switch: 19
+
+System:
+  screen_width: 64
+  screen_height: 32
+  brightness: 100
+
+Pushbullet:
+  enabled: true
+  websocket_url: xxx
+
+OWM:
+  enabled: true
+  token: xxx
+  lat: 0.0
+  lon: 0.0
+
+Spotify:
+  enabled: true
+  client_id: xxx
+  client_secret: xxx
+  redirect_uri: xxx
+
+Notion:
+  enabled: true
+  token_v2: xxx
+  source: xxx
+
+Youtube:
+  enabled: true
+  key: xxx
+
+Gif Viewer:
+  enabled: true
+  location: /home/rpi/Athunas/src/apps_v2/res/gif/horizontal
