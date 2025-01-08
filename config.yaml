@@ -36,4 +36,4 @@ Youtube:
 
 Gif Viewer:
   enabled: true
-  location: /home/rpi/Athunas/src/apps_v2/res/gif/horizontal
+  location: /home/rasp/Athunas/src/apps_v2/res/gif/horizontal
