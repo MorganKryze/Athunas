@@ -5,8 +5,8 @@ Pinout:
   tilt_switch: 19
 
 System:
-  screen_width: 64
-  screen_height: 32
+  pixel_rows: 32
+  pixel_cols: 64
   brightness: 100
 
 Pushbullet:

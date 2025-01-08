@@ -55,14 +55,14 @@ def main():
         sys.exit()
 
     SCREEN_RATIO = 16
-    screen_width = Settings.read_variable('System', 'screen_width', Importance.CRITICAL)
-    if screen_width % SCREEN_RATIO != 0:
-        logging.error("[System] screen_width must be a multiple of 16 to work with the 'rpi-rgb-led-matrix' library.")
+    pixel_rows = Settings.read_variable('System', 'pixel_rows', Importance.CRITICAL)
+    if pixel_rows % SCREEN_RATIO != 0:
+        logging.error("[System] pixel_rows must be a multiple of 16 to work with the 'rpi-rgb-led-matrix' library.")
         logging.error("[System] Exiting program.")
         sys.exit()
-    screen_height = Settings.read_variable('System', 'screen_height', Importance.CRITICAL)
-    if screen_height % SCREEN_RATIO != 0:
-        logging.error("[System] screen_height must be a multiple of 32 to work with the 'rpi-rgb-led-matrix' library.")
+    pixel_width = Settings.read_variable('System', 'pixel_width', Importance.CRITICAL)
+    if pixel_width % SCREEN_RATIO != 0:
+        logging.error("[System] pixel_width must be a multiple of 32 to work with the 'rpi-rgb-led-matrix' library.")
         logging.error("[System] Exiting program.")
         sys.exit()
         
@@ -74,7 +74,7 @@ def main():
     brightness = Settings.read_variable('System', 'brightness') or 100
     is_display_on = True
 
-    black_screen = Image.new("RGB", (screen_width, screen_height), (0, 0, 0))
+    black_screen = Image.new("RGB", (pixel_rows, pixel_width), (0, 0, 0))
 
     encoder_button = Button(encoder_button, pull_up=True)
     input_status_dictionary = {"value": InputStatus.NOTHING}
@@ -138,7 +138,7 @@ def main():
         # spotify_player.SpotifyScreen(config, modules, callbacks),
     ]
 
-    matrix = Utils.create_matrix(screen_height, screen_width, brightness)
+    matrix = Utils.create_matrix(pixel_width, pixel_rows, brightness)
 
     rotation_time = math.floor(time.time())
     while True:

@@ -47,39 +47,32 @@ class Utils:
         return base_dir
         
     @staticmethod
-    def create_matrix(screen_width: int, screen_height: int, brightness: int = 100, disable_hardware_pulsing: bool = True, hardware_mapping: str = "regular") -> RGBMatrix:
+    def create_matrix(pixel_rows: int, pixel_cols: int, brightness: int = 100, disable_hardware_pulsing: bool = False, hardware_mapping: str = "regular") -> RGBMatrix:
         """
         Creates an RGBMatrix object with the specified parameters.
         
-        :param screen_width: The width of the screen.
-        :param screen_height: The height of the screen.
+        :param pixel_rows: The number of rows of the screen.
+        :param pixel_cols: The number of columns of the screen.
         :param brightness: The brightness of the screen (default is 100).
         :param disable_hardware_pulsing: Disables hardware pulsing (default is True).
         :param hardware_mapping: The hardware mapping of the screen (default is 'regular'). For Adafruit HAT: 'adafruit-hat'.
         :return: An RGBMatrix object.
         """
-        logging.debug(f"[Utils] Creating RGBMatrix options with screen width: {screen_width}, screen height: {screen_height}, brightness: {brightness}, disable hardware pulsing: {disable_hardware_pulsing}, hardware mapping: {hardware_mapping}")
+        logging.debug(f"[Utils] Creating RGBMatrix options with screen height: {pixel_rows}, screen width: {pixel_cols}, brightness: {brightness}, disable hardware pulsing: {disable_hardware_pulsing}, hardware mapping: {hardware_mapping}")
         try:
             options = RGBMatrixOptions()
-            options.rows = screen_height
-            options.cols = screen_width
+            options.rows = pixel_rows
+            options.cols = pixel_cols
             options.brightness = brightness
             options.disable_hardware_pulsing = disable_hardware_pulsing
             options.hardware_mapping = hardware_mapping
-            options.chain_length = 1
-            options.parallel = 1
-            options.pixel_mapper_config = "U-mapper;Rotate:180"
-            options.gpio_slowdown = 1
-            options.pwm_lsb_nanoseconds = 80
-            options.limit_refresh_rate_hz = 150
-            options.drop_privileges = False
             
             logging.debug("[Utils] RGBMatrix options set.")
         except Exception as e:
             logging.error(f"[Utils] failed to set RGBMatrix options: {e}")
             raise
         
-        logging.debug(f"[Utils] Creating RGBMatrix object with options: {options}")
+        logging.debug("[Utils] Creating RGBMatrix object with options.")
         try:
             matrix = RGBMatrix(options=options)
             logging.debug("[Utils] RGBMatrix object created.")
