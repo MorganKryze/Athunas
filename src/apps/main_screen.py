@@ -5,7 +5,7 @@ from dateutil import tz
 import time
 import threading
 
-from apps_v2 import pomodoro
+from apps import pomodoro
 
 light_pink = (255,219,218)
 dark_pink = (219,127,142)
