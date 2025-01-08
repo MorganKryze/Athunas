@@ -1,7 +1,7 @@
 import yaml
-from typing import Any, Dict, Optional, Type
+from typing import Any, Dict, Optional
 
-class YAMLUtils:
+class Settings:
     file_path: str = ''
     data: Dict[str, Any] = {}
 
