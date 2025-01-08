@@ -1,6 +1,5 @@
-import configparser
+from board import Board
 from settings import Settings
-from enums.variable_importance import Importance
 from enums.input_status import InputStatus
 
 from apps import (
@@ -14,31 +13,15 @@ from apps import (
 )
 from modules import  notification_module, weather_module, spotify_module
 
-import queue
 import math
 import sys
 import time
 import copy
 import logging
+import configparser
 from PIL import Image
 from utils import Utils
 
-try:
-    from gpiozero import Button, RotaryEncoder
-except Exception:
-    class Button:
-        def __init__(self, num, pull_up=False):
-            self.num = num
-            self.pull_up = pull_up
-            self.when_pressed = lambda: None
-            self.when_pressed = lambda: None
-
-    class RotaryEncoder:
-        def __init__(self, encoding1, encoding2):
-            self.encoding1 = encoding1
-            self.encoding2 = encoding2
-            self.when_rotated_clockwise = lambda: None
-            self.when_rotated_counter_clockwise = lambda: None
 
 
 def main():
@@ -46,73 +29,43 @@ def main():
     
     Utils.start_logging()
     
-    Settings.init('config.yaml')
+    Settings.load('./config.yaml')
 
+    # TODO: Remove
     config = configparser.ConfigParser()
     parsed_configs = config.read("config.ini")
     if len(parsed_configs) == 0:
         print("no config file found")
         sys.exit()
-
-    SCREEN_RATIO = 16
-    pixel_rows = Settings.read_variable('System', 'pixel_rows', Importance.CRITICAL)
-    if pixel_rows % SCREEN_RATIO != 0:
-        logging.error("[System] pixel_rows must be a multiple of 16 to work with the 'rpi-rgb-led-matrix' library.")
-        logging.error("[System] Exiting program.")
-        sys.exit()
-    pixel_cols = Settings.read_variable('System', 'pixel_cols', Importance.CRITICAL)
-    if pixel_cols % SCREEN_RATIO != 0:
-        logging.error("[System] pixel_cols must be a multiple of 32 to work with the 'rpi-rgb-led-matrix' library.")
-        logging.error("[System] Exiting program.")
-        sys.exit()
-        
-    encoder_A = Settings.read_variable('Pinout', 'encoder_a', Importance.CRITICAL)
-    encoder_B = Settings.read_variable('Pinout', 'encoder_b', Importance.CRITICAL)
-    encoder_button = Settings.read_variable('Pinout', 'encoder_button', Importance.CRITICAL)
-    tilt_switch = Settings.read_variable('Pinout', 'tilt_switch', Importance.CRITICAL)
-        
-    brightness = Settings.read_variable('System', 'brightness') or 100
-    is_display_on = True
-
-    black_screen = Image.new("RGB", (pixel_rows, pixel_cols), (0, 0, 0))
-
-    encoder_button = Button(encoder_button, pull_up=True)
-    input_status_dictionary = {"value": InputStatus.NOTHING}
-    encoder_button.when_pressed = lambda button: encoder_button_function(button, input_status_dictionary)
-
-    encoderQueue = queue.Queue()
-    encoder = RotaryEncoder(encoder_A, encoder_B)
-    encoder.when_rotated_clockwise = lambda enc: rotate_clockwise(enc, encoderQueue)
-    encoder.when_rotated_counter_clockwise = lambda enc: rotate_counter_clockwise(enc, encoderQueue)
-    encoder_state = 0
-
-    tilt_switch = Button(tilt_switch, pull_up=True)
-    is_horizontal_dictionary = {"value": True}
-    tilt_switch.when_pressed = lambda button: tilt_callback(button, is_horizontal_dictionary)
-    tilt_switch.when_released = lambda button: tilt_callback(button, is_horizontal_dictionary)
+    # TODO: Remove
+    
+    board = Board()
+    matrix = Utils.create_matrix(board.pixel_rows, board.pixel_cols, board.brightness)
+    black_screen = Image.new("RGB", (board.pixel_rows, board.pixel_cols), (0, 0, 0))
+    
+    
 
     def toggle_display():
-        nonlocal is_display_on
-        is_display_on = not is_display_on
-        print("Display On: " + str(is_display_on))
+        board.is_display_on = not board.is_display_on
+        logging.info(f"[Controller] Display {'on' if board.is_display_on else 'off'}")
 
     def increase_brightness():
-        nonlocal brightness
-        brightness = min(100, brightness + 5)
+        board.brightness = min(100, board.brightness + 5)
+        logging.info(f"[Controller] Brightness increased to {board.brightness}")
 
     def decrease_brightness():
-        nonlocal brightness
-        brightness = max(0, brightness - 5)
+        board.brightness = max(0, board.brightness - 5)
+        logging.info(f"[Controller] Brightness decreased to {board.brightness}")
 
-    current_app_idx = 0
+    current_app_index = 0
 
     def switch_next_app():
-        nonlocal current_app_idx
-        current_app_idx += 1
+        nonlocal current_app_index
+        current_app_index += 1
 
     def switch_prev_app():
-        nonlocal current_app_idx
-        current_app_idx -= 1
+        nonlocal current_app_index
+        current_app_index -= 1
 
     callbacks = {
         "toggle_display": toggle_display,
@@ -138,106 +91,50 @@ def main():
         # spotify_player.SpotifyScreen(config, modules, callbacks),
     ]
 
-    matrix = Utils.create_matrix(pixel_rows, pixel_cols, brightness)
 
     rotation_time = math.floor(time.time())
     while True:
-        while not encoderQueue.empty():
-            encoder_state += encoderQueue.get()
-        if encoder_state > 1:
+        while not board.encoderQueue.empty():
+            board.encoder_state += board.encoderQueue.get()
+        if board.encoder_state > 1:
             print("encoder increased")
-            input_status_dictionary["value"] = InputStatus.ENCODER_INCREASE
-            encoder_state = 0
-        elif encoder_state < -1:
+            board.input_status_dictionary["value"] = InputStatus.ENCODER_INCREASE
+            board.encoder_state = 0
+        elif board.encoder_state < -1:
             print("encoder decreased")
-            input_status_dictionary["value"] = InputStatus.ENCODER_DECREASE
-            encoder_state = 0
+            board.input_status_dictionary["value"] = InputStatus.ENCODER_DECREASE
+            board.encoder_state = 0
 
-        inputStatusSnapshot = copy.copy(input_status_dictionary["value"])
-        input_status_dictionary["value"] = InputStatus.NOTHING
+        inputStatusSnapshot = copy.copy(board.input_status_dictionary["value"])
+        board.input_status_dictionary["value"] = InputStatus.NOTHING
 
-        isHorizontalSnapshot = copy.copy(is_horizontal_dictionary["value"])
+        isHorizontalSnapshot = copy.copy(board.is_horizontal_dictionary["value"])
 
         new_rotation_time = math.floor(time.time())
         if new_rotation_time % 10 == 0 and new_rotation_time - rotation_time >= 10:
-            current_app_idx += 1
+            current_app_index += 1
             rotation_time = new_rotation_time
 
-        frame = app_list[current_app_idx % len(app_list)].generate(
+        frame = app_list[current_app_index % len(app_list)].generate(
             isHorizontalSnapshot, inputStatusSnapshot
         )
-        if not is_display_on:
+        if not board.is_display_on:
             frame = black_screen
 
         matrix.SetImage(frame)
         time.sleep(0.05)
 
 
-def encoder_button_function(enc_button, inputStatusDict):
-    start_time = time.time()
-    time_diff = 0
-    hold_time = 1
 
-    while enc_button.is_active and (time_diff < hold_time):
-        time_diff = time.time() - start_time
-
-    if time_diff >= hold_time:
-        print("long press detected")
-        inputStatusDict["value"] = InputStatus.LONG_PRESS
-    else:
-        enc_button.when_pressed = None
-        start_time = time.time()
-        while time.time() - start_time <= 0.3:
-            time.sleep(0.1)
-            if enc_button.is_pressed:
-                time.sleep(0.1)
-                new_start_time = time.time()
-                while time.time() - new_start_time <= 0.3:
-                    time.sleep(0.1)
-                    if enc_button.is_pressed:
-                        print("triple press detected")
-                        inputStatusDict["value"] = InputStatus.TRIPLE_PRESS
-                        enc_button.when_pressed = lambda button: encoder_button_function(
-                            button, inputStatusDict
-                        )
-                        return
-                print("double press detected")
-                inputStatusDict["value"] = InputStatus.DOUBLE_PRESS
-                enc_button.when_pressed = lambda button: encoder_button_function(
-                    button, inputStatusDict
-                )
-                return
-        print("single press detected")
-        inputStatusDict["value"] = InputStatus.SINGLE_PRESS
-        enc_button.when_pressed = lambda button: encoder_button_function(button, inputStatusDict)
-        return
-
-
-def rotate_clockwise(encoder, encoderQueue):
-    encoderQueue.put(1)
-    encoder.value = 0
-
-
-def rotate_counter_clockwise(encoder, encoderQueue):
-    encoderQueue.put(-1)
-    encoder.value = 0
-
-
-def tilt_callback(tilt_switch, isHorizontalDict):
-    startTime = time.time()
-    while time.time() - startTime < 0.25:
-        pass
-    isHorizontalDict["value"] = tilt_switch.is_pressed
-
-
+# TODO: understand why its there
 def reduceFrameToString(frame):
     res = frame.flatten()
     return " ".join(map(str, res))
+# TODO: understand why its there
 
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("Interrupted with Ctrl-C")
-        sys.exit(0)
+        logging.info("[Controller] Application stopped by user.")
