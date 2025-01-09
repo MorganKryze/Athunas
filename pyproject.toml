@@ -15,4 +15,5 @@ dependencies = [
     "websocket==0.2.1",
     "yfinance==0.2.40",
     "pyyaml==6.0.2",
+    "scipy==1.14.0",
 ]
