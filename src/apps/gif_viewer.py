@@ -18,6 +18,13 @@ FRAME_DELAY = 0.04
 
 class GifScreen:
     def __init__(self, modules: Dict, callbacks: Dict[str, Callable]):
+        """
+        Initialize the GifScreen with modules and callbacks.
+
+        Args:
+            modules (Dict): Dictionary of modules.
+            callbacks (Dict[str, Callable]): Dictionary of callback functions.
+        """
         self.enabled = Settings.read_variable(
             "GifViewer", "enabled", Importance.REQUIRED
         )
@@ -41,8 +48,11 @@ class GifScreen:
         Generate the frame to draw on the LED matrix.
 
         Args:
-            isHorizontal (bool): Whether the LED matrix is horizontal.
-            inputStatus (InputStatus): The current input status.
+            is_horizontal (bool): Whether the LED matrix is horizontal.
+            encoder_input_status (InputStatus): The current input status.
+
+        Returns:
+            Image.Image: The generated frame.
         """
         if encoder_input_status == InputStatus.LONG_PRESS:
             self.selection_mode = not self.selection_mode
@@ -72,6 +82,9 @@ class GifScreen:
         try:
             frame = current_gif[self.current_frame_index].convert("RGB")
         except IndexError:
+            logging.warning(
+                "[GifScreen] IndexError encountered. Resetting frame index."
+            )
             self.current_frame_index = 0
             frame = current_gif[self.current_frame_index].convert("RGB")
         self.current_frame_index = (self.current_frame_index + 1) % len(current_gif)
