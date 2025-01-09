@@ -100,6 +100,8 @@ def main():
         # spotify_player.SpotifyScreen(config, modules, callbacks),
     ]
 
+    available_app_list = [app.enabled is True for app in app_list]
+
     # TODO: Find a better way to implement app rotation
     # rotation_time = math.floor(time.time())
     SLEEP_TIME = 0.05
@@ -128,9 +130,9 @@ def main():
         #     current_app_index += 1
         #     rotation_time = new_rotation_time
 
-        frame = app_list[current_app_index % len(app_list)].generate(
-            is_horizontal_snapshot, input_status_snapshot
-        )
+        frame = available_app_list[
+            current_app_index % len(available_app_list)
+        ].generate(is_horizontal_snapshot, input_status_snapshot)
 
         matrix.SetImage(frame if Board.is_display_on else Board.black_screen)
         time.sleep(SLEEP_TIME)
