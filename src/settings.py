@@ -3,8 +3,9 @@ import logging
 from enums.variable_importance import Importance
 from typing import Any, Dict, Optional
 
+
 class Settings:
-    file_path: str = ''
+    file_path: str = ""
     data: Dict[str, Any] = {}
 
     @classmethod
@@ -24,7 +25,7 @@ class Settings:
         Reads a YAML file and stores its contents in the class dictionary.
         """
         try:
-            with open(cls.file_path, 'r') as file:
+            with open(cls.file_path, "r") as file:
                 cls.data = yaml.safe_load(file)
             logging.info("[Settings] loaded successfully.")
         except FileNotFoundError:
@@ -42,14 +43,16 @@ class Settings:
         Writes the class dictionary to a YAML file.
         """
         try:
-            with open(cls.file_path, 'w') as file:
+            with open(cls.file_path, "w") as file:
                 yaml.safe_dump(cls.data, file)
             logging.info("[Settings] saved successfully.")
         except IOError as e:
             logging.error(f"[Settings] Failed to write to file: {e}")
 
     @classmethod
-    def read_variable(cls, category: str, var: str, importance: Importance=Importance.NORMAL) -> Optional[Any]:
+    def read_variable(
+        cls, category: str, var: str, importance: Importance = Importance.NORMAL
+    ) -> Optional[Any]:
         """
         Reads a specific variable from the class dictionary.
 
@@ -63,7 +66,9 @@ class Settings:
         if value is None:
             logging.warning(f"[Settings] variable not found: {category} -> {var}")
             if importance == Importance.CRITICAL:
-                logging.error(f"[Settings] Critical variable not found: {category} -> {var}")
+                logging.error(
+                    f"[Settings] Critical variable not found: {category} -> {var}"
+                )
                 logging.error("[Settings] Exiting program.")
                 raise
         return value

@@ -11,7 +11,7 @@ from apps import (
     life,
     spotify_player,
 )
-from modules import  notification_module, weather_module, spotify_module
+from modules import notification_module, weather_module, spotify_module
 
 import math
 import sys
@@ -23,13 +23,12 @@ from PIL import Image
 from utils import Utils
 
 
-
 def main():
     Utils.set_base_directory()
-    
+
     Utils.start_logging()
-    
-    Settings.load('./config.yaml')
+
+    Settings.load("./config.yaml")
 
     # TODO: Remove
     config = configparser.ConfigParser()
@@ -38,33 +37,37 @@ def main():
         print("no config file found")
         sys.exit()
     # TODO: Remove
-    
+
     board = Board()
     matrix = Utils.create_matrix(board.pixel_rows, board.pixel_cols, board.brightness)
-    
-    
 
     def toggle_display():
         board.is_display_on = not board.is_display_on
-        logging.info(f"[Controller] Display {'on' if board.is_display_on else 'off'}")
+        logging.debug(f"[Controller] Display {'on' if board.is_display_on else 'off'}")
 
     def increase_brightness():
         board.brightness = min(100, board.brightness + 5)
-        logging.info(f"[Controller] Brightness increased to {board.brightness}")
+        logging.debug(f"[Controller] Brightness increased to {board.brightness}")
 
     def decrease_brightness():
         board.brightness = max(0, board.brightness - 5)
-        logging.info(f"[Controller] Brightness decreased to {board.brightness}")
+        logging.debug(f"[Controller] Brightness decreased to {board.brightness}")
 
     current_app_index = 0
 
     def switch_next_app():
         nonlocal current_app_index
         current_app_index += 1
+        logging.debug(
+            f"[Controller] Switched to next app {current_app_index % len(app_list)}"
+        )
 
     def switch_prev_app():
         nonlocal current_app_index
         current_app_index -= 1
+        logging.debug(
+            f"[Controller] Switched to previous app {current_app_index % len(app_list)}"
+        )
 
     callbacks = {
         "toggle_display": toggle_display,
@@ -124,16 +127,11 @@ def main():
         time.sleep(0.05)
 
 
-
-# TODO: understand why its there
-def reduceFrameToString(frame):
-    res = frame.flatten()
-    return " ".join(map(str, res))
-# TODO: understand why its there
-
-
 if __name__ == "__main__":
     try:
         main()
+        logging.info("[Controller] Application stopped.")
+        logging.info("-------------------------------------------------------------")
     except KeyboardInterrupt:
         logging.info("[Controller] Application stopped by user.")
+        logging.info("-------------------------------------------------------------")
