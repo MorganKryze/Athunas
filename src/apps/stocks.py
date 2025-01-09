@@ -14,7 +14,7 @@ down_arrow = np.asarray([[1,1,1,1,1],[0,1,1,1,0],[0,0,1,0,0]])
 class StocksVerticalScreen:
     def __init__(self, config, modules, default_actions):
         self.ticker_symbols = ['DOGE-USD', 'GME', 'AMC', 'TSM', 'AMD']
-        self.tiny_font = ImageFont.truetype("fonts/tiny.otf", 5)
+        self.tiny_font = ImageFont.truetype("./src/fonts/tiny.otf", 5)
         self.bg = Image.open('apps_v2/res/tothemoon_darker.png').convert('RGB')
         self.queue = LifoQueue()
         self.thread = threading.Thread(target=generateFrameAsync, 

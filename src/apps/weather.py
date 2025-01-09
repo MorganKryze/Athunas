@@ -11,7 +11,7 @@ class WeatherScreen:
     def __init__(self, config, modules, default_actions):
         self.modules = modules
         self.default_actions = default_actions
-        self.font = ImageFont.truetype("fonts/tiny.otf", 5)
+        self.font = ImageFont.truetype("./src/fonts/tiny.otf", 5)
 
         self.canvas_width = config.getint('System', 'canvas_width', fallback=64)
         self.canvas_height = config.getint('System', 'canvas_height', fallback=32)
