@@ -1,88 +1,104 @@
 import logging
+import os
+import time
+from typing import List, Dict, Callable
+
+from PIL import Image, ImageSequence, ImageDraw
+
 from board import Board
 from enums.variable_importance import Importance
-import numpy as np
 from enums.input_status import InputStatus
-from PIL import Image, ImageSequence, ImageDraw
-import time
-import os
-
 from settings import Settings
 
-white = (230, 255, 255)
+# Constants
+GIFS_LOCATION = "./src/apps/res/gif/horizontal/"
+WHITE = (230, 255, 255)
+FRAME_DELAY = 0.04
 
 
 class GifScreen:
-    GIFS_LOCATION = "./src/apps/res/gif/horizontal/"
-
-    def __init__(self, modules, callbacks):
+    def __init__(self, modules: Dict, callbacks: Dict[str, Callable]):
         self.enabled = Settings.read_variable(
             "GifViewer", "enabled", Importance.REQUIRED
         )
         if not self.enabled:
+            logging.debug("[GifScreen] GifViewer is disabled.")
             return
 
-        self.pixel_cols = Board.led_cols
-        self.pixel_rows = Board.led_rows
-        self.animations = GifScreen.loadAnimations()
-        self.currentIdx = 0
-        self.selectMode = False
         self.callbacks = callbacks
-        self.cnt = 0
+        self.led_cols = Board.led_cols
+        self.led_rows = Board.led_rows
+        self.animations = self.loadAnimations()
+        self.current_animation_index = 0
+        self.selection_mode = False
+        self.current_frame_index = 0
         self.was_horizontal = True
 
-    def generate(self, isHorizontal, inputStatus):
-        if inputStatus == InputStatus.LONG_PRESS:
-            self.selectMode = not self.selectMode
+    def generate(
+        self, is_horizontal: bool, encoder_input_status: InputStatus
+    ) -> Image.Image:
+        """
+        Generate the frame to draw on the LED matrix.
 
-        if self.selectMode:
-            if inputStatus is InputStatus.ENCODER_INCREASE:
-                self.currentIdx += 1
-                self.cnt = 0
-            elif inputStatus is InputStatus.ENCODER_DECREASE:
-                self.currentIdx -= 1
-                self.cnt = 0
+        Args:
+            isHorizontal (bool): Whether the LED matrix is horizontal.
+            inputStatus (InputStatus): The current input status.
+        """
+        if encoder_input_status == InputStatus.LONG_PRESS:
+            self.selection_mode = not self.selection_mode
+
+        if self.selection_mode:
+            if encoder_input_status == InputStatus.ENCODER_INCREASE:
+                self.current_animation_index = (self.current_animation_index + 1) % len(
+                    self.animations
+                )
+                self.current_frame_index = 0
+            elif encoder_input_status == InputStatus.ENCODER_DECREASE:
+                self.current_animation_index = (self.current_animation_index - 1) % len(
+                    self.animations
+                )
+                self.current_frame_index = 0
         else:
-            if inputStatus is InputStatus.SINGLE_PRESS:
+            if encoder_input_status == InputStatus.SINGLE_PRESS:
                 self.callbacks["toggle_display"]()
-            elif inputStatus is InputStatus.ENCODER_INCREASE:
+            elif encoder_input_status == InputStatus.ENCODER_INCREASE:
                 self.callbacks["switch_next_app"]()
-            elif inputStatus is InputStatus.ENCODER_DECREASE:
+            elif encoder_input_status == InputStatus.ENCODER_DECREASE:
                 self.callbacks["switch_prev_app"]()
 
-        curr_gif = ImageSequence.Iterator(
-            self.animations[self.currentIdx % len(self.animations)]
+        current_gif = ImageSequence.Iterator(
+            self.animations[self.current_animation_index]
         )
         try:
-            frame = curr_gif[self.cnt].convert("RGB")
+            frame = current_gif[self.current_frame_index].convert("RGB")
         except IndexError:
-            self.cnt = 0
-            frame = curr_gif[self.cnt].convert("RGB")
-        self.cnt += 1
+            self.current_frame_index = 0
+            frame = current_gif[self.current_frame_index].convert("RGB")
+        self.current_frame_index = (self.current_frame_index + 1) % len(current_gif)
 
         draw = ImageDraw.Draw(frame)
+        if self.selection_mode:
+            draw.rectangle((0, 0, self.led_cols - 1, self.led_rows - 1), outline=WHITE)
 
-        if self.selectMode:
-            draw.rectangle(
-                (0, 0, self.pixel_cols - 1, self.pixel_rows - 1), outline=white
-            )
-
-        time.sleep(0.04)
+        time.sleep(FRAME_DELAY)
         return frame
 
     @classmethod
-    def loadAnimations(cls):
+    def loadAnimations(cls) -> List[Image.Image]:
         """
         Loads all GIFs from the GIFS_LOCATION directory.
 
         Returns:
-            List[Image]: A list of all loaded GIFs.
+            List[Image.Image]: A list of all loaded GIFs.
         """
         logging.debug("[GifScreen] Loading GIFs.")
         result = []
-        for filename in os.listdir(cls.GIFS_LOCATION):
-            if filename.endswith(".gif"):
-                logging.debug(f"[GifScreen] Loading GIF: {filename}")
-                result.append(Image.open(os.path.join(cls.GIFS_LOCATION, filename)))
+        try:
+            for filename in os.listdir(GIFS_LOCATION):
+                if filename.endswith(".gif"):
+                    logging.debug(f"[GifScreen] Loading GIF: {filename}")
+                    result.append(Image.open(os.path.join(GIFS_LOCATION, filename)))
+        except Exception as e:
+            logging.error(f"[GifScreen] Error loading GIFs: {e}")
         logging.debug("[GifScreen] All GIFs loaded.")
         return result
