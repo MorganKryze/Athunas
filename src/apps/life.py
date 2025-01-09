@@ -1,49 +1,83 @@
-import numpy as np
-import random
-from enums.input_status import InputStatus
-from datetime import datetime, timedelta
-from PIL import Image, ImageSequence, ImageDraw
+import logging
 import os
+import random
+import numpy as np
+from datetime import datetime, timedelta
+from PIL import Image, ImageDraw
 from scipy.signal import convolve2d
 
-canvas_height = 32
-canvas_width = 64
+from board import Board
+from enums.variable_importance import Importance
+from enums.input_status import InputStatus
+from settings import Settings
+
+# Constants
+LIFE_PATTERNS_DIR = "apps/res/life_patterns/"
+
 
 class GameOfLifeScreen:
     def __init__(self, config, modules, default_actions):
+        """
+        Initialize the GameOfLifeScreen with configuration, modules, and default actions.
+
+        Args:
+            config (Dict): Configuration settings.
+            modules (Dict): Dictionary of modules.
+            default_actions (Dict[str, Callable]): Dictionary of callback functions.
+        """
+        self.enabled = Settings.read_variable(
+            "GameOfLife", "enabled", Importance.REQUIRED
+        )
+        if not self.enabled:
+            logging.debug("[GameOfLife] GameOfLife is disabled.")
+            return
+
         self.modules = modules
         self.default_actions = default_actions
-        self.color = (255,255,255)
-        self.init_states = [generateRandomState,
-                            lambda : fetchPattern('apps_v2/res/life_patterns/centinal'),
-                            lambda : fetchPattern('apps_v2/res/life_patterns/achim_p144'),
-                            lambda : fetchPattern('apps_v2/res/life_patterns/pboj_p22')]
-        self.curr_state_idx = 0
-        self.state = self.init_states[self.curr_state_idx]()
+        self.color = (255, 255, 255)
+        self.initial_states = [
+            generate_random_state,
+            lambda: fetch_pattern(os.path.join(LIFE_PATTERNS_DIR, "centinal")),
+            lambda: fetch_pattern(os.path.join(LIFE_PATTERNS_DIR, "achim_p144")),
+            lambda: fetch_pattern(os.path.join(LIFE_PATTERNS_DIR, "pboj_p22")),
+        ]
+        self.current_state_index = 0
+        self.state = self.initial_states[self.current_state_index]()
 
-    def generate(self, isHorizontal, inputStatus):
-        if (inputStatus is InputStatus.SINGLE_PRESS or inputStatus is InputStatus.LONG_PRESS):
-            if (inputStatus is InputStatus.LONG_PRESS):
-                self.curr_state_idx = (self.curr_state_idx + 1) % len(self.init_states)
-            self.state = self.init_states[self.curr_state_idx]()
-            self.color = generateNewColor()
-        elif (inputStatus is InputStatus.ENCODER_INCREASE):
-            self.default_actions['switch_next_app']()
-        elif (inputStatus is InputStatus.ENCODER_DECREASE):
-            self.default_actions['switch_prev_app']()
-        
+    def generate(self, is_horizontal: bool, input_status: InputStatus) -> Image.Image:
+        """
+        Generate the frame to draw on the LED matrix.
+
+        Args:
+            is_horizontal (bool): Whether the LED matrix is horizontal.
+            input_status (InputStatus): The current input status.
+
+        Returns:
+            Image.Image: The generated frame.
+        """
+        if input_status in [InputStatus.SINGLE_PRESS, InputStatus.LONG_PRESS]:
+            if input_status == InputStatus.LONG_PRESS:
+                self.current_state_index = (self.current_state_index + 1) % len(
+                    self.initial_states
+                )
+            self.state = self.initial_states[self.current_state_index]()
+            self.color = generate_new_color()
+        elif input_status == InputStatus.ENCODER_INCREASE:
+            self.default_actions["switch_next_app"]()
+        elif input_status == InputStatus.ENCODER_DECREASE:
+            self.default_actions["switch_prev_app"]()
+
         end_time = datetime.now() + timedelta(seconds=0.1)
 
         old_state = self.state
-        frame = Image.new("RGB", (canvas_width, canvas_height), (0,0,0)) #np.zeros((canvas_height, canvas_width, 3), dtype=int)
+        frame = Image.new("RGB", (Board.led_cols, Board.led_rows), (0, 0, 0))
         draw = ImageDraw.Draw(frame)
 
-        new_state = life_step_2(old_state)
-        for i in range(canvas_height):
-            for j in range(canvas_width):
+        new_state = life_step(old_state)
+        for i in range(Board.led_rows):
+            for j in range(Board.led_cols):
                 if new_state[i][j] == 1:
-                    draw.point((j,i), fill = self.color)
-                    #frame[i][j] = self.color
+                    draw.point((j, i), fill=self.color)
 
         self.state = new_state
 
@@ -52,51 +86,96 @@ class GameOfLifeScreen:
 
         return frame
 
-def life_step_2(X):
-    """Game of life step using scipy tools"""
-    nbrs_count = convolve2d(X, np.ones((3, 3)), mode='same', boundary='wrap') - X
-    return (nbrs_count == 3) | (X & (nbrs_count == 2))
 
-def getNumNeighbors(state, i, j):
+def life_step(state: np.ndarray) -> np.ndarray:
+    """
+    Perform a step in the Game of Life using scipy tools.
+
+    Args:
+        state (np.ndarray): The current state of the Game of Life.
+
+    Returns:
+        np.ndarray: The new state of the Game of Life.
+    """
+    neighbors_count = (
+        convolve2d(state, np.ones((3, 3)), mode="same", boundary="wrap") - state
+    )
+    return (neighbors_count == 3) | (state & (neighbors_count == 2))
+
+
+def get_num_neighbors(state: np.ndarray, i: int, j: int) -> int:
+    """
+    Get the number of live neighbors for a cell in the Game of Life.
+
+    Args:
+        state (np.ndarray): The current state of the Game of Life.
+        i (int): The row index of the cell.
+        j (int): The column index of the cell.
+
+    Returns:
+        int: The number of live neighbors.
+    """
     num_on = 0
-    adjusted_i = i+1 if i+1 < canvas_height else 0
-    adjusted_j = j+1 if j+1 < canvas_width else 0
-    
-    if state[i-1][j-1] == 1:
-        num_on += 1
-    if state[i-1][j] == 1:
-        num_on += 1
-    if state[i-1][adjusted_j] == 1:
-        num_on += 1
-    if state[i][j-1] == 1:
-        num_on += 1
-    if state[i][adjusted_j] == 1:
-        num_on += 1
-    if state[adjusted_i][j-1] == 1:
-        num_on += 1
-    if state[adjusted_i][j] == 1:
-        num_on += 1
-    if state[adjusted_i][adjusted_j] == 1:
-        num_on += 1
+
+    for di in [-1, 0, 1]:
+        for dj in [-1, 0, 1]:
+            if di == 0 and dj == 0:
+                continue
+            if state[(i + di) % Board.led_rows][(j + dj) % Board.led_cols] == 1:
+                num_on += 1
+
     return num_on
 
-def generateRandomState():
-    init_state = np.zeros((canvas_height, canvas_width), dtype=int)
-    for i in range(canvas_height):
-        for j in range(canvas_width):
-            init_state[i][j] = random.randint(0,1)
-    return init_state
 
-def generateNewColor():
-    return (random.randint(50,255), random.randint(50,255), random.randint(50,255))
+def generate_random_state() -> np.ndarray:
+    """
+    Generate a random initial state for the Game of Life.
 
-def fetchPattern(fileLocation):
-    if not os.path.exists(fileLocation + ".npy"):
-        convertImage(fileLocation)
-    return np.load(fileLocation + ".npy")
+    Returns:
+        np.ndarray: The random initial state.
+    """
+    initial_state = np.zeros((Board.led_rows, Board.led_cols), dtype=int)
+    for i in range(Board.led_rows):
+        for j in range(Board.led_cols):
+            initial_state[i][j] = random.randint(0, 1)
+    return initial_state
 
-def convertImage(location):
-    image = Image.open(location + '.png')
+
+def generate_new_color() -> tuple:
+    """
+    Generate a new random color.
+
+    Returns:
+        tuple: A tuple representing the RGB color.
+    """
+    return (random.randint(50, 255), random.randint(50, 255), random.randint(50, 255))
+
+
+def fetch_pattern(file_location: str) -> np.ndarray:
+    """
+    Fetch a pattern from a file.
+
+    Args:
+        file_location (str): The location of the pattern file.
+
+    Returns:
+        np.ndarray: The loaded pattern.
+    """
+    if not os.path.exists(file_location + ".npy"):
+        convert_image(file_location)
+    return np.load(file_location + ".npy")
+
+
+def convert_image(location: str):
+    """
+    Convert an image to a numpy array and save it.
+
+    Args:
+        location (str): The location of the image file.
+    """
+    image = Image.open(location + ".png")
     width, height = image.size
     image_array = np.array(image.convert("RGB"), dtype=int)
-    np.save(location + '.npy', (image_array[0:height,0:width,0]//255).astype('int32'))
+    np.save(
+        location + ".npy", (image_array[0:height, 0:width, 0] // 255).astype("int32")
+    )
