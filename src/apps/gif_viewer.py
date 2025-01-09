@@ -17,14 +17,10 @@ class GifScreen:
 
     def __init__(self, default_actions):
         self.pixel_cols = Board.pixel_cols
-
         self.pixel_rows = Board.pixel_rows
-
         self.animations = GifScreen.loadAnimations()
-
         self.currentIdx = 0
         self.selectMode = False
-
         self.default_actions = default_actions
         self.cnt = 0
         self.was_horizontal = True
@@ -68,11 +64,11 @@ class GifScreen:
         time.sleep(0.04)
         return frame
 
-    @staticmethod
+    @classmethod
     def loadAnimations(cls):
         """
         Loads all GIFs from the GIFS_LOCATION directory.
-        
+
         Returns:
             List[Image]: A list of all loaded GIFs.
         """
@@ -81,8 +77,6 @@ class GifScreen:
         for filename in os.listdir(cls.GIFS_LOCATION):
             if filename.endswith(".gif"):
                 logging.debug(f"[GifScreen] Loading GIF: {filename}")
-                result.append(
-                    Image.open(os.path.join(cls.GIFS_LOCATION, filename))
-                )
+                result.append(Image.open(os.path.join(cls.GIFS_LOCATION, filename)))
         logging.debug("[GifScreen] All GIFs loaded.")
         return result
