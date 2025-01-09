@@ -26,7 +26,7 @@ class Settings:
         try:
             with open(cls.file_path, 'r') as file:
                 cls.data = yaml.safe_load(file)
-            logging.info(f"[Settings] loaded successfully: {cls.data}")
+            logging.info("[Settings] loaded successfully.")
         except FileNotFoundError:
             logging.error(f"[Settings] The file '{cls.file_path}' was not found.")
             logging.error("[Settings] Exiting program.")
