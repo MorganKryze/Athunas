@@ -40,7 +40,7 @@ def main():
         sys.exit()
     # TODO: Remove
 
-    matrix = Utils.create_matrix(Board.pixel_rows, Board.pixel_cols, Board.brightness)
+    matrix = Utils.create_matrix(Board.led_rows, Board.led_cols, Board.brightness)
 
     def toggle_display():
         Board.is_display_on = not Board.is_display_on

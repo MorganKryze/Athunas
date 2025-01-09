@@ -22,8 +22,8 @@ class GifScreen:
         if not self.enabled:
             return
 
-        self.pixel_cols = Board.pixel_cols
-        self.pixel_rows = Board.pixel_rows
+        self.pixel_cols = Board.led_cols
+        self.pixel_rows = Board.led_rows
         self.animations = GifScreen.loadAnimations()
         self.currentIdx = 0
         self.selectMode = False

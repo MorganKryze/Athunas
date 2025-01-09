@@ -6,8 +6,8 @@ Pinout:
   tilt_switch: 19
 
 System:
-  pixel_rows: 32
-  pixel_cols: 64
+  led_rows: 32
+  led_cols: 64
   brightness: 100
 
 Pushbullet:
@@ -35,5 +35,5 @@ Youtube:
   enabled: true
   key: xxx
 
-Gif Viewer:
+GifViewer:
   enabled: true

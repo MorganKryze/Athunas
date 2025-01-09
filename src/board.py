@@ -36,8 +36,8 @@ class Board:
     BRIGHTNESS_MAX: int = 100
     BRIGHTNESS_STEP: int = 5
 
-    pixel_rows: int
-    pixel_cols: int
+    led_rows: int
+    led_cols: int
     encoder_clk: int
     encoder_dt: int
     encoder: RotaryEncoder
@@ -68,29 +68,25 @@ class Board:
         """
         Initializes the display settings.
         """
-        cls.pixel_rows = Settings.read_variable(
-            "System", "pixel_rows", Importance.REQUIRED
-        )
-        if cls.pixel_rows % cls.SCREEN_RATIO != 0 or cls.pixel_rows <= 0:
+        cls.led_rows = Settings.read_variable("System", "led_rows", Importance.REQUIRED)
+        if cls.led_rows % cls.SCREEN_RATIO != 0 or cls.led_rows <= 0:
             logging.error(
-                f"[Board] pixel_rows must be a positive multiple of {cls.SCREEN_RATIO} to work with the 'rpi-rgb-led-matrix' library."
+                f"[Board] led_rows must be a positive multiple of {cls.SCREEN_RATIO} to work with the 'rpi-rgb-led-matrix' library."
             )
             logging.error("[Board] Exiting program.")
             raise
         else:
-            logging.debug(f"[Board] pixel_rows: {cls.pixel_rows}")
+            logging.debug(f"[Board] led_rows: {cls.led_rows}")
 
-        cls.pixel_cols = Settings.read_variable(
-            "System", "pixel_cols", Importance.REQUIRED
-        )
-        if cls.pixel_cols % cls.SCREEN_RATIO != 0 or cls.pixel_cols <= 0:
+        cls.led_cols = Settings.read_variable("System", "led_cols", Importance.REQUIRED)
+        if cls.led_cols % cls.SCREEN_RATIO != 0 or cls.led_cols <= 0:
             logging.error(
-                f"[Board] pixel_cols must be a multiple of {cls.SCREEN_RATIO} to work with the 'rpi-rgb-led-matrix' library."
+                f"[Board] led_cols must be a multiple of {cls.SCREEN_RATIO} to work with the 'rpi-rgb-led-matrix' library."
             )
             logging.error("[Board] Exiting program.")
             raise
         else:
-            logging.debug(f"[Board] pixel_cols: {cls.pixel_cols}")
+            logging.debug(f"[Board] led_cols: {cls.led_cols}")
 
         cls.brightness = Settings.read_variable(
             "System", "brightness", Importance.REQUIRED
@@ -105,7 +101,7 @@ class Board:
             logging.debug(f"[Board] brightness: {cls.brightness}")
         logging.debug("[Board] All display settings initialized.")
 
-        cls.black_screen = Image.new("RGB", (cls.pixel_rows, cls.pixel_cols), (0, 0, 0))
+        cls.black_screen = Image.new("RGB", (cls.led_rows, cls.led_cols), (0, 0, 0))
 
     @classmethod
     def _init_encoder(cls):
