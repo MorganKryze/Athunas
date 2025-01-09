@@ -1,22 +1,24 @@
 import logging
-import sys
 import time
 from PIL import Image
+import queue
 
 from enums.input_status import InputStatus
 from enums.variable_importance import Importance
 from settings import Settings
 
 try:
+    logging.debug("[Board] Attempting to import gpiozero")
     from gpiozero import Button, RotaryEncoder
 except Exception:
+    logging.error("[Board] Failed to import gpiozero. Using mock instead.")
 
     class Button:
         def __init__(self, num, pull_up=False):
             self.num = num
             self.pull_up = pull_up
             self.when_pressed = lambda: None
-            self.when_pressed = lambda: None
+            self.when_released = lambda: None
 
     class RotaryEncoder:
         def __init__(self, encoding1, encoding2):
@@ -26,89 +28,228 @@ except Exception:
             self.when_rotated_counter_clockwise = lambda: None
 
 
-import queue
-
-
 class Board:
-    SCREEN_RATIO = 16
+    SCREEN_RATIO: int = 16
+    FIRST_GPIO_PIN: int = 0
+    LAST_GPIO_PIN: int = 27
+    MIN_BRIGHTNESS: int = 0
+    MAX_BRIGHTNESS: int = 100
 
-    def __init__(self):
-        self.pixel_rows = Settings.read_variable(
+    pixel_rows: int
+    pixel_cols: int
+    encoder_clk: int
+    encoder_dt: int
+    encoder: RotaryEncoder
+    encoder_sw: int
+    encoder_button: Button
+    tilt_switch: int
+    tilt_switch_button: Button
+    brightness: int
+    is_display_on: bool = True
+    encoder_queue: queue.Queue
+    encoder_state: int = 0
+    is_horizontal: bool = True
+    encoder_input_status: InputStatus = InputStatus.NOTHING
+    black_screen: Image
+
+    @classmethod
+    def init_system():
+        """
+        Initializes the system components.
+        """
+        Board._init_display()
+        Board._init_encoder()
+        Board._init_tilt_switch()
+        logging.debug("[Board] All system components initialized.")
+
+    @classmethod
+    def _init_display():
+        """
+        Initializes the display settings.
+        """
+        Board.pixel_rows = Settings.read_variable(
             "System", "pixel_rows", Importance.CRITICAL
         )
-        if self.pixel_rows % self.SCREEN_RATIO != 0:
+        if (
+            Board.pixel_rows % Board.SCREEN_RATIO != 0
+            or Board.pixel_rows <= 0
+            or Board.pixel_rows is None
+        ):
             logging.error(
-                "[System] pixel_rows must be a multiple of 16 to work with the 'rpi-rgb-led-matrix' library."
+                f"[Board] pixel_rows must be a positive multiple of {Board.SCREEN_RATIO} to work with the 'rpi-rgb-led-matrix' library."
             )
-            logging.error("[System] Exiting program.")
-            sys.exit()
+            logging.error("[Board] Exiting program.")
+            raise
+        else:
+            logging.debug(f"[Board] pixel_rows: {Board.pixel_rows}")
 
-        self.pixel_cols = Settings.read_variable(
+        Board.pixel_cols = Settings.read_variable(
             "System", "pixel_cols", Importance.CRITICAL
         )
-        if self.pixel_cols % self.SCREEN_RATIO != 0:
+        if (
+            Board.pixel_cols % Board.SCREEN_RATIO != 0
+            or Board.pixel_cols <= 0
+            or Board.pixel_cols is None
+        ):
             logging.error(
-                "[System] pixel_cols must be a multiple of 16 to work with the 'rpi-rgb-led-matrix' library."
+                f"[Board] pixel_cols must be a multiple of {Board.SCREEN_RATIO} to work with the 'rpi-rgb-led-matrix' library."
             )
-            logging.error("[System] Exiting program.")
-            sys.exit()
+            logging.error("[Board] Exiting program.")
+            raise
+        else:
+            logging.debug(f"[Board] pixel_cols: {Board.pixel_cols}")
 
-        self.encoder_A = Settings.read_variable(
-            "Pinout", "encoder_a", Importance.CRITICAL
+        Board.brightness = Settings.read_variable("System", "brightness")
+        if (
+            Board.brightness < Board.MIN_BRIGHTNESS
+            or Board.brightness > Board.MAX_BRIGHTNESS
+            or Board.brightness is None
+        ):
+            logging.error(
+                f"[Board] brightness must be between {Board.MIN_BRIGHTNESS} and {Board.MAX_BRIGHTNESS}."
+            )
+            logging.error("[Board] Exiting program.")
+            raise
+        else:
+            logging.debug(f"[Board] brightness: {Board.brightness}")
+        logging.debug("[Board] All display settings initialized.")
+
+        Board.black_screen = Image.new(
+            "RGB", (Board.pixel_rows, Board.pixel_cols), (0, 0, 0)
         )
-        self.encoder_B = Settings.read_variable(
-            "Pinout", "encoder_b", Importance.CRITICAL
+
+    @classmethod
+    def _init_encoder():
+        """
+        Initializes the encoder settings.
+        """
+        Board.encoder_clk = Settings.read_variable(
+            "Pinout", "encoder_clk", Importance.CRITICAL
         )
-        self.encoder_button = Settings.read_variable(
-            "Pinout", "encoder_button", Importance.CRITICAL
+        if (
+            Board.encoder_clk < Board.FIRST_GPIO_PIN
+            or Board.encoder_clk > Board.LAST_GPIO_PIN
+            or Board.encoder_clk is None
+        ):
+            logging.error(
+                f"[Board] encoder_clk must be between {Board.FIRST_GPIO_PIN} and {Board.LAST_GPIO_PIN}."
+            )
+            logging.error("[Board] Exiting program.")
+            raise
+        logging.debug(f"[Board] encoder_clk: {Board.encoder_clk}")
+
+        Board.encoder_dt = Settings.read_variable(
+            "Pinout", "encoder_dt", Importance.CRITICAL
         )
-        self.tilt_switch = Settings.read_variable(
+        if (
+            Board.encoder_dt < Board.FIRST_GPIO_PIN
+            or Board.encoder_dt > Board.LAST_GPIO_PIN
+            or Board.encoder_dt is None
+        ):
+            logging.error(
+                f"[Board] encoder_dt must be between {Board.FIRST_GPIO_PIN} and {Board.LAST_GPIO_PIN}."
+            )
+            logging.error("[Board] Exiting program.")
+            raise
+        logging.debug(f"[Board] encoder_dt: {Board.encoder_dt}")
+
+        Board.encoder_sw = Settings.read_variable(
+            "Pinout", "encoder_sw", Importance.CRITICAL
+        )
+        if (
+            Board.encoder_sw < Board.FIRST_GPIO_PIN
+            or Board.encoder_sw > Board.LAST_GPIO_PIN
+            or Board.encoder_sw is None
+        ):
+            logging.error(
+                f"[Board] encoder_sw must be between {Board.FIRST_GPIO_PIN} and {Board.LAST_GPIO_PIN}."
+            )
+            logging.error("[Board] Exiting program.")
+            raise
+        logging.debug(f"[Board] encoder_sw: {Board.encoder_sw}")
+
+        Board.encoder_button = Button(Board.encoder_sw, pull_up=True)
+        Board.encoder_button.when_pressed = (
+            lambda button: Board.encoder_button_callback(button)
+        )
+        logging.debug("[Board] Encoder button initialized.")
+
+        Board.encoder_queue = queue.Queue()
+        Board.encoder = RotaryEncoder(Board.encoder_clk, Board.encoder_dt)
+        Board.encoder.when_rotated_clockwise = (
+            lambda enc: Board.rotate_clockwise_callback(enc)
+        )
+        Board.encoder.when_rotated_counter_clockwise = (
+            lambda enc: Board.rotate_counter_clockwise_callback(enc)
+        )
+        logging.debug("[Board] Encoder initialized.")
+
+    @classmethod
+    def _init_tilt_switch():
+        """
+        Initializes the tilt switch settings.
+        """
+        Board.tilt_switch = Settings.read_variable(
             "Pinout", "tilt_switch", Importance.CRITICAL
         )
+        if (
+            Board.tilt_switch < Board.FIRST_GPIO_PIN
+            or Board.tilt_switch > Board.LAST_GPIO_PIN
+            or Board.tilt_switch is None
+        ):
+            logging.error("[Board] tilt_switch must be between 0 and 27.")
+            logging.error("[Board] Exiting program.")
+            raise
+        logging.debug(f"[Board] tilt_switch: {Board.tilt_switch}")
 
-        self.brightness = Settings.read_variable("System", "brightness") or 100
-        self.is_display_on = True
+        Board.tilt_switch_button = Button(Board.tilt_switch_button, pull_up=True)
+        Board.tilt_switch_button.when_pressed = lambda button: Board.tilt_callback(
+            button
+        )
+        Board.tilt_switch_button.when_released = lambda button: Board.tilt_callback(
+            button
+        )
+        logging.debug("[Board] Tilt switch button initialized.")
 
-        self.encoder_button = Button(self.encoder_button, pull_up=True)
-        self.input_status_dictionary = {"value": InputStatus.NOTHING}
-        self.encoder_button.when_pressed = lambda button: self.encoder_button_function(
-            button, self.input_status_dictionary
-        )
+    @classmethod
+    def rotate_clockwise_callback(encoder):
+        """
+        Callback function for rotating the encoder clockwise.
+        """
+        Board.encoder_queue.put(1)
+        Board.reset_encoder(encoder)
 
-        self.encoderQueue = queue.Queue()
-        self.encoder = RotaryEncoder(self.encoder_A, self.encoder_B)
-        self.encoder.when_rotated_clockwise = lambda enc: self.rotate_clockwise(
-            enc, self.encoderQueue
-        )
-        self.encoder.when_rotated_counter_clockwise = (
-            lambda enc: self.rotate_counter_clockwise(enc, self.encoderQueue)
-        )
-        self.encoder_state = 0
+    @classmethod
+    def rotate_counter_clockwise_callback(encoder):
+        """
+        Callback function for rotating the encoder counter-clockwise.
+        """
+        Board.encoder_queue.put(-1)
+        Board.reset_encoder(encoder)
 
-        self.tilt_switch = Button(self.tilt_switch, pull_up=True)
-        self.is_horizontal_dictionary = {"value": True}
-        self.tilt_switch.when_pressed = lambda button: self.tilt_callback(
-            button, self.is_horizontal_dictionary
-        )
-        self.tilt_switch.when_released = lambda button: self.tilt_callback(
-            button, self.is_horizontal_dictionary
-        )
-
-    def rotate_clockwise(self, encoder, encoderQueue):
-        encoderQueue.put(1)
+    @classmethod
+    def reset_encoder(encoder):
+        """
+        Resets the encoder value to 0.
+        """
         encoder.value = 0
 
-    def rotate_counter_clockwise(self, encoder, encoderQueue):
-        encoderQueue.put(-1)
-        encoder.value = 0
-
-    def tilt_callback(self, tilt_switch, isHorizontalDict):
+    @classmethod
+    def tilt_callback(tilt_switch):
+        """
+        Callback function for the tilt switch.
+        """
+        TILT_DEBOUNCE_TIME = 0.25
         startTime = time.time()
-        while time.time() - startTime < 0.25:
+        while time.time() - startTime < TILT_DEBOUNCE_TIME:
             pass
-        isHorizontalDict["value"] = tilt_switch.is_pressed
+        Board.is_horizontal = tilt_switch.is_pressed
 
-    def encoder_button_function(self, enc_button, inputStatusDict):
+    @classmethod
+    def encoder_button_callback(enc_button):
+        """
+        Callback function for the encoder button.
+        """
         start_time = time.time()
         time_diff = 0
         hold_time = 1
@@ -118,7 +259,7 @@ class Board:
 
         if time_diff >= hold_time:
             print("long press detected")
-            inputStatusDict["value"] = InputStatus.LONG_PRESS
+            Board.encoder_input_status = InputStatus.LONG_PRESS
         else:
             enc_button.when_pressed = None
             start_time = time.time()
@@ -131,24 +272,20 @@ class Board:
                         time.sleep(0.1)
                         if enc_button.is_pressed:
                             print("triple press detected")
-                            inputStatusDict["value"] = InputStatus.TRIPLE_PRESS
+                            Board.encoder_input_status = InputStatus.TRIPLE_PRESS
                             enc_button.when_pressed = (
-                                lambda button: self.encoder_button_function(
-                                    button, inputStatusDict
-                                )
+                                lambda button: Board.encoder_button_callback(button)
                             )
                             return
                     print("double press detected")
-                    inputStatusDict["value"] = InputStatus.DOUBLE_PRESS
+                    Board.encoder_input_status = InputStatus.DOUBLE_PRESS
                     enc_button.when_pressed = (
-                        lambda button: self.encoder_button_function(
-                            button, inputStatusDict
-                        )
+                        lambda button: Board.encoder_button_callback(button)
                     )
                     return
             print("single press detected")
-            inputStatusDict["value"] = InputStatus.SINGLE_PRESS
-            enc_button.when_pressed = lambda button: self.encoder_button_function(
-                button, inputStatusDict
+            Board.encoder_input_status = InputStatus.SINGLE_PRESS
+            enc_button.when_pressed = lambda button: Board.encoder_button_callback(
+                button
             )
             return

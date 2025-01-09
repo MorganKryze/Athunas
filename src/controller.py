@@ -30,6 +30,8 @@ def main():
 
     Settings.load("./config.yaml")
 
+    Board.init_system()
+
     # TODO: Remove
     config = configparser.ConfigParser()
     parsed_configs = config.read("config.ini")
@@ -38,20 +40,21 @@ def main():
         sys.exit()
     # TODO: Remove
 
-    board = Board()
-    matrix = Utils.create_matrix(board.pixel_rows, board.pixel_cols, board.brightness)
+    matrix = Utils.create_matrix(Board.pixel_rows, Board.pixel_cols, Board.brightness)
 
     def toggle_display():
-        board.is_display_on = not board.is_display_on
-        logging.debug(f"[Controller] Display {'on' if board.is_display_on else 'off'}")
+        Board.is_display_on = not Board.is_display_on
+        logging.debug(
+            f"[Controller] Display set to: {'on' if Board.is_display_on else 'off'}"
+        )
 
     def increase_brightness():
-        board.brightness = min(100, board.brightness + 5)
-        logging.debug(f"[Controller] Brightness increased to {board.brightness}")
+        Board.brightness = min(100, Board.brightness + 5)
+        logging.debug(f"[Controller] Brightness increased to {Board.brightness}")
 
     def decrease_brightness():
-        board.brightness = max(0, board.brightness - 5)
-        logging.debug(f"[Controller] Brightness decreased to {board.brightness}")
+        Board.brightness = max(0, Board.brightness - 5)
+        logging.debug(f"[Controller] Brightness decreased to {Board.brightness}")
 
     current_app_index = 0
 
@@ -84,47 +87,46 @@ def main():
     }
 
     app_list = [
-        main_screen.MainScreen(config, modules, callbacks),
-        gif_viewer.GifScreen(config, modules, callbacks),
+        # main_screen.MainScreen(config, modules, callbacks),
+        gif_viewer.GifScreen(callbacks),
         # notion.NotionScreen(config, modules, callbacks),
         # weather.WeatherScreen(config, modules, callbacks),
         # subcount.SubcountScreen(config, modules, callbacks),
-        life.GameOfLifeScreen(config, modules, callbacks),
+        # life.GameOfLifeScreen(config, modules, callbacks),
         # spotify_player.SpotifyScreen(config, modules, callbacks),
     ]
 
-    black_screen = Image.new("RGB", (board.pixel_rows, board.pixel_cols), (0, 0, 0))
-    rotation_time = math.floor(time.time())
+    # TODO: Find a better way to implement app rotation
+    # rotation_time = math.floor(time.time())
+    SLEEP_TIME = 0.05
     while True:
-        while not board.encoderQueue.empty():
-            board.encoder_state += board.encoderQueue.get()
-        if board.encoder_state > 1:
+        while not Board.encoder_queue.empty():
+            Board.encoder_state += Board.encoder_queue.get()
+        if Board.encoder_state > 1:
             print("DEBUG: encoder ---")
-            board.input_status_dictionary["value"] = InputStatus.ENCODER_INCREASE
-            board.encoder_state = 0
-        elif board.encoder_state < -1:
+            Board.encoder_input_status = InputStatus.ENCODER_INCREASE
+            Board.encoder_state = 0
+        elif Board.encoder_state < -1:
             print("DEBUG: encoder +++")
-            board.input_status_dictionary["value"] = InputStatus.ENCODER_DECREASE
-            board.encoder_state = 0
+            Board.encoder_input_status = InputStatus.ENCODER_DECREASE
+            Board.encoder_state = 0
 
-        inputStatusSnapshot = copy.copy(board.input_status_dictionary["value"])
-        board.input_status_dictionary["value"] = InputStatus.NOTHING
+        is_horizontal_snapshot = copy.copy(Board.is_horizontal)
+        input_status_snapshot = copy.copy(Board.encoder_input_status)
+        Board.encoder_input_status = InputStatus.NOTHING
 
-        isHorizontalSnapshot = copy.copy(board.is_horizontal_dictionary["value"])
-
-        new_rotation_time = math.floor(time.time())
-        if new_rotation_time % 10 == 0 and new_rotation_time - rotation_time >= 10:
-            current_app_index += 1
-            rotation_time = new_rotation_time
+        # TODO: Find a better way to implement app rotation
+        # new_rotation_time = math.floor(time.time())
+        # if new_rotation_time % 10 == 0 and new_rotation_time - rotation_time >= 10:
+        #     current_app_index += 1
+        #     rotation_time = new_rotation_time
 
         frame = app_list[current_app_index % len(app_list)].generate(
-            isHorizontalSnapshot, inputStatusSnapshot
+            is_horizontal_snapshot, input_status_snapshot
         )
-        if not board.is_display_on:
-            frame = black_screen
 
-        matrix.SetImage(frame)
-        time.sleep(0.05)
+        matrix.SetImage(frame if Board.is_display_on else Board.black_screen)
+        time.sleep(SLEEP_TIME)
 
 
 if __name__ == "__main__":
