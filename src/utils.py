@@ -43,6 +43,7 @@ class Utils:
         base_dir = os.path.abspath(os.path.join(current_script_dir, '..', '..', base_dir_name))
         os.chdir(base_dir)
         sys.path.append(base_dir)
+        sys.path.append(os.path.join(base_dir, "rpi-rgb-led-matrix", "bindings", "python"))
         return base_dir
         
     @staticmethod
