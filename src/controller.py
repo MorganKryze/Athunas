@@ -85,11 +85,11 @@ def main():
 
     app_list = [
         gif_viewer.GifScreen(config, modules, callbacks),
-        # main_screen.MainScreen(config, modules, callbacks),
+        main_screen.MainScreen(config, modules, callbacks),
         # notion.NotionScreen(config, modules, callbacks),
         # weather.WeatherScreen(config, modules, callbacks),
         # subcount.SubcountScreen(config, modules, callbacks),
-        # life.GameOfLifeScreen(config, modules, callbacks),
+        life.GameOfLifeScreen(config, modules, callbacks),
         # spotify_player.SpotifyScreen(config, modules, callbacks),
     ]
 
@@ -99,11 +99,11 @@ def main():
         while not board.encoderQueue.empty():
             board.encoder_state += board.encoderQueue.get()
         if board.encoder_state > 1:
-            print("encoder increased")
+            print("DEBUG: encoder ---")
             board.input_status_dictionary["value"] = InputStatus.ENCODER_INCREASE
             board.encoder_state = 0
         elif board.encoder_state < -1:
-            print("encoder decreased")
+            print("DEBUG: encoder +++")
             board.input_status_dictionary["value"] = InputStatus.ENCODER_DECREASE
             board.encoder_state = 0
 

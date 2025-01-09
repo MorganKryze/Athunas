@@ -1,4 +1,5 @@
 Pinout:
+  # Please note that these are not PIN numbers, but GPIO numbers. See https://pinout.xyz/ for more information.
   encoder_a: 5
   encoder_b: 6
   encoder_button: 13

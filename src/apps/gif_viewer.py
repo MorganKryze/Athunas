@@ -59,7 +59,6 @@ class GifScreen:
         if (self.selectMode):
             draw.rectangle((0,0,self.canvas_width-1,self.canvas_height-1), outline=white)
     
-        print(f"Displaying frame {self.cnt} of GIF {self.currentIdx}")
         time.sleep(0.04)
         return frame
     
