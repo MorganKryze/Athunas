@@ -3,8 +3,7 @@ import sys
 import inspect
 import logging
 from datetime import datetime
-from rgbmatrix import RGBMatrix, RGBMatrixOptions
-
+from typing import Any
 
 class Utils:
     @staticmethod
@@ -47,7 +46,7 @@ class Utils:
         return base_dir
         
     @staticmethod
-    def create_matrix(pixel_rows: int, pixel_cols: int, brightness: int = 100, disable_hardware_pulsing: bool = False, hardware_mapping: str = "regular") -> RGBMatrix:
+    def create_matrix(pixel_rows: int, pixel_cols: int, brightness: int = 100, disable_hardware_pulsing: bool = False, hardware_mapping: str = "regular") -> Any:
         """
         Creates an RGBMatrix object with the specified parameters.
         
@@ -58,6 +57,8 @@ class Utils:
         :param hardware_mapping: The hardware mapping of the screen (default is 'regular'). For Adafruit HAT: 'adafruit-hat'.
         :return: An RGBMatrix object.
         """
+        from rgbmatrix import RGBMatrix, RGBMatrixOptions
+        
         logging.debug(f"[Utils] Creating RGBMatrix options with screen height: {pixel_rows}, screen width: {pixel_cols}, brightness: {brightness}, disable hardware pulsing: {disable_hardware_pulsing}, hardware mapping: {hardware_mapping}")
         try:
             options = RGBMatrixOptions()
