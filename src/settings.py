@@ -51,7 +51,7 @@ class Settings:
 
     @classmethod
     def read_variable(
-        cls, category: str, var: str, importance: Importance = Importance.NORMAL
+        cls, category: str, var: str, importance: Importance = Importance.OPTIONAL
     ) -> Optional[Any]:
         """
         Reads a specific variable from the class dictionary.
@@ -65,7 +65,7 @@ class Settings:
         logging.debug(f"[Settings] read variable: {category} -> {var}")
         if value is None:
             logging.warning(f"[Settings] variable not found: {category} -> {var}")
-            if importance == Importance.CRITICAL:
+            if importance == Importance.REQUIRED:
                 logging.error(
                     f"[Settings] Critical variable not found: {category} -> {var}"
                 )

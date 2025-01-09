@@ -15,13 +15,19 @@ white = (230, 255, 255)
 class GifScreen:
     GIFS_LOCATION = "./src/apps/res/gif/horizontal/"
 
-    def __init__(self, default_actions):
+    def __init__(self, modules, callbacks):
+        self.enabled = Settings.read_variable(
+            "GifViewer", "enabled", Importance.REQUIRED
+        )
+        if not self.enabled:
+            return
+
         self.pixel_cols = Board.pixel_cols
         self.pixel_rows = Board.pixel_rows
         self.animations = GifScreen.loadAnimations()
         self.currentIdx = 0
         self.selectMode = False
-        self.default_actions = default_actions
+        self.callbacks = callbacks
         self.cnt = 0
         self.was_horizontal = True
 
@@ -38,11 +44,11 @@ class GifScreen:
                 self.cnt = 0
         else:
             if inputStatus is InputStatus.SINGLE_PRESS:
-                self.default_actions["toggle_display"]()
+                self.callbacks["toggle_display"]()
             elif inputStatus is InputStatus.ENCODER_INCREASE:
-                self.default_actions["switch_next_app"]()
+                self.callbacks["switch_next_app"]()
             elif inputStatus is InputStatus.ENCODER_DECREASE:
-                self.default_actions["switch_prev_app"]()
+                self.callbacks["switch_prev_app"]()
 
         curr_gif = ImageSequence.Iterator(
             self.animations[self.currentIdx % len(self.animations)]

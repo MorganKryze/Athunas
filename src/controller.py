@@ -49,11 +49,15 @@ def main():
         )
 
     def increase_brightness():
-        Board.brightness = min(100, Board.brightness + 5)
+        Board.brightness = min(
+            Board.BRIGHTNESS_MAX, Board.brightness + Board.BRIGHTNESS_STEP
+        )
         logging.debug(f"[Controller] Brightness increased to {Board.brightness}")
 
     def decrease_brightness():
-        Board.brightness = max(0, Board.brightness - 5)
+        Board.brightness = max(
+            Board.BRIGHTNESS_MIN, Board.brightness - Board.BRIGHTNESS_STEP
+        )
         logging.debug(f"[Controller] Brightness decreased to {Board.brightness}")
 
     current_app_index = 0
@@ -88,7 +92,7 @@ def main():
 
     app_list = [
         # main_screen.MainScreen(config, modules, callbacks),
-        gif_viewer.GifScreen(callbacks),
+        gif_viewer.GifScreen(modules, callbacks),
         # notion.NotionScreen(config, modules, callbacks),
         # weather.WeatherScreen(config, modules, callbacks),
         # subcount.SubcountScreen(config, modules, callbacks),
@@ -102,12 +106,15 @@ def main():
     while True:
         while not Board.encoder_queue.empty():
             Board.encoder_state += Board.encoder_queue.get()
+
         if Board.encoder_state > 1:
-            print("DEBUG: encoder ---")
+            # TODO: Change to a logging message
+            print("DEBUG: encoder +++")
             Board.encoder_input_status = InputStatus.ENCODER_INCREASE
             Board.encoder_state = 0
         elif Board.encoder_state < -1:
-            print("DEBUG: encoder +++")
+            # TODO: Change to a logging message
+            print("DEBUG: encoder ---")
             Board.encoder_input_status = InputStatus.ENCODER_DECREASE
             Board.encoder_state = 0
 
