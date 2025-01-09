@@ -47,7 +47,7 @@ class Utils:
         return base_dir
         
     @staticmethod
-    def create_matrix(pixel_rows: int, pixel_cols: int, brightness: int = 100, disable_hardware_pulsing: bool = False, hardware_mapping: str = "regular") -> Any:
+    def create_matrix(pixel_rows: int, pixel_cols: int, brightness: int = 100, disable_hardware_pulsing: bool = True, hardware_mapping: str = "regular") -> Any:
         """
         Creates an RGBMatrix object with the specified parameters.
         
