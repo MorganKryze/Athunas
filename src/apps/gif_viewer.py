@@ -69,7 +69,7 @@ class GifScreen:
         return frame
 
     @staticmethod
-    def loadAnimations():
+    def loadAnimations(cls):
         """
         Loads all GIFs from the GIFS_LOCATION directory.
         
@@ -78,11 +78,11 @@ class GifScreen:
         """
         logging.debug("[GifScreen] Loading GIFs.")
         result = []
-        for filename in os.listdir(GifScreen.GIFS_LOCATION):
+        for filename in os.listdir(cls.GIFS_LOCATION):
             if filename.endswith(".gif"):
                 logging.debug(f"[GifScreen] Loading GIF: {filename}")
                 result.append(
-                    Image.open(os.path.join(GifScreen.GIFS_LOCATION, filename))
+                    Image.open(os.path.join(cls.GIFS_LOCATION, filename))
                 )
         logging.debug("[GifScreen] All GIFs loaded.")
         return result
