@@ -2,6 +2,7 @@
 .DS_Store
 
 # Python
+.venv/
 __pycache__/
 
 # KiCad

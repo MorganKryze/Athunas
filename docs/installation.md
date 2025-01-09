@@ -12,10 +12,19 @@
 ssh rasp@pi.local
 ```
 
+```plaintext
+Username: raspberry
+Password: raspberry
+Hostname: pi
+```
+
 - Reset the locale settings.
 
 ```bash
 sudo dpkg-reconfigure locales
+```
+
+```bash
 sudo update-locale LANG=en_GB.UTF-8 LC_ALL=en_GB.UTF-8
 sudo reboot
 ```
@@ -31,13 +40,22 @@ sudo usermod -a -G gpio $USER
 ```bash
 sudo apt-get update -y
 sudo apt-get upgrade -y
-sudo apt install python3-pip -y
 ```
 
-- Install `git`.
+- Install `git` and `pip`.
 
 ```bash
-sudo apt-get install git -y
+sudo apt-get install git python3-pip -y
+```
+
+- Add a small flag at the end of the line to add better results:
+
+```bash
+sudo nano /boot/firmware/cmdline.txt
+```
+
+```bash
+isolcpus=3
 ```
 
 ## Disable sound module
@@ -105,10 +123,10 @@ sudo ./rpi-rgb-led-matrix/examples-api-use/demo -D 0 --led-no-hardware-pulse --l
 sudo apt-get install libsixel-dev python3-tk cython3 -y
 ```
 
-- Install the Python dependencies, this may take a while.
+- Install `uv` package manager.
 
 ```bash
-pip install -r requirements.txt --break-system-packages
+pip install uv --break-system-packages
 ```
 
 - Add the package to the path.
@@ -128,27 +146,22 @@ export PYTHONPATH=$PYTHONPATH:$HOME/.local/lib/python3.11/site-packages
 source ~/.bashrc
 ```
 
+- Install the Python dependencies, this may take a while.
+
+```bash
+uv venv
+source .venv/bin/activate
+uv pip install .
+```
+
 - Then install the `rpi-rgb-led-matrix` Python library.
 
 ```bash
-cd rpi-rgb-led-matrix/
-make build-python
-sudo make install-python
-cd ..
-```
-
-- Add a small flag at the end of the line to add better results:
-
-```bash
-sudo nano /boot/firmware/cmdline.txt
-```
-
-```bash
-isolcpus=3
+cd ./rpi-rgb-led-matrix/ && make build-python && cd -
 ```
 
 - Finally, run the project.
 
 ```bash
-sudo -E python3 ./src/controller.py
+uv run ./src/controller.py
 ```
