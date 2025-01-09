@@ -16,4 +16,5 @@ dependencies = [
     "yfinance==0.2.40",
     "pyyaml==6.0.2",
     "scipy==1.14.0",
+    "lgpio==0.2.2.0",
 ]
