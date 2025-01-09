@@ -44,11 +44,11 @@ class MainScreen:
         self.on_cycle = True
 
         self.bgs = {
-            "sakura": Image.open("apps/res/main_screen/sakura-bg.png").convert("RGB"),
-            "cloud": Image.open("apps/res/main_screen/cloud-bg-clear.png").convert(
+            "sakura": Image.open("src/apps/res/main_screen/sakura-bg.png").convert("RGB"),
+            "cloud": Image.open("src/apps/res/main_screen/cloud-bg-clear.png").convert(
                 "RGBA"
             ),
-            "forest": Image.open("apps/res/main_screen/forest-bg.png").convert("RGB"),
+            "forest": Image.open("src/apps/res/main_screen/forest-bg.png").convert("RGB"),
         }
         self.theme_list = [self.generateSakura, self.generateCloud, self.generateForest]
 
