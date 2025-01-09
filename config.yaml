@@ -36,4 +36,4 @@ Youtube:
 
 Gif Viewer:
   enabled: true
-  location: /home/rasp/Athunas/src/apps/res/gif/horizontal
+  location: /home/raspberry/Athunas/src/apps/res/gif/horizontal
