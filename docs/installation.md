@@ -146,6 +146,12 @@ export PYTHONPATH=$PYTHONPATH:$HOME/.local/lib/python3.11/site-packages
 source ~/.bashrc
 ```
 
+- Allow python to control timing and thread priority.
+
+```bash
+sudo setcap 'cap_sys_nice=eip' /usr/bin/python3.11
+```
+
 - Install the Python dependencies, this may take a while.
 
 ```bash
