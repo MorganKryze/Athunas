@@ -29,12 +29,12 @@ class Settings:
                 cls.data = yaml.safe_load(file)
             logging.info("[Settings] loaded successfully.")
         except FileNotFoundError:
-            logging.error(f"[Settings] The file '{cls.file_path}' was not found.")
-            logging.error("[Settings] Exiting program.")
+            logging.critical(f"[Settings] The file '{cls.file_path}' was not found.")
+            logging.critical("[Settings] Exiting program.")
             raise
         except yaml.YAMLError as e:
-            logging.error(f"[Settings] Failed to parse YAML file: {e}")
-            logging.error("[Settings] Exiting program.")
+            logging.critical(f"[Settings] Failed to parse YAML file: {e}")
+            logging.critical("[Settings] Exiting program.")
             raise
 
     @classmethod
@@ -66,9 +66,9 @@ class Settings:
         if value is None:
             logging.warning(f"[Settings] variable not found: {category} -> {var}")
             if importance == Importance.REQUIRED:
-                logging.error(
-                    f"[Settings] Critical variable not found: {category} -> {var}"
+                logging.critical(
+                    f"[Settings] Required variable not found: {category} -> {var}"
                 )
-                logging.error("[Settings] Exiting program.")
+                logging.critical("[Settings] Exiting program.")
                 raise
         return value
