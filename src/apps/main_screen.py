@@ -26,7 +26,7 @@ spotify_color = (0,255,0)
 
 class MainScreen:
     def __init__(self, config, modules, default_actions):
-        self.font = ImageFont.truetype("fonts/tiny.otf", 5)
+        self.font = ImageFont.truetype("./src/fonts/tiny.otf", 5)
         self.modules = modules
         self.default_actions = default_actions
 

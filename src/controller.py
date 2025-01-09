@@ -84,8 +84,8 @@ def main():
     }
 
     app_list = [
-        gif_viewer.GifScreen(config, modules, callbacks),
         main_screen.MainScreen(config, modules, callbacks),
+        gif_viewer.GifScreen(config, modules, callbacks),
         # notion.NotionScreen(config, modules, callbacks),
         # weather.WeatherScreen(config, modules, callbacks),
         # subcount.SubcountScreen(config, modules, callbacks),
