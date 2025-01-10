@@ -109,11 +109,11 @@ make build
 - (Optional) If you did the wiring, you may try the demo.
 
 ```bash
-sudo ./rpi-rgb-led-matrix/examples-api-use/demo -D 0 --led-no-hardware-pulse --led-rows=32 --led-cols=64
+make example
 ```
 
 > [!TIP]
-> If you get any error with the display:
+> If you get any error with the display, open the `Makefile` and try the following steps:
 >
 > - Check the wiring;
 > - Add/remove: `--led-no-hardware-pulse`;
