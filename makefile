@@ -4,7 +4,7 @@ all: $(COMMANDS)
 
 install:
 # Install dependencies to build 'rpi-rgb-led-matrix'
-	sudo apt-get install python3-tk cython3 -y
+	sudo apt-get install libsixel-dev python3-tk cython3 -y
 # Install 'uv' using 'pip'
 	pip install uv --break-system-packages
 # Add 'uv' to PATH and PYTHONPATH
