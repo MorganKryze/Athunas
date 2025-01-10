@@ -22,7 +22,7 @@ build:
 # Setup virtual environment
 	uv venv
 # Enter virtual environment
-	source .venv/bin/activate
+	. .venv/bin/activate
 # Install project python dependencies
 	uv pip install .
 
