@@ -60,6 +60,7 @@ class Utils:
         brightness: int = 100,
         disable_hardware_pulsing: bool = True,
         hardware_mapping: str = "regular",
+        use_emulator: bool = False,
     ) -> Any:
         """
         Creates an RGBMatrix object with the specified parameters.
@@ -71,7 +72,10 @@ class Utils:
         :param hardware_mapping: The hardware mapping of the screen (default is 'regular'). For Adafruit HAT: 'adafruit-hat'.
         :return: An RGBMatrix object.
         """
-        from rgbmatrix import RGBMatrix, RGBMatrixOptions
+        if use_emulator:
+            from RGBMatrixEmulator import RGBMatrix, RGBMatrixOptions
+        else:
+            from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
         logging.debug(
             f"[Utils] Creating RGBMatrix options with screen height: {pixel_rows}, screen width: {pixel_cols}, brightness: {brightness}, disable hardware pulsing: {disable_hardware_pulsing}, hardware mapping: {hardware_mapping}"
