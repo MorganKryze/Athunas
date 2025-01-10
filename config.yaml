@@ -1,45 +1,61 @@
 # ------------------ System Configuration ------------------
-
-Pinout:
-  # Please note that these are NOT PIN numbers, but GPIO numbers. See https://pinout.xyz/ for more information.
-  encoder_clk: 5
-  encoder_dt: 6
-  encoder_sw: 13
-  tilt_switch: 19
+# System configuration is used to declare the hardware configuration of the matrix and
+# the pinout of the connected peripherals.
 
 System:
   led_rows: 32
   led_cols: 64
   brightness: 100
 
+# Please note that the following values are NOT PIN numbers, but GPIO numbers.
+# See https://pinout.xyz/ for more information.
+Pinout:
+  encoder_clk: 5
+  encoder_dt: 6
+  encoder_sw: 13
+  tilt_switch: 19
+
 # ------------------ Module Configuration ------------------
+# Modules are the toolboxes used by applications. Disabled modules will result in the
+# corresponding applications not being available and disabled.
+
+Notifications-Module:
+  enabled: true
+
+Weather-Module:
+  enabled: true
+
+Spotify-Module:
+  enabled: true
 
 # -------------------- App Configuration -------------------
+# Apps are the applications that are available to the user. Disabled apps will not be
+# available to the user.
+
+GifViewer:
+  enabled: true
 
 Spotify:
-  enabled: true
+  enabled: false
   client_id:
   client_secret:
   redirect_uri:
 
 Notion:
-  enabled: true
+  enabled: false
   token_v2:
   source:
 
 Youtube:
-  enabled: true
+  enabled: false
   key:
 
-GifViewer:
-  enabled: true
-
 Pushbullet:
-  enabled: true
-  websocket_url:
+  enabled: false
+  websocket_url: xyz
 
-OWM:
-  enabled: true
+Weather:
+  enabled: false
   token:
   lat:
   lon:
