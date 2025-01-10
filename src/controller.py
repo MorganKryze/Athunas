@@ -14,11 +14,9 @@ from apps import (
 from modules import notification_module, weather_module, spotify_module
 
 import math
-import sys
 import time
 import copy
 import logging
-import configparser
 from PIL import Image
 from utils import Utils
 
@@ -31,14 +29,6 @@ def main():
     Settings.load("./config.yaml")
 
     Board.init_system()
-
-    # TODO: Remove
-    config = configparser.ConfigParser()
-    parsed_configs = config.read("config.ini")
-    if len(parsed_configs) == 0:
-        print("no config file found")
-        sys.exit()
-    # TODO: Remove
 
     matrix = Utils.create_matrix(Board.led_rows, Board.led_cols, Board.brightness)
 
