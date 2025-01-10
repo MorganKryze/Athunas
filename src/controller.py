@@ -86,7 +86,7 @@ def main():
         # notion.NotionScreen(config, modules, callbacks),
         # weather.WeatherScreen(config, modules, callbacks),
         # subcount.SubcountScreen(config, modules, callbacks),
-        life.GameOfLifeScreen(modules, callbacks),
+        # life.GameOfLifeScreen(modules, callbacks),
         # spotify_player.SpotifyScreen(config, modules, callbacks),
     ]
     available_app_list = [app for app in app_list if app.enabled]

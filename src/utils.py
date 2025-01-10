@@ -39,6 +39,8 @@ class Utils:
         """
         log_dir = "logs"
         os.makedirs(log_dir, exist_ok=True)
+        # TODO: REMOVE THIS LINE
+        print(f"Log directory: {log_dir}")
 
         log_filename = datetime.now().strftime("%Y-%m-%d") + ".log"
         log_file_path = os.path.join(log_dir, log_filename)
@@ -48,7 +50,6 @@ class Utils:
             format="%(asctime)s - %(levelname)s - %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S",
             filename=log_file_path,
-            filemode="a",
         )
         logging.debug(f"Logging level set to: {level}")
 
