@@ -30,7 +30,7 @@ def main():
 
     Board.init_system()
 
-    matrix = Utils.create_matrix(Board.led_rows, Board.led_cols, Board.brightness)
+    matrix = Utils.create_matrix(Board.led_rows, Board.led_cols, Board.brightness, use_emulator=True)
 
     def toggle_display():
         Board.is_display_on = not Board.is_display_on
