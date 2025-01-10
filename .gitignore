@@ -4,6 +4,7 @@
 # Python
 .venv/
 __pycache__/
+*.lock
 
 # KiCad
 KiCad/Rpi_matrix_adapter/Rpi_matrix_adapter-backups/*
@@ -11,6 +12,8 @@ KiCad/Rpi_matrix_adapter/Rpi_matrix_adapter-backups/*
 # Compiled source
 rpi-rgb-led-matrix/bindings/
 *.o
+src/Athunas.egg-info/
+build/
 
 # Logs
 *.log
