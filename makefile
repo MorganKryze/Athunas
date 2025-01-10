@@ -8,9 +8,9 @@ install:
 # Install 'uv' using 'pip'
 	pip install uv --break-system-packages
 # Add 'uv' to PATH and PYTHONPATH
-	@echo "export PATH=\$${PATH}:\$${HOME}/.local/bin" >> ~/.bashrc
-	@echo "export PYTHONPATH=\$${PYTHONPATH}:\$${HOME}/.local/lib/python3.11/site-packages" >> ~/.bashrc
-	@source ~/.bashrc
+	echo "export PATH=\$${PATH}:\$${HOME}/.local/bin" >> ~/.bashrc
+	echo "export PYTHONPATH=\$${PYTHONPATH}:\$${HOME}/.local/lib/python3.11/site-packages" >> ~/.bashrc
+	. ~/.bashrc
 # Allow 'python3.11' to use 'cap_sys_nice'
 	sudo setcap 'cap_sys_nice=eip' /usr/bin/python3.11
 
