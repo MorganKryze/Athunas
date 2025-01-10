@@ -1,3 +1,7 @@
+# WARNING: Bad configuration of modules can lead to apps not loading correctly and bad
+# system configuration will lead to system crashes. Please be careful when editing this
+# file. Feel free to ask for help on the GitHub repository and read the documentation.
+
 # ------------------ System Configuration ------------------
 # System configuration is used to declare the hardware configuration of the matrix and
 # the pinout of the connected peripherals.
