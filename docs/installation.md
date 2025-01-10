@@ -169,5 +169,5 @@ cd ./rpi-rgb-led-matrix/ && make build-python && cd -
 - Finally, run the project.
 
 ```bash
-uv run ./src/controller.py
+uv run src/controller.py
 ```
