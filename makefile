@@ -46,7 +46,7 @@ clean:
 
 update:
 # Update 'uv' package
-	pip install --upgrade uv
+	pip install --upgrade uv --break-system-packages
 # Pull latest changes from 'rpi-rgb-led-matrix' repository
 	git submodule update --remote --merge
 # pulling the latest changes from project repository
