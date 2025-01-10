@@ -23,8 +23,10 @@ Pinout:
 # Modules are the toolboxes used by applications. Disabled modules will result in the
 # corresponding applications not being available and disabled.
 
-Notifications-Module:
-  enabled: true
+Notification-Module:
+  enabled: false
+  app_white_list:
+  websocket_url: xyz
 
 Weather-Module:
   enabled: true
@@ -56,7 +58,6 @@ Youtube:
 
 Pushbullet:
   enabled: false
-  websocket_url: xyz
 
 Weather:
   enabled: false

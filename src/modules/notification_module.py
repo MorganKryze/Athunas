@@ -1,5 +1,7 @@
 from threading import Thread
 from queue import Queue
+from enums.variable_importance import Importance
+from settings import Settings
 import websocket
 import json
 import time
@@ -8,33 +10,39 @@ import logging
 
 
 class NotificationModule:
-    def __init__(self, config):
+    def __init__(self):
         """
         Initialize the NotificationModule with the given configuration.
 
         Args:
             config (dict): Configuration settings.
         """
-        app_white_list = parse_white_list(
-            config.get("Notification Module", "white_list", fallback=None)
+        self.enabled = Settings.read_variable(
+            "Notification-Module", "enabled", Importance.REQUIRED
         )
-        pushbullet_ws = config.get(
-            "Notification Module", "pushbullet_ws", fallback=None
+        if not self.enabled:
+            logging.info("[Notification Module] Disabled")
+            return
+
+        logging.debug("[Notification Module] Initializing")
+        self.app_white_list = Settings.read_variable(
+            "Notification-Module", "app_white_list"
         )
-
-        self.noti_list = []
-        self.noti_queue = Queue()
-
-        if pushbullet_ws is None or app_white_list is None or len(app_white_list) == 0:
-            logging.error(
-                "[Notification Module] Pushbullet websocket URL or app white list is not specified in config"
+        if len(self.app_white_list) == 0:
+            logging.warning(
+                "[Notification Module] No applications found in the white list, no notifications will be received."
             )
-        else:
-            logging.info("[Notification Module] Starting websocket service")
-            Thread(
-                target=start_service,
-                args=(self.noti_queue, pushbullet_ws, app_white_list),
-            ).start()
+        self.websocket_url = Settings.read_variable(
+            "Notification-Module", "websocket_url", Importance.REQUIRED
+        )
+        self.notifications_list = []
+        self.notification_queue = Queue()
+
+        logging.debug("[Notification Module] Starting websocket service")
+        Thread(
+            target=start_service,
+            args=(self.notification_queue, self.websocket_url, self.app_white_list),
+        ).start()
 
     def get_notification_list(self):
         """
@@ -44,28 +52,32 @@ class NotificationModule:
             list: The list of notifications.
         """
         need_to_sort = False
-        while not self.noti_queue.empty():
-            new_noti = self.noti_queue.get()
+        while not self.notification_queue.empty():
+            new_noti = self.notification_queue.get()
             logging.debug(f"[Notification Module] Processing notification: {new_noti}")
             if new_noti.add_to_count:
-                found = any(noti.noti_id == new_noti.noti_id for noti in self.noti_list)
+                found = any(
+                    noti.noti_id == new_noti.noti_id for noti in self.notifications_list
+                )
                 if not found:
                     need_to_sort = True
-                    self.noti_list.append(new_noti)
+                    self.notifications_list.append(new_noti)
                     logging.info(
                         f"[Notification Module] Added new notification: {new_noti}"
                     )
             else:
-                self.noti_list = [
-                    noti for noti in self.noti_list if noti.noti_id != new_noti.noti_id
+                self.notifications_list = [
+                    noti
+                    for noti in self.notifications_list
+                    if noti.noti_id != new_noti.noti_id
                 ]
                 logging.info(f"[Notification Module] Removed notification: {new_noti}")
 
         if need_to_sort:
-            self.noti_list.sort(key=cmp_to_key(Notification.compare))
+            self.notifications_list.sort(key=cmp_to_key(Notification.compare))
             logging.debug("[Notification Module] Sorted notification list")
 
-        return self.noti_list
+        return self.notifications_list
 
 
 class Notification:
@@ -178,7 +190,7 @@ def on_close(_):
     Args:
         _ (WebSocketApp): The websocket app (unused).
     """
-    logging.warning("### websocket closed ###")
+    logging.warning("[Notification Module] Websocket closed")
 
 
 def start_service(noti_queue, pushbullet_ws, app_white_list):
@@ -202,25 +214,3 @@ def start_service(noti_queue, pushbullet_ws, app_white_list):
         on_close=on_close,
     )
     ws.run_forever()
-
-
-def parse_white_list(str_list):
-    """
-    Parse the white list string into a dictionary.
-
-    Args:
-        str_list (str): The white list string.
-
-    Returns:
-        dict: The parsed white list dictionary.
-    """
-    if str_list is None:
-        return None
-
-    result = {}
-    pairs = str_list.split(",")
-    for pair in pairs:
-        pkg, name = pair.split(":")
-        result[pkg] = name
-    logging.debug(f"[Notification Module] Parsed white list: {result}")
-    return result
