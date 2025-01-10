@@ -32,10 +32,11 @@ class GifScreen:
             logging.debug("[GifScreen] GifViewer is disabled.")
             return
 
+        logging.debug("[GifScreen] Initializing GifScreen.")
         self.callbacks = callbacks
         self.led_cols = Board.led_cols
         self.led_rows = Board.led_rows
-        self.animations = load_animations()
+        self.animations = self.load_animations()
         self.current_animation_index = 0
         self.selection_mode = False
         self.current_frame_index = 0
@@ -96,22 +97,27 @@ class GifScreen:
         time.sleep(FRAME_DELAY)
         return frame
 
+    def load_animations(self) -> List[Image.Image]:
+        """
+        Loads all GIFs from the GIFS_LOCATION directory.
 
-def load_animations() -> List[Image.Image]:
-    """
-    Loads all GIFs from the GIFS_LOCATION directory.
-
-    Returns:
-        List[Image.Image]: A list of all loaded GIFs.
-    """
-    logging.debug("[GifScreen] Loading GIFs.")
-    result = []
-    try:
-        for filename in os.listdir(GIFS_LOCATION):
-            if filename.endswith(".gif"):
-                logging.debug(f"[GifScreen] Loading GIF: {filename}")
-                result.append(Image.open(os.path.join(GIFS_LOCATION, filename)))
-    except Exception as e:
-        logging.error(f"[GifScreen] Error loading GIFs: {e}")
-    logging.debug("[GifScreen] All GIFs loaded.")
-    return result
+        Returns:
+            List[Image.Image]: A list of all loaded GIFs.
+        """
+        logging.debug("[GifScreen] Loading GIFs.")
+        result = []
+        try:
+            for filename in os.listdir(GIFS_LOCATION):
+                if filename.endswith(".gif"):
+                    logging.debug(f"[GifScreen] Loading GIF: {filename}")
+                    result.append(Image.open(os.path.join(GIFS_LOCATION, filename)))
+        except Exception as e:
+            logging.error(f"[GifScreen] Error loading GIFs: {e}")
+            logging.debug("[GifScreen] Disabling GifScreen for safety.")
+            Settings.update_variable("GifViewer", "enabled", False)
+            self.enabled = False
+            logging.debug(
+                "[GifScreen] Due to loading error, GifViewer has been disabled."
+            )
+        logging.debug("[GifScreen] All GIFs loaded.")
+        return result
