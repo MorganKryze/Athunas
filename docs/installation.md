@@ -29,12 +29,6 @@ sudo update-locale LANG=en_GB.UTF-8 LC_ALL=en_GB.UTF-8
 sudo reboot
 ```
 
-- Set correct permissions:
-
-```bash
-sudo usermod -a -G gpio $USER
-```
-
 - Update your system.
 
 ```bash
@@ -45,8 +39,10 @@ sudo apt-get upgrade -y
 - Install `git` and `pip`.
 
 ```bash
-sudo apt-get install git python3-pip -y
+sudo apt install git python3-pip -y
 ```
+
+## Improve performance for Matrix
 
 - Add a small flag at the end of the line to add better results:
 
@@ -54,7 +50,7 @@ sudo apt-get install git python3-pip -y
 sudo nano /boot/firmware/cmdline.txt
 ```
 
-```bash
+```plaintext
 isolcpus=3
 ```
 
@@ -96,15 +92,21 @@ git clone --recurse-submodules https://github.com/MorganKryze/Athunas.git
 cd Athunas
 ```
 
-## Install the dependencies & run the project
+## Build & Run
+
+- We use our `Makefile` to install the project dependencies.
+
+```bash
+make install
+```
 
 - Build the dependencies.
 
 ```bash
-make -C ./rpi-rgb-led-matrix/examples-api-use
+make build
 ```
 
-- If you did the wiring, you may try the demo.
+- (Optional) If you did the wiring, you may try the demo.
 
 ```bash
 sudo ./rpi-rgb-led-matrix/examples-api-use/demo -D 0 --led-no-hardware-pulse --led-rows=32 --led-cols=64
@@ -117,57 +119,8 @@ sudo ./rpi-rgb-led-matrix/examples-api-use/demo -D 0 --led-no-hardware-pulse --l
 > - Add/remove: `--led-no-hardware-pulse`;
 > - Breathe in, breathe out, do it again.
 
-- Install additional dependencies.
-
-```bash
-sudo apt-get install libsixel-dev python3-tk cython3 -y
-```
-
-- Install `uv` package manager.
-
-```bash
-pip install uv --break-system-packages
-```
-
-- Add the package to the path.
-
-```bash
-nano ~/.bashrc
-```
-
-```bash
-export PATH=$PATH:$HOME/.local/bin
-export PYTHONPATH=$PYTHONPATH:$HOME/.local/lib/python3.11/site-packages
-```
-
-- Then reload the file.
-
-```bash
-source ~/.bashrc
-```
-
-- Allow python to control timing and thread priority.
-
-```bash
-sudo setcap 'cap_sys_nice=eip' /usr/bin/python3.11
-```
-
-- Install the Python dependencies, this may take a while.
-
-```bash
-uv venv
-source .venv/bin/activate
-uv pip install .
-```
-
-- Then install the `rpi-rgb-led-matrix` Python library.
-
-```bash
-cd ./rpi-rgb-led-matrix/ && make build-python && cd -
-```
-
 - Finally, run the project.
 
 ```bash
-uv run src/controller.py
+make run
 ```
