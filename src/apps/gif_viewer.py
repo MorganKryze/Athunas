@@ -37,6 +37,13 @@ class GifScreen:
         self.led_cols = Board.led_cols
         self.led_rows = Board.led_rows
         self.animations = self.load_animations()
+        if not self.animations:
+            self.enabled = False
+            logging.debug(
+                "[GifScreen App] Due to loading error, GifViewer has been disabled."
+            )
+            return
+
         self.current_animation_index = 0
         self.selection_mode = False
         self.current_frame_index = 0
@@ -80,15 +87,18 @@ class GifScreen:
         current_gif = ImageSequence.Iterator(
             self.animations[self.current_animation_index]
         )
+        current_gif_frames = list(current_gif)
         try:
-            frame = current_gif[self.current_frame_index].convert("RGB")
+            frame = current_gif_frames[self.current_frame_index].convert("RGB")
         except IndexError:
             logging.warning(
                 "[GifScreen App] IndexError encountered. Resetting frame index."
             )
             self.current_frame_index = 0
-            frame = current_gif[self.current_frame_index].convert("RGB")
-        self.current_frame_index = (self.current_frame_index + 1) % len(current_gif)
+            frame = current_gif_frames[self.current_frame_index].convert("RGB")
+        self.current_frame_index = (self.current_frame_index + 1) % len(
+            current_gif_frames
+        )
 
         draw = ImageDraw.Draw(frame)
         if self.selection_mode:
@@ -119,5 +129,6 @@ class GifScreen:
             logging.debug(
                 "[GifScreen App] Due to loading error, GifViewer has been disabled."
             )
+            return []
         logging.debug("[GifScreen App] All GIFs loaded.")
         return result
