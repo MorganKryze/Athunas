@@ -73,4 +73,4 @@ If you want to contribute to the project, you can follow the steps described in 
 
 ### License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE) file for details.
+This project is licensed under the GNU GPL v3 License - see the [LICENSE.md](LICENSE) file for details.
