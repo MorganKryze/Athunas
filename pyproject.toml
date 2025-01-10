@@ -18,5 +18,6 @@ dependencies = [
     "scipy==1.14.0",
     "lgpio==0.2.2.0",
     "gpiozero==2.0.1",
-    "RGBMatrixEmulator==0.11.6"
+    "RGBMatrixEmulator==0.11.6",
+    "libsixel-python==0.5.0",
 ]
