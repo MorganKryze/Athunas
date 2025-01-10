@@ -10,6 +10,7 @@ from settings import Settings
 try:
     logging.debug("[Board] Attempting to import gpiozero")
     from gpiozero import Button, RotaryEncoder
+    logging.debug("[Board] gpiozero imported successfully.")
 except Exception:
     logging.error("[Board] Failed to import gpiozero. Using mock instead.")
 
