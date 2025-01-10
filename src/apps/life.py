@@ -16,7 +16,7 @@ LIFE_PATTERNS_DIR = "apps/res/life_patterns/"
 
 
 class GameOfLifeScreen:
-    def __init__(self, config, modules, default_actions):
+    def __init__(self, modules, callbacks):
         """
         Initialize the GameOfLifeScreen with configuration, modules, and default actions.
 
@@ -33,7 +33,7 @@ class GameOfLifeScreen:
             return
 
         self.modules = modules
-        self.default_actions = default_actions
+        self.callbacks = callbacks
         self.color = (255, 255, 255)
         self.initial_states = [
             generate_random_state,
@@ -63,9 +63,9 @@ class GameOfLifeScreen:
             self.state = self.initial_states[self.current_state_index]()
             self.color = generate_new_color()
         elif input_status == InputStatus.ENCODER_INCREASE:
-            self.default_actions["switch_next_app"]()
+            self.callbacks["switch_next_app"]()
         elif input_status == InputStatus.ENCODER_DECREASE:
-            self.default_actions["switch_prev_app"]()
+            self.callbacks["switch_prev_app"]()
 
         end_time = datetime.now() + timedelta(seconds=0.1)
 
