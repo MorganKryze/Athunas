@@ -102,7 +102,7 @@ class Board:
             logging.debug(f"[Board] brightness: {cls.brightness}")
         logging.debug("[Board] All display settings initialized.")
 
-        cls.black_screen = Image.new("RGB", (cls.led_rows, cls.led_cols), (0, 0, 0))
+        cls.black_screen = Image.new("RGB", (cls.led_cols, cls.led_rows), (0, 0, 0))
 
     @classmethod
     def _init_encoder(cls):
