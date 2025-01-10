@@ -7,6 +7,29 @@ from typing import Any
 
 
 class Utils:
+    base_directory: str = ""
+
+    @classmethod
+    def set_base_directory(cls, base_dir_name: str = "Athunas") -> str:
+        """
+        Sets the base directory for the script to the specified directory name.
+
+        :param base_dir_name: The name of the base directory (default is 'Athunas').
+        :return: The absolute path of the base directory.
+        """
+        current_script_path = os.path.abspath(inspect.getfile(inspect.currentframe()))
+        current_script_dir = os.path.dirname(current_script_path)
+        base_dir = os.path.abspath(
+            os.path.join(current_script_dir, "..", "..", base_dir_name)
+        )
+        os.chdir(base_dir)
+        sys.path.append(base_dir)
+        sys.path.append(
+            os.path.join(base_dir, "rpi-rgb-led-matrix", "bindings", "python")
+        )
+        cls.base_directory = base_dir
+        return base_dir
+
     @staticmethod
     def start_logging(level: int = logging.DEBUG) -> None:
         """
@@ -27,28 +50,10 @@ class Utils:
             filename=log_file_path,
             filemode="a",
         )
+        logging.debug(f"Logging level set to: {level}")
+
         logging.info("-------------------------------------------------------------")
         logging.info("[Utils] Application started.")
-
-    @staticmethod
-    def set_base_directory(base_dir_name: str = "Athunas") -> str:
-        """
-        Sets the base directory for the script to the specified directory name.
-
-        :param base_dir_name: The name of the base directory (default is 'Athunas').
-        :return: The absolute path of the base directory.
-        """
-        current_script_path = os.path.abspath(inspect.getfile(inspect.currentframe()))
-        current_script_dir = os.path.dirname(current_script_path)
-        base_dir = os.path.abspath(
-            os.path.join(current_script_dir, "..", "..", base_dir_name)
-        )
-        os.chdir(base_dir)
-        sys.path.append(base_dir)
-        sys.path.append(
-            os.path.join(base_dir, "rpi-rgb-led-matrix", "bindings", "python")
-        )
-        return base_dir
 
     @staticmethod
     def create_matrix(
