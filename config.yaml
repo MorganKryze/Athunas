@@ -1,5 +1,7 @@
+# ------------------ System Configuration ------------------
+
 Pinout:
-  # Please note that these are not PIN numbers, but GPIO numbers. See https://pinout.xyz/ for more information.
+  # Please note that these are NOT PIN numbers, but GPIO numbers. See https://pinout.xyz/ for more information.
   encoder_clk: 5
   encoder_dt: 6
   encoder_sw: 13
@@ -10,30 +12,34 @@ System:
   led_cols: 64
   brightness: 100
 
-Pushbullet:
-  enabled: true
-  websocket_url: xxx
+# ------------------ Module Configuration ------------------
 
-OWM:
-  enabled: true
-  token: xxx
-  lat: 0.0
-  lon: 0.0
+# -------------------- App Configuration -------------------
 
 Spotify:
   enabled: true
-  client_id: xxx
-  client_secret: xxx
-  redirect_uri: xxx
+  client_id:
+  client_secret:
+  redirect_uri:
 
 Notion:
   enabled: true
-  token_v2: xxx
-  source: xxx
+  token_v2:
+  source:
 
 Youtube:
   enabled: true
-  key: xxx
+  key:
 
 GifViewer:
   enabled: true
+
+Pushbullet:
+  enabled: true
+  websocket_url:
+
+OWM:
+  enabled: true
+  token:
+  lat:
+  lon:

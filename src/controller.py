@@ -96,7 +96,7 @@ def main():
         # notion.NotionScreen(config, modules, callbacks),
         # weather.WeatherScreen(config, modules, callbacks),
         # subcount.SubcountScreen(config, modules, callbacks),
-        # life.GameOfLifeScreen(config, modules, callbacks),
+        life.GameOfLifeScreen(modules, callbacks),
         # spotify_player.SpotifyScreen(config, modules, callbacks),
     ]
 

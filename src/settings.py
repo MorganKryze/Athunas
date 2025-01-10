@@ -72,3 +72,25 @@ class Settings:
                 logging.critical("[Settings] Exiting program.")
                 raise
         return value
+
+    @classmethod
+    def update_variable(
+        cls,
+        category: str,
+        var: str,
+        value: Any,
+    ) -> None:
+        """
+        Updates a specific variable in the class dictionary.
+
+        :param category: The category key in the dictionary.
+        :param var: The variable key within the category.
+        :param value: The new value of the variable.
+        """
+        if category not in cls.data:
+            raise ValueError(f"[Settings] category not found: {category}")
+
+        logging.debug(f"[Settings] updated variable: {category} -> {var}")
+        cls.data[category][var] = value
+        cls.write_yaml()
+        logging.info(f"[Settings] updated variable: {category} -> {var} = {value}")
