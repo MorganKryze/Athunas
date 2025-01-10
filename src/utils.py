@@ -39,8 +39,6 @@ class Utils:
         """
         log_dir = "logs"
         os.makedirs(log_dir, exist_ok=True)
-        # TODO: REMOVE THIS LINE
-        print(f"Log directory: {log_dir}")
 
         log_filename = datetime.now().strftime("%Y-%m-%d") + ".log"
         log_file_path = os.path.join(log_dir, log_filename)
@@ -52,7 +50,6 @@ class Utils:
             filename=log_file_path,
         )
         logging.debug(f"Logging level set to: {level}")
-
         logging.info("-------------------------------------------------------------")
         logging.info("[Utils] Application started.")
 
