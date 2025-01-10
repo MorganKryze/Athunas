@@ -89,8 +89,10 @@ def main():
         life.GameOfLifeScreen(modules, callbacks),
         # spotify_player.SpotifyScreen(config, modules, callbacks),
     ]
-
-    available_app_list = list(filter(lambda app: app.enabled, app_list))
+    available_app_list = []
+    for app in app_list:
+        if app.enabled:
+            available_app_list.append(app)
 
     # TODO: Find a better way to implement app rotation
     # rotation_time = math.floor(time.time())
