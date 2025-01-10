@@ -64,3 +64,6 @@ Weather:
   token:
   lat:
   lon:
+
+GameOfLife:
+  enabled: true
