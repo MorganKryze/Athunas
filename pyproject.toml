@@ -1,7 +1,7 @@
 [project]
 name = "Athunas"
 version = "0.0.0"
-description = "RGB led matrix controller."
+description = "RGB led matrix controller, providing apps and modules for various purposes."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
