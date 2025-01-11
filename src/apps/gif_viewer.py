@@ -90,7 +90,7 @@ class GifScreen:
         try:
             frame = current_gif[self.current_frame_index].convert("RGB")
         except IndexError:
-            logging.info(
+            logging.debug(
                 "[GifScreen App] Reached the end of the GIF. Restarting from the beginning."
             )
             self.current_frame_index = 0
