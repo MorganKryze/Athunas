@@ -76,7 +76,7 @@ def main():
     }
 
     modules = {
-        # "weather": weather_module.WeatherModule(config),
+        "weather": weather_module.WeatherModule(),
         "notifications": notification_module.NotificationModule(),
         "spotify": spotify_module.SpotifyModule(),
     }
