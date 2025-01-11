@@ -87,7 +87,7 @@ For any other issues, feel free to [open an issue](https://github.com/MorganKryz
 
 ## Contributing
 
-If you want to contribute to the project, you can follow the steps described in the [CONTRIBUTING](./.github/CONTRIBUTING) file and get in touch with us at this email: [morgan@kodelab.fr](mailto:morgan@kodelab.fr).
+If you want to contribute to the project, you can follow the steps described in the [CONTRIBUTING](./.github/CONTRIBUTING.md) file and get in touch with us at this email: [morgan@kodelab.fr](mailto:morgan@kodelab.fr).
 
 ## Acknowledgments
 
