@@ -11,7 +11,9 @@ The purpose of the project is to provide a framework to add apps and functionali
 - [Overview](#overview)
 - [Getting Started](#getting-started)
 - [Documentation](#documentation)
-- [Features](#features)
+- [Key features](#key-features)
+  - [Apps](#apps)
+  - [Functionalities](#functionalities)
 - [Setting up](#setting-up)
   - [Prerequisites](#prerequisites)
   - [Install](#install)
@@ -32,9 +34,30 @@ For documentation about the `rpi-rgb-led-matrix` library, check their detailed [
 
 For any other information, feel free to [open an issue](https://github.com/MorganKryze/Athunas/issues) on the repository.
 
-## Features
+## Key features
 
-- ...
+### Apps
+
+- [x] Clock **WIP**
+- [x] Weather **WIP**
+- [x] Notion todo lists **WIP**
+- [x] Gif viewer
+- [x] Pomodoro timer **WIP**
+- [x] Conways game of life **WIP**
+- [x] Spotify player **WIP**
+- [x] Stocks & crypto **WIP**
+- [x] Youtube subscribers count **WIP**
+- [ ] ...
+
+### Functionalities
+
+- [x] Logging system
+- [x] One-file configuration
+- [x] Makefile
+- [ ] Comprehensive documentation to add new apps
+- [ ] Web interface to manage the apps
+- [ ] CAD files for 3D printing
+- [ ] ...
 
 ## Setting up
 
@@ -54,7 +77,7 @@ Overall budget: **~$xyz** / **xyz€**
 
 First, follow the wiring instructions in the [wiring](./docs/wiring.md) guide.
 
-Or, on the other hand do every step manually by following the [installation guide](./docs/installation.md).
+Once everything is set up, we can follow the [installation guide](./docs/installation.md).
 
 ### Troubleshooting
 
