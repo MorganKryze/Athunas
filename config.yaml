@@ -29,7 +29,7 @@ Notification-Module:
   websocket_url:
 
 Weather-Module:
-  enabled: true
+  enabled: false
   token:
   latitude:
   longitude:
