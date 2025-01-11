@@ -153,7 +153,7 @@ class Board:
         """
         Callback function for rotating the encoder clockwise.
         """
-        logging.debug("[Board] Rotated clockwise (+).")
+        logging.debug(f"[Board] Rotated clockwise: {cls.encoder_state}.")
         cls.encoder_queue.put(1)
         cls.reset_encoder(encoder)
 
@@ -162,7 +162,7 @@ class Board:
         """
         Callback function for rotating the encoder counter-clockwise.
         """
-        logging.debug("[Board] Rotated counter-clockwise (-).")
+        logging.debug(f"[Board] Rotated counter-clockwise: {cls.encoder_state}.")
         cls.encoder_queue.put(-1)
         cls.reset_encoder(encoder)
 
