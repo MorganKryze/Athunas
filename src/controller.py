@@ -100,9 +100,11 @@ def main():
             Board.encoder_state += Board.encoder_queue.get()
 
         if Board.encoder_state > 1:
+            logging.debug(f"[Controller] Encoder state: {Board.encoder_state}")
             Board.encoder_input_status = InputStatus.ENCODER_INCREASE
             Board.encoder_state = 0
         elif Board.encoder_state < -1:
+            logging.debug(f"[Controller] Encoder state: {Board.encoder_state}")
             Board.encoder_input_status = InputStatus.ENCODER_DECREASE
             Board.encoder_state = 0
 
