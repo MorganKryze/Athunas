@@ -23,22 +23,6 @@ Documentation is mandatory for all contributions, including code, issues, and pu
 - Included in the `README.md` file at the root of the project
 - Additional documentation can be added to the `docs` folder
 
-## Deployment
-
-Every solution should include a Docker deployment option, with a `compose.yml` and `Dockerfile` if necessary. The deployment process should be:
-
-- As simple as possible
-- Documented in the `README.md` file
-
-## Testing
-
-All contributions should include tests to ensure the stability and reliability of the project. Please follow these guidelines for testing:
-
-- Write unit tests for new functionality and bug fixes.
-- Use a testing framework appropriate for the project's language and environment.
-- Ensure that all tests pass before submitting a pull request.
-- Include instructions on how to run the tests in the README.md file.
-
 ## Commit Messages
 
 All commit messages should follow the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) format. This format ensures that the commit messages are easy to read and follow a consistent structure.
@@ -56,14 +40,6 @@ All contributions should follow the [GitFlow](https://www.atlassian.com/git/tuto
 - `release/*`: Release branches for preparing a new release. These branches should be merged into the `main` and `develop` branches.
 - `support/*`: Support branches for long-term support. These branches should be merged into the `main` branch.
 - `docs/*`: Documentation branches for updating the documentation. These branches should be merged into the `main` branch.
-
-## Archiving
-
-Each project within the DeVinci Fablab organization should be archived when it is no longer maintained. This includes projects that have been completed or abandoned.
-
-## Licensing
-
-All public projects within the DeVinci Fablab organization are licensed under the [MIT License](../LICENSE).
 
 ---
 
