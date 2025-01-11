@@ -85,20 +85,18 @@ class GifScreen:
                 self.callbacks["switch_prev_app"]()
 
         current_gif = ImageSequence.Iterator(
-            self.animations[self.current_animation_index]
+            self.animations[self.current_animation_index % len(self.animations)]
         )
-        current_gif_frames = list(current_gif)
         try:
-            frame = current_gif_frames[self.current_frame_index].convert("RGB")
+            frame = current_gif[self.current_frame_index].convert("RGB")
         except IndexError:
-            logging.warning(
-                "[GifScreen App] IndexError encountered. Resetting frame index."
+            logging.info(
+                "[GifScreen App] Reached the end of the GIF. Restarting from the beginning."
             )
             self.current_frame_index = 0
-            frame = current_gif_frames[self.current_frame_index].convert("RGB")
-        self.current_frame_index = (self.current_frame_index + 1) % len(
-            current_gif_frames
-        )
+            frame = current_gif[self.current_frame_index].convert("RGB")
+
+        self.current_frame_index += 1
 
         draw = ImageDraw.Draw(frame)
         if self.selection_mode:
@@ -130,5 +128,5 @@ class GifScreen:
                 "[GifScreen App] Due to loading error, GifViewer has been disabled."
             )
             return []
-        logging.debug("[GifScreen App] All GIFs loaded.")
+        logging.info(f"[GifScreen App] All {len(result)} GIFs loaded successfully.")
         return result
