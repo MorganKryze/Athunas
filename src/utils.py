@@ -108,10 +108,9 @@ class Utils:
             logging.error(f"[Utils] failed to set RGBMatrix options: {e}")
             raise
 
-        logging.debug("[Utils] Creating RGBMatrix object with options.")
         try:
             matrix = RGBMatrix(options=options)
-            logging.debug("[Utils] RGBMatrix object created.")
+            logging.info("[Utils] RGBMatrix object created.")
             return matrix
         except Exception as e:
             logging.error(f"[Utils] failed to create RGBMatrix object: {e}")

@@ -51,36 +51,30 @@ class Board:
         """
         cls.led_rows = Settings.read_variable("System", "led_rows", Importance.REQUIRED)
         if cls.led_rows % cls.SCREEN_RATIO != 0 or cls.led_rows <= 0:
-            logging.error(
+            logging.critical(
                 f"[Board] led_rows must be a positive multiple of {cls.SCREEN_RATIO} to work with the 'rpi-rgb-led-matrix' library."
             )
-            logging.error("[Board] Exiting program.")
+            logging.critical("[Board] Exiting program.")
             raise
-        else:
-            logging.debug(f"[Board] led_rows: {cls.led_rows}")
 
         cls.led_cols = Settings.read_variable("System", "led_cols", Importance.REQUIRED)
         if cls.led_cols % cls.SCREEN_RATIO != 0 or cls.led_cols <= 0:
-            logging.error(
+            logging.critical(
                 f"[Board] led_cols must be a multiple of {cls.SCREEN_RATIO} to work with the 'rpi-rgb-led-matrix' library."
             )
-            logging.error("[Board] Exiting program.")
+            logging.critical("[Board] Exiting program.")
             raise
-        else:
-            logging.debug(f"[Board] led_cols: {cls.led_cols}")
 
         cls.brightness = Settings.read_variable(
             "System", "brightness", Importance.REQUIRED
         )
         if cls.brightness < cls.BRIGHTNESS_MIN or cls.brightness > cls.BRIGHTNESS_MAX:
-            logging.error(
+            logging.critical(
                 f"[Board] brightness must be between {cls.BRIGHTNESS_MIN} and {cls.BRIGHTNESS_MAX}."
             )
-            logging.error("[Board] Exiting program.")
+            logging.critical("[Board] Exiting program.")
             raise
-        else:
-            logging.debug(f"[Board] brightness: {cls.brightness}")
-        logging.debug("[Board] All display settings initialized.")
+        logging.info("[Board] All display settings initialized.")
 
         cls.black_screen = Image.new("RGB", (cls.led_cols, cls.led_rows), (0, 0, 0))
 
@@ -93,40 +87,37 @@ class Board:
             "Pinout", "encoder_clk", Importance.REQUIRED
         )
         if cls.encoder_clk < cls.FIRST_GPIO_PIN or cls.encoder_clk > cls.LAST_GPIO_PIN:
-            logging.error(
+            logging.critical(
                 f"[Board] encoder_clk must be between {cls.FIRST_GPIO_PIN} and {cls.LAST_GPIO_PIN}."
             )
-            logging.error("[Board] Exiting program.")
+            logging.critical("[Board] Exiting program.")
             raise
-        logging.debug(f"[Board] encoder_clk: {cls.encoder_clk}")
 
         cls.encoder_dt = Settings.read_variable(
             "Pinout", "encoder_dt", Importance.REQUIRED
         )
         if cls.encoder_dt < cls.FIRST_GPIO_PIN or cls.encoder_dt > cls.LAST_GPIO_PIN:
-            logging.error(
+            logging.critical(
                 f"[Board] encoder_dt must be between {cls.FIRST_GPIO_PIN} and {cls.LAST_GPIO_PIN}."
             )
-            logging.error("[Board] Exiting program.")
+            logging.critical("[Board] Exiting program.")
             raise
-        logging.debug(f"[Board] encoder_dt: {cls.encoder_dt}")
 
         cls.encoder_sw = Settings.read_variable(
             "Pinout", "encoder_sw", Importance.REQUIRED
         )
         if cls.encoder_sw < cls.FIRST_GPIO_PIN or cls.encoder_sw > cls.LAST_GPIO_PIN:
-            logging.error(
+            logging.critical(
                 f"[Board] encoder_sw must be between {cls.FIRST_GPIO_PIN} and {cls.LAST_GPIO_PIN}."
             )
-            logging.error("[Board] Exiting program.")
+            logging.critical("[Board] Exiting program.")
             raise
-        logging.debug(f"[Board] encoder_sw: {cls.encoder_sw}")
 
         cls.encoder_button = Button(cls.encoder_sw, pull_up=True, bounce_time=0.1)
         cls.encoder_button.when_pressed = lambda button: cls.encoder_button_callback(
             button
         )
-        logging.debug("[Board] Encoder button initialized.")
+        logging.info("[Board] Encoder button initialized.")
 
         cls.encoder_queue = queue.Queue()
         cls.encoder = RotaryEncoder(cls.encoder_clk, cls.encoder_dt)
@@ -136,7 +127,7 @@ class Board:
         cls.encoder.when_rotated_counter_clockwise = (
             lambda enc: cls.rotate_counter_clockwise_callback(enc)
         )
-        logging.debug("[Board] Encoder initialized.")
+        logging.info("[Board] Encoder initialized.")
 
     @classmethod
     def _init_tilt_switch(cls):
@@ -147,8 +138,8 @@ class Board:
             "Pinout", "tilt_switch", Importance.REQUIRED
         )
         if cls.tilt_switch < cls.FIRST_GPIO_PIN or cls.tilt_switch > cls.LAST_GPIO_PIN:
-            logging.error("[Board] tilt_switch must be between 0 and 27.")
-            logging.error("[Board] Exiting program.")
+            logging.critical("[Board] tilt_switch must be between 0 and 27.")
+            logging.critical("[Board] Exiting program.")
             raise
         logging.debug(f"[Board] tilt_switch: {cls.tilt_switch}")
 
@@ -162,7 +153,7 @@ class Board:
         """
         Callback function for rotating the encoder clockwise.
         """
-        logging.debug("[Board] Rotated clockwise.")
+        logging.debug("[Board] Rotated clockwise (+).")
         cls.encoder_queue.put(1)
         cls.reset_encoder(encoder)
 
@@ -171,7 +162,7 @@ class Board:
         """
         Callback function for rotating the encoder counter-clockwise.
         """
-        logging.debug("[Board] Rotated counter-clockwise.")
+        logging.debug("[Board] Rotated counter-clockwise (-).")
         cls.encoder_queue.put(-1)
         cls.reset_encoder(encoder)
 
@@ -199,6 +190,7 @@ class Board:
         """
         Callback function for the encoder button.
         """
+        # TODO: NOW ONLY SINGLE PRESS AND LONG ARE PARTIALLY RECOGNIZED
         start_time = time.time()
         hold_time = 1
         press_count = 0
@@ -209,19 +201,19 @@ class Board:
                 press_count += 1
                 start_time = time.time()
                 if press_count == 3:
-                    logging.debug("[Board] Triple press detected.")
+                    logging.debug("[Board] Triple press detected (3).")
                     cls.encoder_input_status = InputStatus.TRIPLE_PRESS
                     return
                 elif press_count == 2:
-                    logging.debug("[Board] Double press detected.")
+                    logging.debug("[Board] Double press detected (2).")
                     cls.encoder_input_status = InputStatus.DOUBLE_PRESS
                     return
 
         if time.time() - start_time >= hold_time:
-            logging.debug("[Board] Long press detected.")
+            logging.debug("[Board] Long press detected (5).")
             cls.encoder_input_status = InputStatus.LONG_PRESS
         elif press_count == 1:
-            logging.debug("[Board] Single press detected.")
+            logging.debug("[Board] Single press detected (1).")
             cls.encoder_input_status = InputStatus.SINGLE_PRESS
 
         # Reset the button state

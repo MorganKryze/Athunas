@@ -62,7 +62,6 @@ class Settings:
         :return: The value of the variable if it exists, otherwise None.
         """
         value = cls.data.get(category, {}).get(var)
-        logging.debug(f"[Settings] read variable: {category} -> {var}={value}")
         if value is None:
             logging.warning(f"[Settings] variable not found: {category} -> {var}")
             if importance == Importance.REQUIRED:
@@ -71,6 +70,7 @@ class Settings:
                 )
                 logging.critical("[Settings] Exiting program.")
                 raise
+        logging.debug(f"[Settings] read variable: {category} -> {var}={value}")
         return value
 
     @classmethod
@@ -89,8 +89,6 @@ class Settings:
         """
         if category not in cls.data:
             raise ValueError(f"[Settings] category not found: {category}")
-
-        logging.debug(f"[Settings] updated variable: {category} -> {var}")
         cls.data[category][var] = value
         cls.write_yaml()
         logging.info(f"[Settings] updated variable: {category} -> {var}={value}")
