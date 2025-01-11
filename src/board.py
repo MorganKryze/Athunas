@@ -8,11 +8,13 @@ from enums.variable_importance import Importance
 from settings import Settings
 
 try:
-    logging.debug("[Board] Attempting to import gpiozero")
+    # TODO: remove after testing
+    print("[Board] Attempting to import gpiozero")
     from gpiozero import Button, RotaryEncoder
+
     logging.debug("[Board] gpiozero imported successfully.")
 except Exception:
-    logging.error("[Board] Failed to import gpiozero. Using mock instead.")
+    print("[Board] Failed to import gpiozero. Using mock instead.")
 
     class Button:
         def __init__(self, num, pull_up=False):
@@ -182,6 +184,7 @@ class Board:
         """
         Callback function for rotating the encoder clockwise.
         """
+        logging.debug("[Board] Rotated clockwise.")
         cls.encoder_queue.put(1)
         cls.reset_encoder(encoder)
 
@@ -190,6 +193,7 @@ class Board:
         """
         Callback function for rotating the encoder counter-clockwise.
         """
+        logging.debug("[Board] Rotated counter-clockwise.")
         cls.encoder_queue.put(-1)
         cls.reset_encoder(encoder)
 
@@ -209,6 +213,7 @@ class Board:
         startTime = time.time()
         while time.time() - startTime < TILT_DEBOUNCE_TIME:
             pass
+        logging.debug("[Board] Tilt switch activated.")
         cls.is_horizontal = tilt_switch.is_pressed
 
     @classmethod
@@ -224,8 +229,7 @@ class Board:
             time_diff = time.time() - start_time
 
         if time_diff >= hold_time:
-            # TODO: Change to a logging message
-            print("long press detected")
+            logging.debug("[Board] Long press detected.")
             cls.encoder_input_status = InputStatus.LONG_PRESS
         else:
             enc_button.when_pressed = None
@@ -238,22 +242,19 @@ class Board:
                     while time.time() - new_start_time <= 0.3:
                         time.sleep(0.1)
                         if enc_button.is_pressed:
-                            # TODO: Change to a logging message
-                            print("triple press detected")
+                            logging.debug("[Board] Triple press detected.")
                             cls.encoder_input_status = InputStatus.TRIPLE_PRESS
                             enc_button.when_pressed = (
                                 lambda button: cls.encoder_button_callback(button)
                             )
                             return
-                    # TODO: Change to a logging message
-                    print("double press detected")
+                    logging.debug("[Board] Double press detected.")
                     cls.encoder_input_status = InputStatus.DOUBLE_PRESS
                     enc_button.when_pressed = (
                         lambda button: cls.encoder_button_callback(button)
                     )
                     return
-            # TODO: Change to a logging message
-            print("single press detected")
+            logging.debug("[Board] Single press detected.")
             cls.encoder_input_status = InputStatus.SINGLE_PRESS
             enc_button.when_pressed = lambda button: cls.encoder_button_callback(button)
             return
