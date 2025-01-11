@@ -32,7 +32,10 @@ Weather-Module:
   enabled: true
 
 Spotify-Module:
-  enabled: true
+  enabled: false
+  client_id:
+  client_secret:
+  redirect_uri:
 
 # -------------------- App Configuration -------------------
 # Apps are the applications that are available to the user. Disabled apps will not be
@@ -43,9 +46,6 @@ GifViewer:
 
 Spotify:
   enabled: false
-  client_id:
-  client_secret:
-  redirect_uri:
 
 Notion:
   enabled: false

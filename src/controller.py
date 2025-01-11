@@ -78,7 +78,7 @@ def main():
     modules = {
         # "weather": weather_module.WeatherModule(config),
         "notifications": notification_module.NotificationModule(),
-        # "spotify": spotify_module.SpotifyModule(config),
+        "spotify": spotify_module.SpotifyModule(),
     }
 
     app_list = [

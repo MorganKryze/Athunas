@@ -1,4 +1,3 @@
-import numpy as np
 from PIL import Image, ImageFont, ImageDraw
 import requests
 from io import BytesIO
