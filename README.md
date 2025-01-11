@@ -96,6 +96,7 @@ We would like to express our gratitude to the following individuals for their co
 - [Allen's lab](https://github.com/allenslab): for the `matrix-dashboard` project, which is a great starting point for building a dashboard using the Matrix platform through his [video](https://www.youtube.com/watch?v=A5A6ET64Oz8).
 - [Ty Porter](https://github.com/ty-porter): for bringing public [Allen's lab's project](https://github.com/ty-porter/matrix-dashboard) source code and making it available to the community.
 - [Henner Zeller](https://github.com/hzeller): for the `rpi-rgb-led-matrix` library, which is the core of the communication between the Raspberry Pi and the led matrix.
+- [Milk And Espresso](https://m.twitch.tv/milkandespresso/about): for making some of the original background images.
 
 Additionally, we would like to thank the following people for their contributions to the project:
 
