@@ -5,6 +5,7 @@
 .venv/
 __pycache__/
 *.lock
+.python-version
 
 # KiCad
 KiCad/Rpi_matrix_adapter/Rpi_matrix_adapter-backups/*
