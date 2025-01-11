@@ -16,7 +16,7 @@ class Settings:
         :param file_path: Path to the YAML file.
         """
         cls.file_path = file_path
-        logging.debug(f"[Settings] file path set: {cls.file_path}")
+        logging.debug(f"[Settings] file_path set: {cls.file_path}")
         cls.read_yaml()
 
     @classmethod
@@ -27,7 +27,7 @@ class Settings:
         try:
             with open(cls.file_path, "r") as file:
                 cls.data = yaml.safe_load(file)
-            logging.info("[Settings] loaded successfully.")
+            logging.info("[Settings] Config file loaded successfully.")
         except FileNotFoundError:
             logging.critical(f"[Settings] The file '{cls.file_path}' was not found.")
             logging.critical("[Settings] Exiting program.")
@@ -62,7 +62,7 @@ class Settings:
         :return: The value of the variable if it exists, otherwise None.
         """
         value = cls.data.get(category, {}).get(var)
-        logging.debug(f"[Settings] read variable: {category} -> {var}")
+        logging.debug(f"[Settings] read variable: {category} -> {var}= {value}")
         if value is None:
             logging.warning(f"[Settings] variable not found: {category} -> {var}")
             if importance == Importance.REQUIRED:
