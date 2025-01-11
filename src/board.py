@@ -6,29 +6,7 @@ import queue
 from enums.input_status import InputStatus
 from enums.variable_importance import Importance
 from settings import Settings
-
-try:
-    # TODO: remove after testing
-    print("[Board] Attempting to import gpiozero")
-    from gpiozero import Button, RotaryEncoder
-
-    logging.debug("[Board] gpiozero imported successfully.")
-except Exception:
-    print("[Board] Failed to import gpiozero. Using mock instead.")
-
-    class Button:
-        def __init__(self, num, pull_up=False):
-            self.num = num
-            self.pull_up = pull_up
-            self.when_pressed = lambda: None
-            self.when_released = lambda: None
-
-    class RotaryEncoder:
-        def __init__(self, encoding1, encoding2):
-            self.encoding1 = encoding1
-            self.encoding2 = encoding2
-            self.when_rotated_clockwise = lambda: None
-            self.when_rotated_counter_clockwise = lambda: None
+from gpiozero import Button, RotaryEncoder
 
 
 class Board:
