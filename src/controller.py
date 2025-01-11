@@ -30,7 +30,9 @@ def main():
 
     Board.init_system()
 
-    matrix = Utils.create_matrix(Board.led_rows, Board.led_cols, Board.brightness, use_emulator=True)
+    matrix = Utils.create_matrix(
+        Board.led_rows, Board.led_cols, Board.brightness, use_emulator=True
+    )
 
     def toggle_display():
         Board.is_display_on = not Board.is_display_on
@@ -109,21 +111,21 @@ def main():
             Board.encoder_input_status = InputStatus.ENCODER_DECREASE
             Board.encoder_state = 0
 
-        is_horizontal_snapshot = copy.copy(Board.is_horizontal)
-        input_status_snapshot = copy.copy(Board.encoder_input_status)
-        Board.encoder_input_status = InputStatus.NOTHING
-
         # TODO: Find a better way to implement app rotation
         # new_rotation_time = math.floor(time.time())
         # if new_rotation_time % 10 == 0 and new_rotation_time - rotation_time >= 10:
         #     current_app_index += 1
         #     rotation_time = new_rotation_time
 
+        is_horizontal_snapshot = copy.copy(Board.is_horizontal)
+        input_status_snapshot = copy.copy(Board.encoder_input_status)
+
         frame = available_app_list[
             current_app_index % len(available_app_list)
         ].generate(is_horizontal_snapshot, input_status_snapshot)
 
         matrix.SetImage(frame if Board.is_display_on else Board.black_screen)
+        Board.encoder_input_status = InputStatus.NOTHING
         time.sleep(SLEEP_TIME)
 
 
