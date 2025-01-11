@@ -7,17 +7,18 @@ import json
 import time
 from functools import cmp_to_key
 import logging
+from typing import List, Dict, Any
+
+# Constants
+RETRY_DELAY_SECONDS = 1000
 
 
 class NotificationModule:
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Initialize the NotificationModule with the given configuration.
-
-        Args:
-            config (dict): Configuration settings.
         """
-        self.enabled = Settings.read_variable(
+        self.enabled: bool = Settings.read_variable(
             "Notification-Module", "enabled", Importance.REQUIRED
         )
         if not self.enabled:
@@ -25,18 +26,18 @@ class NotificationModule:
             return
 
         logging.debug("[Notification Module] Initializing")
-        self.app_white_list = Settings.read_variable(
+        self.app_white_list: Dict[str, str] = Settings.read_variable(
             "Notification-Module", "app_white_list"
         )
         if len(self.app_white_list) == 0:
             logging.warning(
                 "[Notification Module] No applications found in the white list, no notifications will be received."
             )
-        self.websocket_url = Settings.read_variable(
+        self.websocket_url: str = Settings.read_variable(
             "Notification-Module", "websocket_url", Importance.REQUIRED
         )
-        self.notifications_list = []
-        self.notification_queue = Queue()
+        self.notifications_list: List[Notification] = []
+        self.notification_queue: Queue = Queue()
 
         logging.debug("[Notification Module] Starting websocket service")
         Thread(
@@ -44,16 +45,18 @@ class NotificationModule:
             args=(self.notification_queue, self.websocket_url, self.app_white_list),
         ).start()
 
-    def get_notification_list(self):
+        logging.info("[Notification Module] Initialized")
+
+    def get_notification_list(self) -> List[Any]:
         """
         Get the list of notifications.
 
         Returns:
-            list: The list of notifications.
+            List[Notification]: The list of notifications.
         """
         need_to_sort = False
         while not self.notification_queue.empty():
-            new_noti = self.notification_queue.get()
+            new_noti: Notification = self.notification_queue.get()
             logging.debug(f"[Notification Module] Processing notification: {new_noti}")
             if new_noti.add_to_count:
                 found = any(
@@ -81,7 +84,15 @@ class NotificationModule:
 
 
 class Notification:
-    def __init__(self, application, add_to_count, noti_id, title, body, noti_time):
+    def __init__(
+        self,
+        application: str,
+        add_to_count: bool,
+        noti_id: int,
+        title: str,
+        body: str,
+        noti_time: float,
+    ) -> None:
         """
         Initialize a Notification object.
 
@@ -101,7 +112,7 @@ class Notification:
         self.noti_time = noti_time
 
     @staticmethod
-    def compare(noti1, noti2):
+    def compare(noti1: "Notification", noti2: "Notification") -> int:
         """
         Compare two notifications based on their time.
 
@@ -120,7 +131,12 @@ class Notification:
             return 0
 
 
-def on_message(_, message, noti_queue, app_white_list):
+def on_message(
+    _: websocket.WebSocketApp,
+    message: str,
+    noti_queue: Queue,
+    app_white_list: Dict[str, str],
+) -> None:
     """
     Handle incoming messages from the websocket.
 
@@ -166,7 +182,13 @@ def on_message(_, message, noti_queue, app_white_list):
                 )
 
 
-def on_error(_, error, noti_queue, pushbullet_ws, app_white_list):
+def on_error(
+    _: websocket.WebSocketApp,
+    error: Exception,
+    noti_queue: Queue,
+    pushbullet_ws: str,
+    app_white_list: Dict[str, str],
+) -> None:
     """
     Handle errors from the websocket.
 
@@ -178,12 +200,12 @@ def on_error(_, error, noti_queue, pushbullet_ws, app_white_list):
         app_white_list (dict): The application white list.
     """
     logging.error(f"[Notification Module] WebSocket error: {error}")
-    time.sleep(1000)
+    time.sleep(RETRY_DELAY_SECONDS)
     logging.info("[Notification Module] Restarting websocket service")
     start_service(noti_queue, pushbullet_ws, app_white_list)
 
 
-def on_close(_):
+def on_close(_: websocket.WebSocketApp) -> None:
     """
     Handle the websocket close event.
 
@@ -193,7 +215,9 @@ def on_close(_):
     logging.warning("[Notification Module] Websocket closed")
 
 
-def start_service(noti_queue, pushbullet_ws, app_white_list):
+def start_service(
+    noti_queue: Queue, pushbullet_ws: str, app_white_list: Dict[str, str]
+) -> None:
     """
     Start the websocket service.
 
