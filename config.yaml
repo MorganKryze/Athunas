@@ -26,10 +26,13 @@ Pinout:
 Notification-Module:
   enabled: false
   app_white_list:
-  websocket_url: xyz
+  websocket_url:
 
 Weather-Module:
   enabled: true
+  token:
+  latitude:
+  longitude:
 
 Spotify-Module:
   enabled: false
@@ -61,9 +64,6 @@ Pushbullet:
 
 Weather:
   enabled: false
-  token:
-  lat:
-  lon:
 
 GameOfLife:
   enabled: true
