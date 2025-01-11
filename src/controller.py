@@ -17,7 +17,6 @@ import math
 import time
 import copy
 import logging
-from PIL import Image
 from utils import Utils
 
 
