@@ -95,7 +95,7 @@ def main():
 
     # TODO: Find a better way to implement app rotation
     # rotation_time = math.floor(time.time())
-    SLEEP_TIME = 0.05
+    SLEEP_TIME = 0.02
     while True:
         while not Board.encoder_queue.empty():
             Board.encoder_state += Board.encoder_queue.get()
