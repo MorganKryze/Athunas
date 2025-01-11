@@ -132,7 +132,7 @@ class Notification:
 
 
 def on_message(
-    _: websocket.WebSocketApp,
+    _: websocket.WebSocket,
     message: str,
     noti_queue: Queue,
     app_white_list: Dict[str, str],
@@ -183,7 +183,7 @@ def on_message(
 
 
 def on_error(
-    _: websocket.WebSocketApp,
+    _: websocket.WebSocket,
     error: Exception,
     noti_queue: Queue,
     pushbullet_ws: str,
@@ -205,7 +205,7 @@ def on_error(
     start_service(noti_queue, pushbullet_ws, app_white_list)
 
 
-def on_close(_: websocket.WebSocketApp) -> None:
+def on_close(_: websocket.WebSocket) -> None:
     """
     Handle the websocket close event.
 
@@ -227,7 +227,7 @@ def start_service(
         app_white_list (dict): The application white list.
     """
     logging.info("[Notification Module] Starting websocket service")
-    ws = websocket.WebSocketApp(
+    ws = websocket.WebSocket(
         pushbullet_ws,
         on_message=lambda ws, message: on_message(
             ws, message, noti_queue, app_white_list
