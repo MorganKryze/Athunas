@@ -141,7 +141,6 @@ class Board:
             logging.critical("[Board] tilt_switch must be between 0 and 27.")
             logging.critical("[Board] Exiting program.")
             raise
-        logging.debug(f"[Board] tilt_switch: {cls.tilt_switch}")
 
         cls.tilt_switch_button = Button(cls.tilt_switch, pull_up=True)
         cls.tilt_switch_button.when_pressed = lambda button: cls.tilt_callback(button)
