@@ -210,7 +210,7 @@ class MainScreen:
         minutes = currentTime.minute
         seconds = currentTime.second
 
-        noti_list = self.modules["notifications"].getNotificationList()
+        noti_list = self.modules["notifications"].get_notification_list()
         if noti_list is not None:
             threading.Thread(
                 target=generateNotiFramesAsync,
