@@ -47,9 +47,9 @@ Spotify-Module:
 
 MainScreen:
   enabled: true
-  cycle_time: 20
   use_24_hour: true
   date_format: DD-MM
+  cycle_duration_in_seconds: 20
 
 Pomodoro:
   enabled: true

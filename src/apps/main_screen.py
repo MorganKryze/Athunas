@@ -57,8 +57,9 @@ class MainScreen:
         self.callbacks = callbacks
 
         self.font = ImageFont.truetype(PathTo.FONT_FILE, FONT_SIZE)
-        self.cycle_time = (
-            Settings.read_variable("MainScreen", "cycle_time") or DEFAULT_CYCLE_TIME
+        self.cycle_duration_in_seconds = (
+            Settings.read_variable("MainScreen", "cycle_duration_in_seconds")
+            or DEFAULT_CYCLE_TIME
         )
         self.use_24_hour = (
             Settings.read_variable("MainScreen", "use_24_hour") or DEFAULT_USE_24_HOUR
@@ -76,7 +77,7 @@ class MainScreen:
         self.vertical = pomodoro.PomodoroScreen(modules, callbacks)
 
         self.lastGenerateCall = None
-        self.on_cycle = True
+        self.is_on_cycle = True
 
         self.backgrounds = {
             "sakura": Image.open(
@@ -127,8 +128,8 @@ class MainScreen:
 
         if self.lastGenerateCall is None:
             self.lastGenerateCall = time.time()
-        if time.time() - self.lastGenerateCall >= self.cycle_time:
-            self.on_cycle = not self.on_cycle
+        if time.time() - self.lastGenerateCall >= self.cycle_duration_in_seconds:
+            self.is_on_cycle = not self.is_on_cycle
             self.lastGenerateCall = time.time()
 
         frame = self.theme_list[self.currentIdx % len(self.theme_list)]()
@@ -145,7 +146,6 @@ class MainScreen:
         current_time = datetime.now(tz=tz.tzlocal())
         month = current_time.month
         day = current_time.day
-        dayOfWeek = current_time.weekday()
         hours = current_time.hour
         if not self.use_24_hour:
             hours = hours % 12
@@ -160,7 +160,7 @@ class MainScreen:
         draw.text((10, 6), ":", light_pink, font=self.font)
         draw.text((13, 6), format_to_two_digits(minutes), light_pink, font=self.font)
 
-        if self.on_cycle:
+        if self.is_on_cycle:
             if self.date_format == "MM-DD":
                 # date
                 draw.text(
@@ -177,16 +177,8 @@ class MainScreen:
                 )
         else:
             # dayOfWeek
-            day_abbreviation = calendar.day_abbr[dayOfWeek].upper()
+            day_abbreviation = calendar.day_abbr[current_time.weekday()].upper()
             draw.text((23, 6), day_abbreviation, dark_pink, font=self.font)
-            # weather
-            weather = self.modules["weather"]
-            temperature = weather.get_temperature()
-            if temperature is not None:
-                draw.text(
-                    (33, 6), format_to_two_digits(temperature), white, font=self.font
-                )
-                draw.point((41, 6), fill=white)
 
         # notifications
         noti_list = self.modules["notifications"].get_notification_list()
