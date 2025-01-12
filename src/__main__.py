@@ -10,7 +10,7 @@ from typing import Any
 
 def main() -> None:
     Utils.set_base_directory()
-    Utils.start_logging()
+    Utils.start_logging(level=logging.DEBUG)
     Settings.load("./config.yaml")
     Board.init_system()
     AppManager.init_apps()

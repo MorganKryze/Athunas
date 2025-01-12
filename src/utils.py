@@ -5,9 +5,13 @@ import logging
 from datetime import datetime
 from typing import Any
 
+from settings import Settings
+
 
 class Utils:
     base_directory: str = ""
+    logs_directory: str = "logs"
+    default_log_level: int = logging.DEBUG
 
     @classmethod
     def set_base_directory(cls, base_dir_name: str = "Athunas") -> str:
@@ -30,18 +34,32 @@ class Utils:
         cls.base_directory = base_dir
         return base_dir
 
-    @staticmethod
-    def start_logging(level: int = logging.DEBUG) -> None:
+    @classmethod
+    def start_logging(cls, level: int = default_log_level) -> None:
         """
         Starts logging with the specified log level.
 
-        :param level: The log level (default is logging.DEBUG).
+        Args:
+            :param level: The log level (default is logging.DEBUG).
         """
-        log_dir = "logs"
-        os.makedirs(log_dir, exist_ok=True)
+        cls.create_logger(level)
+        logging.info("-------------------------------------------------------------")
+        logging.info(
+            f"[Utils] Application started, version: {Settings.get_version_from_pyproject()}, log level: {logging.getLevelName(level)}."
+        )
+
+    @classmethod
+    def create_logger(cls, level: int = default_log_level) -> None:
+        """
+        Creates a logger with the specified log level.
+
+        Args:
+            level (int): The log level (default is logging.DEBUG).
+        """
+        os.makedirs(cls.logs_directory, exist_ok=True)
 
         log_filename = datetime.now().strftime("%Y-%m-%d") + ".log"
-        log_file_path = os.path.join(log_dir, log_filename)
+        log_file_path = os.path.join(cls.logs_directory, log_filename)
 
         logger = logging.getLogger()
         logger.setLevel(level)
@@ -64,9 +82,6 @@ class Utils:
 
         logger.addHandler(file_handler)
         logger.addHandler(console_handler)
-
-        logging.info("-------------------------------------------------------------")
-        logging.info("[Utils] Application started.")
 
     @staticmethod
     def create_matrix(

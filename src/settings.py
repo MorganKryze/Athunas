@@ -1,5 +1,6 @@
 import sys
 import yaml
+import tomllib
 import logging
 from enums.variable_importance import Importance
 from typing import Any, Dict, Optional
@@ -93,3 +94,16 @@ class Settings:
         cls.data[category][var] = value
         cls.write_yaml()
         logging.info(f"[Settings] updated variable: {category} -> {var}={value}")
+        
+    @classmethod
+    def get_version_from_pyproject(cls) -> str:
+        """
+        Reads the version from the pyproject.toml file.
+
+        :return: The version string if found, otherwise 'unknown'.
+        """
+        with open("pyproject.toml", "rb") as f:
+            data = tomllib.load(f)
+
+        version = data.get("project", {}).get("version", "unknown")
+        return version
