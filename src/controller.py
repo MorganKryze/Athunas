@@ -1,7 +1,4 @@
 import logging
-from typing import Dict, Callable
-
-from app_manager import AppManager
 from board import Board
 
 
@@ -41,19 +38,3 @@ class Controller:
             Board.brightness - Board.BRIGHTNESS_STEP,
         )
         logging.debug(f"[Controller] Brightness decreased to {Board.brightness}")
-
-    @classmethod
-    def get_callbacks(cls) -> Dict[str, Callable[[], None]]:
-        """
-        Get the callback functions for various control operations.
-
-        Returns:
-            Dict[str, Callable[[], None]]: A dictionary of callback functions.
-        """
-        return {
-            "toggle_display": cls.toggle_display,
-            "increase_brightness": cls.increase_brightness,
-            "decrease_brightness": cls.decrease_brightness,
-            "switch_next_app": AppManager.switch_next_app,
-            "switch_prev_app": AppManager.switch_prev_app,
-        }

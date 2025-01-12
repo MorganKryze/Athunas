@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List, Any
+from typing import Callable, Dict, List, Any
 from modules import weather_module, notification_module, spotify_module
 from apps import (
     main_screen,
@@ -49,6 +49,21 @@ def load_apps(modules: Dict[str, Any], callbacks: Dict[str, Any]) -> List[Any]:
     ]
 
 
+def load_callbacks() -> Dict[str, Callable[[], None]]:
+    """
+    Get the callback functions for various control operations.
+    Returns:
+        Dict[str, Callable[[], None]]: A dictionary of callback functions.
+    """
+    return {
+        "toggle_display": Controller.toggle_display,
+        "increase_brightness": Controller.increase_brightness,
+        "decrease_brightness": Controller.decrease_brightness,
+        "switch_next_app": AppManager.switch_next_app,
+        "switch_prev_app": AppManager.switch_prev_app,
+    }
+
+
 class AppManager:
     """
     Manages the current application and provides methods to switch between applications.
@@ -56,7 +71,7 @@ class AppManager:
 
     current_app_index: int = 0
     modules: Dict[str, Any] = load_modules()
-    callbacks: Dict[str, Any] = Controller.get_callbacks()
+    callbacks: Dict[str, Any] = load_callbacks()
     apps: List[Any] = load_apps(modules, callbacks)
     enabled_apps: List[Any] = [app for app in apps if app.enabled]
 
