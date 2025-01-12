@@ -12,7 +12,7 @@ from enums.input_status import InputStatus
 from settings import Settings
 
 # Constants
-LIFE_PATTERNS_DIR = "apps/res/life_patterns/"
+LIFE_PATTERNS_DIR = "src/apps/res/life_patterns/"
 
 
 class GameOfLifeScreen:
