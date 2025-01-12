@@ -101,7 +101,6 @@ class AppManager:
         Returns:
             Any: The current application.
         """
-        logging.debug(f"[AppManager] Current app index: {cls.current_app_index}.")
         return cls.enabled_apps[cls.current_app_index]
 
     @classmethod
