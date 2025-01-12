@@ -12,6 +12,7 @@ from settings import Settings
 
 # Constants
 WHITE = (230, 255, 255)
+MAX_PLAY_COUNT = 5
 
 
 class GifScreen:
@@ -48,9 +49,10 @@ class GifScreen:
         self.selection_mode = False
         self.current_frame_index = 0
         self.was_horizontal = True
-        self.double_press_mode = False
+        self.auto_play_mode = False
         self.play_count = 0
-        self.play_limit = 5
+        self.play_limit = MAX_PLAY_COUNT
+        logging.debug("[GifScreen App] GifScreen initialized.")
 
     def generate(
         self, is_horizontal: bool, encoder_input_status: InputStatus
@@ -66,21 +68,25 @@ class GifScreen:
             Image.Image: The generated frame.
         """
         if encoder_input_status == InputStatus.LONG_PRESS:
+            logging.debug("[GifScreen App] Toggling selection mode.")
             self.selection_mode = not self.selection_mode
 
         if encoder_input_status == InputStatus.DOUBLE_PRESS:
-            self.double_press_mode = not self.double_press_mode
-            if self.double_press_mode:
+            logging.debug("[GifScreen App] Toggling auto play mode.")
+            self.auto_play_mode = not self.auto_play_mode
+            if self.auto_play_mode:
                 self.play_count = 0
                 self.current_animation_index = 0
 
         if self.selection_mode:
             if encoder_input_status == InputStatus.ENCODER_INCREASE:
+                logging.debug("[GifScreen App] Switching to next GIF.")
                 self.current_animation_index = (self.current_animation_index + 1) % len(
                     self.animations
                 )
                 self.current_frame_index = 0
             elif encoder_input_status == InputStatus.ENCODER_DECREASE:
+                logging.debug("[GifScreen App] Switching to previous GIF.")
                 self.current_animation_index = (self.current_animation_index - 1) % len(
                     self.animations
                 )
@@ -107,7 +113,7 @@ class GifScreen:
 
         self.current_frame_index += 1
 
-        if self.double_press_mode:
+        if self.auto_play_mode:
             frame_count = sum(
                 1
                 for _ in ImageSequence.Iterator(
