@@ -38,15 +38,15 @@ For any other information, feel free to [open an issue](https://github.com/Morga
 
 ### Apps
 
-- [x] Clock **WIP**
-- [x] Weather **WIP**
-- [x] Notion todo lists **WIP**
+- [x] Main screen / Clock
 - [x] Gif viewer
-- [x] Pomodoro timer **WIP**
-- [x] Conways game of life **WIP**
-- [x] Spotify player **WIP**
-- [x] Stocks & crypto **WIP**
-- [x] Youtube subscribers count **WIP**
+- [x] Conways game of life
+- [ ] Weather[^1]
+- [ ] Notion todo lists[^2]
+- [ ] Pomodoro timer
+- [ ] Spotify player[^3]
+- [ ] Stocks & crypto
+- [ ] Youtube subscribers count
 - [ ] ...
 
 ### Functionalities
@@ -108,3 +108,7 @@ Finally, we would like to thank all the people who tried the project and gave us
 ## License
 
 This project is licensed by the [original author](https://github.com/allenslab) under the GNU GPL v3, which allows you to _use_, _modify_, and _distribute_ the software freely, as long as you **provide the source code** and do not add restrictions that limit others' rights under the same license. For full details, refer to the [LICENSE](LICENSE) file.
+
+[^1]: The weather app is compatible with the [OpenWeatherMap API](https://openweathermap.org/) or [AccuWeather API](https://developer.accuweather.com/). You will need to create an account on their website to get an API key. Although AccuWeather won't require you to enter your credit card details.
+[^2]: The Notion todo lists app is compatible with the [Notion API](https://developers.notion.com/). You will need to create an account on their website to get an API key.
+[^3]: The Spotify player app is compatible with the [Spotify API](https://developer.spotify.com/). You will need to create an account on their website to get an API key.
