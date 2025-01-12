@@ -263,21 +263,38 @@ class MainScreen:
 
         date_x_off = 45
         date_y_off = 25
-        draw.text(
-            (date_x_off, date_y_off),
-            format_to_two_digits(month),
-            orange_tinted_white,
-            font=self.font,
-        )
-        draw.text(
-            (date_x_off + 7, date_y_off), ".", orange_tinted_white, font=self.font
-        )
-        draw.text(
-            (date_x_off + 10, date_y_off),
-            format_to_two_digits(day),
-            orange_tinted_white,
-            font=self.font,
-        )
+        if self.date_format == "MM-DD":
+            draw.text(
+                (date_x_off, date_y_off),
+                format_to_two_digits(month),
+                orange_tinted_white,
+                font=self.font,
+            )
+            draw.text(
+                (date_x_off + 7, date_y_off), ".", orange_tinted_white, font=self.font
+            )
+            draw.text(
+                (date_x_off + 10, date_y_off),
+                format_to_two_digits(day),
+                orange_tinted_white,
+                font=self.font,
+            )
+        else:
+            draw.text(
+                (date_x_off, date_y_off),
+                format_to_two_digits(day),
+                orange_tinted_white,
+                font=self.font,
+            )
+            draw.text(
+                (date_x_off + 7, date_y_off), ".", orange_tinted_white, font=self.font
+            )
+            draw.text(
+                (date_x_off + 10, date_y_off),
+                format_to_two_digits(month),
+                orange_tinted_white,
+                font=self.font,
+            )
 
         return frame.convert("RGB")
 
