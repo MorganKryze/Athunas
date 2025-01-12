@@ -96,6 +96,8 @@ class MainScreen:
         self.old_noti_list = []
         self.queued_frames = []
 
+        logging.info("[MainScreen App] Initialized.")
+
     def generate(self, isHorizontal, inputStatus):
         if not isHorizontal:
             return self.vertical.generate(isHorizontal, inputStatus)
