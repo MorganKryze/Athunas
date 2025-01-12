@@ -33,7 +33,7 @@ class GifScreen:
         logging.debug("[GifScreen App] Initializing GifScreen.")
         self.modules = modules
         self.callbacks = callbacks
-        
+
         self.led_cols = Board.led_cols
         self.led_rows = Board.led_rows
         self.animations = self.load_animations()
@@ -48,6 +48,9 @@ class GifScreen:
         self.selection_mode = False
         self.current_frame_index = 0
         self.was_horizontal = True
+        self.double_press_mode = False
+        self.play_count = 0
+        self.play_limit = 5
 
     def generate(
         self, is_horizontal: bool, encoder_input_status: InputStatus
@@ -64,6 +67,12 @@ class GifScreen:
         """
         if encoder_input_status == InputStatus.LONG_PRESS:
             self.selection_mode = not self.selection_mode
+
+        if encoder_input_status == InputStatus.DOUBLE_PRESS:
+            self.double_press_mode = not self.double_press_mode
+            if self.double_press_mode:
+                self.play_count = 0
+                self.current_animation_index = 0
 
         if self.selection_mode:
             if encoder_input_status == InputStatus.ENCODER_INCREASE:
@@ -97,6 +106,16 @@ class GifScreen:
             frame = current_gif[self.current_frame_index].convert("RGB")
 
         self.current_frame_index += 1
+
+        if self.double_press_mode:
+            if self.current_frame_index >= len(current_gif):
+                self.play_count += 1
+                if self.play_count >= self.play_limit:
+                    self.play_count = 0
+                    self.current_animation_index = (
+                        self.current_animation_index + 1
+                    ) % len(self.animations)
+                self.current_frame_index = 0
 
         draw = ImageDraw.Draw(frame)
         if self.selection_mode:
