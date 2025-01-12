@@ -45,7 +45,7 @@ class MainScreen:
             callbacks (Dict[str, Callable]): Dictionary of callback functions.
         """
         self.enabled = Settings.read_variable(
-            "Main Screen", "enabled", Importance.REQUIRED
+            "MainScreen", "enabled", Importance.REQUIRED
         )
         if not self.enabled:
             logging.debug("[MainScreen App] MainScreen is disabled.")
