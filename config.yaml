@@ -47,6 +47,9 @@ Spotify-Module:
 GifViewer:
   enabled: true
 
+GameOfLife:
+  enabled: true
+
 Spotify:
   enabled: false
 
@@ -64,6 +67,3 @@ Pushbullet:
 
 Weather:
   enabled: false
-
-GameOfLife:
-  enabled: true

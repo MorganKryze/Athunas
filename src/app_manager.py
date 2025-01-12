@@ -4,11 +4,11 @@ from typing import Callable, Dict, List, Any
 from modules import weather_module, notification_module, spotify_module
 from apps import (
     main_screen,
+    gif_viewer,
+    life,
     notion,
     subcount,
-    gif_viewer,
     weather,
-    life,
     spotify_player,
 )
 from controller import Controller
@@ -42,10 +42,10 @@ def load_apps(modules: Dict[str, Any], callbacks: Dict[str, Any]) -> List[Any]:
     return [
         # main_screen.MainScreen(config, modules, callbacks),
         gif_viewer.GifScreen(modules, callbacks),
-        # notion.NotionScreen(config, modules, callbacks),
+        life.GameOfLifeScreen(modules, callbacks),
         # weather.WeatherScreen(config, modules, callbacks),
+        # notion.NotionScreen(config, modules, callbacks),
         # subcount.SubcountScreen(config, modules, callbacks),
-        # life.GameOfLifeScreen(modules, callbacks),
         # spotify_player.SpotifyScreen(config, modules, callbacks),
     ]
 
