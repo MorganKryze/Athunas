@@ -184,34 +184,47 @@ class Board:
         """
         Callback function for the encoder button.
         """
-        # TODO: NOW ONLY SINGLE PRESS AND LONG ARE PARTIALLY RECOGNIZED
+        HOLD_TIME = 1
+        DOUBLE_PRESS_TIME = 0.3
+        TRIPLE_PRESS_TIME = 0.3
+        SLEEP_INTERVAL = 0.1
+        
         start_time = time.time()
-        hold_time = 1
-        press_count = 0
+        time_diff = 0
 
-        while enc_button.is_active and (time.time() - start_time < hold_time):
-            time.sleep(0.1)
-            if not enc_button.is_active:
-                press_count += 1
-                start_time = time.time()
-                if press_count == 3:
-                    logging.debug("[Board] Triple press detected (3).")
-                    cls.encoder_input_status = InputStatus.TRIPLE_PRESS
-                    return
-                elif press_count == 2:
-                    logging.debug("[Board] Double press detected (2).")
-                    cls.encoder_input_status = InputStatus.DOUBLE_PRESS
-                    return
+        while enc_button.is_active and (time_diff < HOLD_TIME):
+            time_diff = time.time() - start_time
 
-        if time.time() - start_time >= hold_time:
+        if time_diff >= HOLD_TIME:
             logging.debug("[Board] Long press detected (5).")
             cls.encoder_input_status = InputStatus.LONG_PRESS
-        elif press_count == 1:
+        else:
+            enc_button.when_pressed = None
+            start_time = time.time()
+            while time.time() - start_time <= DOUBLE_PRESS_TIME:
+                time.sleep(SLEEP_INTERVAL)
+                if enc_button.is_pressed:
+                    time.sleep(SLEEP_INTERVAL)
+                    new_start_time = time.time()
+                    while time.time() - new_start_time <= TRIPLE_PRESS_TIME:
+                        time.sleep(SLEEP_INTERVAL)
+                        if enc_button.is_pressed:
+                            logging.debug("[Board] Triple press detected (3).")
+                            cls.encoder_input_status = InputStatus.TRIPLE_PRESS
+                            enc_button.when_pressed = (
+                                lambda button: cls.encoder_button_callback(button)
+                            )
+                            return
+                        logging.debug("[Board] Double press detected (2).")
+                        cls.encoder_input_status = InputStatus.DOUBLE_PRESS
+                        enc_button.when_pressed = (
+                            lambda button: cls.encoder_button_callback(button)
+                        )
+                        return
             logging.debug("[Board] Single press detected (1).")
             cls.encoder_input_status = InputStatus.SINGLE_PRESS
-
-        # Reset the button state
-        enc_button.when_pressed = lambda button: cls.encoder_button_callback(button)
+            enc_button.when_pressed = lambda button: cls.encoder_button_callback(button)
+            return
 
     @classmethod
     def reset_encoder(cls, encoder):
