@@ -54,6 +54,8 @@ class NotificationModule:
         Returns:
             List[Notification]: The list of notifications.
         """
+        if not self.enabled:
+            return None
         need_to_sort = False
         while not self.notification_queue.empty():
             new_noti: Notification = self.notification_queue.get()
