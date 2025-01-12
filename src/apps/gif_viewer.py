@@ -1,6 +1,5 @@
 import logging
 import os
-import time
 from typing import List, Dict, Callable
 
 from PIL import Image, ImageSequence, ImageDraw
@@ -13,7 +12,6 @@ from settings import Settings
 
 # Constants
 WHITE = (230, 255, 255)
-FRAME_DELAY = 0.04
 
 
 class GifScreen:
@@ -104,7 +102,6 @@ class GifScreen:
         if self.selection_mode:
             draw.rectangle((0, 0, self.led_cols - 1, self.led_rows - 1), outline=WHITE)
 
-        time.sleep(FRAME_DELAY)
         return frame
 
     def load_animations(self) -> List[Image.Image]:
