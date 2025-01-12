@@ -13,7 +13,7 @@ class SubcountScreen:
         self.modules = modules
         self.default_actions = default_actions
         self.bg = Image.open('apps_v2/res/pixel_logo_flipped.png').convert('RGB')
-        self.font = ImageFont.truetype("fonts/tiny.otf", 5)
+        self.font = ImageFont.truetype("./src/apps/res/fonts/tiny.otf", 5)
         self.queue = LifoQueue()
 
         self.canvas_width = config.getint('System', 'canvas_width', fallback=64)

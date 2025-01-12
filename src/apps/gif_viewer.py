@@ -8,10 +8,10 @@ from PIL import Image, ImageSequence, ImageDraw
 from board import Board
 from enums.variable_importance import Importance
 from enums.input_status import InputStatus
+from path import PathTo
 from settings import Settings
 
 # Constants
-GIFS_LOCATION = "./src/apps/res/gif/horizontal/"
 WHITE = (230, 255, 255)
 FRAME_DELAY = 0.04
 
@@ -107,7 +107,7 @@ class GifScreen:
 
     def load_animations(self) -> List[Image.Image]:
         """
-        Loads all GIFs from the GIFS_LOCATION directory.
+        Loads all GIFs from their respective folder.
 
         Returns:
             List[Image.Image]: A list of all loaded GIFs.
@@ -115,10 +115,10 @@ class GifScreen:
         logging.debug("[GifScreen App] Loading GIFs.")
         result = []
         try:
-            for filename in os.listdir(GIFS_LOCATION):
+            for filename in os.listdir(PathTo.GIF_FOLDER):
                 if filename.endswith(".gif"):
                     logging.debug(f"[GifScreen App] Loading GIF: {filename}")
-                    result.append(Image.open(os.path.join(GIFS_LOCATION, filename)))
+                    result.append(Image.open(os.path.join(PathTo.GIF_FOLDER, filename)))
         except Exception as e:
             logging.error(f"[GifScreen App] Error loading GIFs: {e}")
             logging.debug("[GifScreen App] Disabling GifScreen for safety.")

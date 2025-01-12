@@ -7,31 +7,19 @@ from typing import Any, Dict, Optional
 
 
 class Settings:
-    file_path: str = ""
     data: Dict[str, Any] = {}
 
     @classmethod
     def load(cls, file_path: str) -> None:
         """
-        Reads the specified file and store its value.
-
-        :param file_path: Path to the YAML file.
-        """
-        cls.file_path = file_path
-        logging.debug(f"[Settings] file_path set: {cls.file_path}")
-        cls.read_yaml()
-
-    @classmethod
-    def read_yaml(cls) -> None:
-        """
         Reads a YAML file and stores its contents in the class dictionary.
         """
         try:
-            with open(cls.file_path, "r") as file:
+            with open(file_path, "r") as file:
                 cls.data = yaml.safe_load(file)
             logging.info("[Settings] Config file loaded successfully.")
         except FileNotFoundError:
-            logging.critical(f"[Settings] The file '{cls.file_path}' was not found.")
+            logging.critical(f"[Settings] The file '{file_path}' was not found.")
             logging.critical("[Settings] Exiting program.")
             sys.exit(1)
         except yaml.YAMLError as e:
@@ -40,7 +28,7 @@ class Settings:
             sys.exit(1)
 
     @classmethod
-    def write_yaml(cls) -> None:
+    def save(cls) -> None:
         """
         Writes the class dictionary to a YAML file.
         """
@@ -92,9 +80,9 @@ class Settings:
         if category not in cls.data:
             raise ValueError(f"[Settings] category not found: {category}")
         cls.data[category][var] = value
-        cls.write_yaml()
+        cls.save()
         logging.info(f"[Settings] updated variable: {category} -> {var}={value}")
-        
+
     @classmethod
     def get_version_from_pyproject(cls) -> str:
         """
@@ -107,3 +95,53 @@ class Settings:
 
         version = data.get("project", {}).get("version", "unknown")
         return version
+
+    @staticmethod
+    def create_matrix(
+        pixel_rows: int,
+        pixel_cols: int,
+        brightness: int = 100,
+        disable_hardware_pulsing: bool = True,
+        hardware_mapping: str = "regular",
+        use_emulator: bool = False,
+    ) -> Any:
+        """
+        Creates an RGBMatrix object with the specified parameters.
+
+        :param pixel_rows: The number of rows of the screen.
+        :param pixel_cols: The number of columns of the screen.
+        :param brightness: The brightness of the screen (default is 100).
+        :param disable_hardware_pulsing: Disables hardware pulsing (default is True).
+        :param hardware_mapping: The hardware mapping of the screen (default is 'regular'). For Adafruit HAT: 'adafruit-hat'.
+        :return: An RGBMatrix object.
+        """
+        if use_emulator:
+            from RGBMatrixEmulator import RGBMatrix, RGBMatrixOptions  # type: ignore
+        else:
+            from rgbmatrix import RGBMatrix, RGBMatrixOptions  # type: ignore
+
+        logging.debug(
+            f"[Utils] Creating RGBMatrix options with screen height: {pixel_rows}, screen width: {pixel_cols}, brightness: {brightness}, disable hardware pulsing: {disable_hardware_pulsing}, hardware mapping: {hardware_mapping}"
+        )
+        try:
+            options = RGBMatrixOptions()
+            options.rows = pixel_rows
+            options.cols = pixel_cols
+            options.brightness = brightness
+            options.disable_hardware_pulsing = disable_hardware_pulsing
+            options.hardware_mapping = hardware_mapping
+
+            logging.debug("[Utils] RGBMatrix options set.")
+        except Exception as e:
+            logging.critical(f"[Utils] failed to set RGBMatrix options: {e}")
+            logging.critical("[Utils] Exiting program.")
+            sys.exit(1)
+
+        try:
+            matrix = RGBMatrix(options=options)
+            logging.info("[Utils] RGBMatrix object created.")
+            return matrix
+        except Exception as e:
+            logging.critical(f"[Utils] failed to create RGBMatrix object: {e}")
+            logging.critical("[Utils] Exiting program.")
+            sys.exit(1)

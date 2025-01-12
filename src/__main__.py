@@ -1,21 +1,25 @@
 import time
-from app_manager import AppManager
-from board import Board
-from enums.input_status import InputStatus
-from settings import Settings
-from utils import Utils
 import logging
 from typing import Any
 
+from enums.input_status import InputStatus
+from board import Board
+from path import PathTo
+from logs import Logs
+from app_manager import AppManager
+from settings import Settings
+
 
 def main() -> None:
-    Utils.set_base_directory()
-    Utils.start_logging(level=logging.DEBUG)
-    Settings.load("./config.yaml")
+    PathTo.set_base_directory()
+    PathTo.add_library_to_path()
+    
+    Logs.start(level=logging.DEBUG)
+    Settings.load(PathTo.CONFIG_FILE)
     Board.init_system()
     AppManager.init_apps()
 
-    matrix = Utils.create_matrix(
+    matrix = Settings.create_matrix(
         Board.led_rows, Board.led_cols, Board.brightness, use_emulator=True
     )
 

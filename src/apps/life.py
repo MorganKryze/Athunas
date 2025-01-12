@@ -9,10 +9,8 @@ from scipy.signal import convolve2d
 from board import Board
 from enums.variable_importance import Importance
 from enums.input_status import InputStatus
+from path import PathTo
 from settings import Settings
-
-# Constants
-LIFE_PATTERNS_DIR = "src/apps/res/life_patterns/"
 
 
 class GameOfLifeScreen:
@@ -37,9 +35,15 @@ class GameOfLifeScreen:
         self.color = (255, 255, 255)
         self.initial_states = [
             generate_random_state,
-            lambda: fetch_pattern(os.path.join(LIFE_PATTERNS_DIR, "centinal")),
-            lambda: fetch_pattern(os.path.join(LIFE_PATTERNS_DIR, "achim_p144")),
-            lambda: fetch_pattern(os.path.join(LIFE_PATTERNS_DIR, "pboj_p22")),
+            lambda: fetch_pattern(
+                os.path.join(PathTo.LIFE_PATTERNS_FOLDER, "centinal")
+            ),
+            lambda: fetch_pattern(
+                os.path.join(PathTo.LIFE_PATTERNS_FOLDER, "achim_p144")
+            ),
+            lambda: fetch_pattern(
+                os.path.join(PathTo.LIFE_PATTERNS_FOLDER, "pboj_p22")
+            ),
         ]
         self.current_state_index = 0
         self.state = self.initial_states[self.current_state_index]()

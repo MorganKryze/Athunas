@@ -43,6 +43,13 @@ Spotify-Module:
 # -------------------- App Configuration -------------------
 # Apps are the applications that are available to the user. Disabled apps will not be
 # available to the user.
+MainScreen:
+  enabled: true
+  cycle_time: 20
+  use_24_hour: true
+
+Pomodoro:
+  enabled: true
 
 GifViewer:
   enabled: true

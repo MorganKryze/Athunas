@@ -1,3 +1,4 @@
+from board import Board
 from enums.input_status import InputStatus
 from PIL import Image, ImageFont, ImageDraw
 from datetime import datetime
@@ -6,6 +7,7 @@ import time
 import threading
 
 from apps import pomodoro
+from path import PathTo
 
 light_pink = (255, 219, 218)
 dark_pink = (219, 127, 142)
@@ -26,19 +28,17 @@ spotify_color = (0, 255, 0)
 
 
 class MainScreen:
-    def __init__(self, config, modules, default_actions):
-        self.font = ImageFont.truetype("./src/fonts/tiny.otf", 5)
+    def __init__(self, config, modules, callbacks):
         self.modules = modules
-        self.default_actions = default_actions
+        self.callbacks = callbacks
 
-        self.canvas_width = config.getint("System", "canvas_width", fallback=64)
-        self.canvas_height = config.getint("System", "canvas_height", fallback=32)
+        self.font = ImageFont.truetype(PathTo.FONT_FILE, 5)
         self.cycle_time = config.getint("Main Screen", "cycle_time", fallback=20)
         self.use_24_hour = config.getboolean(
             "Main Screen", "use_24_hour", fallback=False
         )
 
-        self.vertical = pomodoro.PomodoroScreen(config, modules, default_actions)
+        self.vertical = pomodoro.PomodoroScreen(config, modules, callbacks)
 
         self.lastGenerateCall = None
         self.on_cycle = True
@@ -74,11 +74,11 @@ class MainScreen:
                 self.queued_frames = []
         else:
             if inputStatus is InputStatus.SINGLE_PRESS:
-                self.default_actions["toggle_display"]()
+                self.callbacks["toggle_display"]()
             elif inputStatus is InputStatus.ENCODER_INCREASE:
-                self.default_actions["switch_next_app"]()
+                self.callbacks["switch_next_app"]()
             elif inputStatus is InputStatus.ENCODER_DECREASE:
-                self.default_actions["switch_prev_app"]()
+                self.callbacks["switch_prev_app"]()
 
         if self.lastGenerateCall == None:
             self.lastGenerateCall = time.time()
@@ -91,7 +91,7 @@ class MainScreen:
         if self.selectMode:
             draw = ImageDraw.Draw(frame)
             draw.rectangle(
-                (0, 0, self.canvas_width - 1, self.canvas_height - 1), outline=white
+                (0, 0, Board.led_cols - 1, Board.led_rows - 1), outline=white
             )
 
         return frame
@@ -169,8 +169,8 @@ class MainScreen:
                 noti_list,
                 self.old_noti_list.copy(),
                 self.font,
-                self.canvas_width,
-                self.canvas_height,
+                Board.led_cols,
+                Board.led_rows,
             ),
         ).start()
 
@@ -178,7 +178,7 @@ class MainScreen:
 
         if len(self.queued_frames) == 0:
             frame = Image.new(
-                "RGBA", (self.canvas_width, self.canvas_height), washed_out_navy
+                "RGBA", (Board.led_cols, Board.led_rows), washed_out_navy
             )
         else:
             frame = self.queued_frames.pop(0)

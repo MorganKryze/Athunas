@@ -9,7 +9,7 @@ class PomodoroScreen:
         self.default_actions = default_actions
         
         self.active = False
-        self.font = ImageFont.truetype("./src/fonts/tiny.otf", 5)
+        self.font = ImageFont.truetype("./src/apps/res/fonts/tiny.otf", 5)
         self.canvas_width = config.getint('System', 'canvas_width', fallback=64)
         self.canvas_height = config.getint('System', 'canvas_height', fallback=32)
 

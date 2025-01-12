@@ -15,7 +15,7 @@ class StocksVerticalScreen:
     def __init__(self, config, modules, default_actions):
         self.ticker_symbols = ['DOGE-USD', 'GME', 'AMC', 'TSM', 'AMD']
         self.tiny_font = ImageFont.truetype("./src/fonts/tiny.otf", 5)
-        self.bg = Image.open('apps_v2/res/tothemoon_darker.png').convert('RGB')
+        self.bg = Image.open('apps/res/tothemoon_darker.png').convert('RGB')
         self.queue = LifoQueue()
         self.thread = threading.Thread(target=generateFrameAsync, 
                         args=(self.queue, self.ticker_symbols, self.tiny_font, self.bg))
