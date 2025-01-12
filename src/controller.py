@@ -1,136 +1,59 @@
-from board import Board
-from settings import Settings
-from enums.input_status import InputStatus
-
-from apps import (
-    main_screen,
-    notion,
-    subcount,
-    gif_viewer,
-    weather,
-    life,
-    spotify_player,
-)
-from modules import notification_module, weather_module, spotify_module
-
-import math
-import time
-import copy
 import logging
-from utils import Utils
+from typing import Dict, Callable
+
+from app_manager import AppManager
+from board import Board
 
 
-def main():
-    Utils.set_base_directory()
+class Controller:
+    """
+    Manages the control operations for the board and applications.
+    """
 
-    Utils.start_logging()
-
-    Settings.load("./config.yaml")
-
-    Board.init_system()
-
-    matrix = Utils.create_matrix(
-        Board.led_rows, Board.led_cols, Board.brightness, use_emulator=True
-    )
-
-    def toggle_display():
+    @classmethod
+    def toggle_display(cls) -> None:
+        """
+        Toggle the display on or off.
+        """
         Board.is_display_on = not Board.is_display_on
         logging.debug(
             f"[Controller] Display set to: {'on' if Board.is_display_on else 'off'}"
         )
 
-    def increase_brightness():
+    @classmethod
+    def increase_brightness(cls) -> None:
+        """
+        Increase the brightness of the display.
+        """
         Board.brightness = min(
-            Board.BRIGHTNESS_MAX, Board.brightness + Board.BRIGHTNESS_STEP
+            Board.BRIGHTNESS_MAX,
+            Board.brightness + Board.BRIGHTNESS_STEP,
         )
         logging.debug(f"[Controller] Brightness increased to {Board.brightness}")
 
-    def decrease_brightness():
+    @classmethod
+    def decrease_brightness(cls) -> None:
+        """
+        Decrease the brightness of the display.
+        """
         Board.brightness = max(
-            Board.BRIGHTNESS_MIN, Board.brightness - Board.BRIGHTNESS_STEP
+            Board.BRIGHTNESS_MIN,
+            Board.brightness - Board.BRIGHTNESS_STEP,
         )
         logging.debug(f"[Controller] Brightness decreased to {Board.brightness}")
 
-    current_app_index = 0
+    @classmethod
+    def get_callbacks(cls) -> Dict[str, Callable[[], None]]:
+        """
+        Get the callback functions for various control operations.
 
-    def switch_next_app():
-        nonlocal current_app_index
-        current_app_index += 1
-        logging.debug(
-            f"[Controller] Switched to next app {current_app_index % len(app_list)}"
-        )
-
-    def switch_prev_app():
-        nonlocal current_app_index
-        current_app_index -= 1
-        logging.debug(
-            f"[Controller] Switched to previous app {current_app_index % len(app_list)}"
-        )
-
-    callbacks = {
-        "toggle_display": toggle_display,
-        "increase_brightness": increase_brightness,
-        "decrease_brightness": decrease_brightness,
-        "switch_next_app": switch_next_app,
-        "switch_prev_app": switch_prev_app,
-    }
-
-    modules = {
-        "weather": weather_module.WeatherModule(),
-        "notifications": notification_module.NotificationModule(),
-        "spotify": spotify_module.SpotifyModule(),
-    }
-
-    app_list = [
-        # main_screen.MainScreen(config, modules, callbacks),
-        gif_viewer.GifScreen(modules, callbacks),
-        # notion.NotionScreen(config, modules, callbacks),
-        # weather.WeatherScreen(config, modules, callbacks),
-        # subcount.SubcountScreen(config, modules, callbacks),
-        # life.GameOfLifeScreen(modules, callbacks),
-        # spotify_player.SpotifyScreen(config, modules, callbacks),
-    ]
-    available_app_list = [app for app in app_list if app.enabled]
-
-    # TODO: Find a better way to implement app rotation
-    # rotation_time = math.floor(time.time())
-    SLEEP_TIME = 0.02
-    while True:
-        while not Board.encoder_queue.empty():
-            Board.encoder_state += Board.encoder_queue.get()
-
-        if Board.encoder_state > 1:
-            logging.debug(f"[Controller] Encoder state: {Board.encoder_state}")
-            Board.encoder_input_status = InputStatus.ENCODER_INCREASE
-            Board.encoder_state = 0
-        elif Board.encoder_state < -1:
-            logging.debug(f"[Controller] Encoder state: {Board.encoder_state}")
-            Board.encoder_input_status = InputStatus.ENCODER_DECREASE
-            Board.encoder_state = 0
-
-        # TODO: Find a better way to implement app rotation
-        # new_rotation_time = math.floor(time.time())
-        # if new_rotation_time % 10 == 0 and new_rotation_time - rotation_time >= 10:
-        #     current_app_index += 1
-        #     rotation_time = new_rotation_time
-
-        is_horizontal_snapshot = copy.copy(Board.is_horizontal)
-        input_status_snapshot = copy.copy(Board.encoder_input_status)
-
-        frame = available_app_list[
-            current_app_index % len(available_app_list)
-        ].generate(is_horizontal_snapshot, input_status_snapshot)
-
-        matrix.SetImage(frame if Board.is_display_on else Board.black_screen)
-        Board.encoder_input_status = InputStatus.NOTHING
-        time.sleep(SLEEP_TIME)
-
-
-if __name__ == "__main__":
-    try:
-        main()
-        logging.info("[Controller] Application stopped.")
-        logging.info("-------------------------------------------------------------")
-    except KeyboardInterrupt:
-        logging.info("[Controller] Application stopped by user.")
-        logging.info("-------------------------------------------------------------")
+        Returns:
+            Dict[str, Callable[[], None]]: A dictionary of callback functions.
+        """
+        return {
+            "toggle_display": cls.toggle_display,
+            "increase_brightness": cls.increase_brightness,
+            "decrease_brightness": cls.decrease_brightness,
+            "switch_next_app": AppManager.switch_next_app,
+            "switch_prev_app": AppManager.switch_prev_app,
+        }

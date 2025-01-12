@@ -10,6 +10,7 @@ from gpiozero import Button, RotaryEncoder
 
 
 class Board:
+    FRAME_TIME: float = 0.05
     SCREEN_RATIO: int = 16
     FIRST_GPIO_PIN: int = 0
     LAST_GPIO_PIN: int = 27
@@ -166,13 +167,6 @@ class Board:
         cls.reset_encoder(encoder)
 
     @classmethod
-    def reset_encoder(cls, encoder):
-        """
-        Resets the encoder value to 0.
-        """
-        encoder.value = 0
-
-    @classmethod
     def tilt_callback(cls, tilt_switch):
         """
         Callback function for the tilt switch.
@@ -217,3 +211,44 @@ class Board:
 
         # Reset the button state
         enc_button.when_pressed = lambda button: cls.encoder_button_callback(button)
+
+    @classmethod
+    def reset_encoder(cls, encoder):
+        """
+        Resets the encoder value to 0.
+        """
+        encoder.value = 0
+
+    @classmethod
+    def reset_encoder_state(cls):
+        """
+        Resets the encoder state to 0.
+        """
+        cls.encoder_state = 0
+
+    @classmethod
+    def reset_encoder_input_status(cls):
+        """
+        Resets the encoder input status to NOTHING.
+        """
+        cls.encoder_input_status = InputStatus.NOTHING
+
+    @classmethod
+    def has_encoder_increased(cls):
+        """
+        Returns True if the encoder has increased, False otherwise.
+        """
+        if cls.encoder_state > 0:
+            logging.debug(f"[Board] Encoder state: {cls.encoder_state}")
+            return True
+        return False
+
+    @classmethod
+    def has_encoder_decreased(cls):
+        """
+        Returns True if the encoder has decreased, False otherwise.
+        """
+        if cls.encoder_state < 0:
+            logging.debug(f"[Board] Encoder state: {cls.encoder_state}")
+            return True
+        return False

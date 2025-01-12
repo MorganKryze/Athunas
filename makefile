@@ -32,7 +32,7 @@ example:
 
 run:
 # Run project controller
-	uv run src/controller.py
+	uv run src
 
 clean:
 # Clean virtual environment
