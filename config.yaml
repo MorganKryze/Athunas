@@ -48,7 +48,7 @@ MainScreen:
   enabled: true
   cycle_time: 20
   use_24_hour: true
-  date_format: "DD-MM"
+  date_format: DD-MM
 
 Pomodoro:
   enabled: true

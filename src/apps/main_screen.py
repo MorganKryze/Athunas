@@ -65,7 +65,7 @@ class MainScreen:
         self.date_format = Settings.read_variable(
             "MainScreen", "date_format", Importance.REQUIRED
         )
-        if self.date_format != "MM-DD" or self.date_format != "DD-MM":
+        if self.date_format != "MM-DD" and self.date_format != "DD-MM":
             logging.error(
                 "[MainScreen App] Invalid date format. Possible values are 'MM-DD' or 'DD-MM'."
             )
