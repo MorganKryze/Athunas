@@ -105,8 +105,9 @@ class Utils:
 
             logging.debug("[Utils] RGBMatrix options set.")
         except Exception as e:
-            logging.error(f"[Utils] failed to set RGBMatrix options: {e}")
-            raise
+            logging.critical(f"[Utils] failed to set RGBMatrix options: {e}")
+            logging.critical("[Utils] Exiting program.")
+            sys.exit(1)
 
         try:
             matrix = RGBMatrix(options=options)
@@ -114,4 +115,5 @@ class Utils:
             return matrix
         except Exception as e:
             logging.error(f"[Utils] failed to create RGBMatrix object: {e}")
-            raise
+            logging.error("[Utils] Exiting program.")
+            sys.exit(1)

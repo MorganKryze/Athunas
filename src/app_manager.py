@@ -1,4 +1,5 @@
 import logging
+import sys
 from typing import Callable, Dict, List, Any
 from modules import weather_module, notification_module, spotify_module
 from apps import (
@@ -70,10 +71,27 @@ class AppManager:
     """
 
     current_app_index: int = 0
-    modules: Dict[str, Any] = load_modules()
-    callbacks: Dict[str, Any] = load_callbacks()
-    apps: List[Any] = load_apps(modules, callbacks)
-    enabled_apps: List[Any] = [app for app in apps if app.enabled]
+    modules: Dict[str, Any]
+    callbacks: Dict[str, Any]
+    apps: List[Any]
+    enabled_apps: List[Any]
+
+    @classmethod
+    def init_apps(cls) -> None:
+        """
+        Initialize the applications.
+        """
+        logging.debug("[AppManager] Initializing apps.")
+        try:
+            cls.modules = load_modules()
+            cls.callbacks = load_callbacks()
+            cls.apps = load_apps(cls.modules, cls.callbacks)
+            cls.enabled_apps = [app for app in cls.apps if app.enabled]
+            logging.debug(f"[AppManager] Enabled apps: {cls.enabled_apps}")
+        except Exception as e:
+            logging.critical(f"[AppManager] Failed to initialize apps: {e}")
+            logging.critical("[AppManager] Exiting program.")
+            sys.exit(1)
 
     @classmethod
     def get_current_app(cls) -> Any:

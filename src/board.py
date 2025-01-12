@@ -1,4 +1,5 @@
 import logging
+import sys
 import time
 from PIL import Image
 import queue
@@ -56,7 +57,7 @@ class Board:
                 f"[Board] led_rows must be a positive multiple of {cls.SCREEN_RATIO} to work with the 'rpi-rgb-led-matrix' library."
             )
             logging.critical("[Board] Exiting program.")
-            raise
+            sys.exit(1)
 
         cls.led_cols = Settings.read_variable("System", "led_cols", Importance.REQUIRED)
         if cls.led_cols % cls.SCREEN_RATIO != 0 or cls.led_cols <= 0:
@@ -64,7 +65,7 @@ class Board:
                 f"[Board] led_cols must be a multiple of {cls.SCREEN_RATIO} to work with the 'rpi-rgb-led-matrix' library."
             )
             logging.critical("[Board] Exiting program.")
-            raise
+            sys.exit(1)
 
         cls.brightness = Settings.read_variable(
             "System", "brightness", Importance.REQUIRED
@@ -74,7 +75,7 @@ class Board:
                 f"[Board] brightness must be between {cls.BRIGHTNESS_MIN} and {cls.BRIGHTNESS_MAX}."
             )
             logging.critical("[Board] Exiting program.")
-            raise
+            sys.exit(1)
         logging.info("[Board] All display settings initialized.")
 
         cls.black_screen = Image.new("RGB", (cls.led_cols, cls.led_rows), (0, 0, 0))
@@ -92,7 +93,7 @@ class Board:
                 f"[Board] encoder_clk must be between {cls.FIRST_GPIO_PIN} and {cls.LAST_GPIO_PIN}."
             )
             logging.critical("[Board] Exiting program.")
-            raise
+            sys.exit(1)
 
         cls.encoder_dt = Settings.read_variable(
             "Pinout", "encoder_dt", Importance.REQUIRED
@@ -102,7 +103,7 @@ class Board:
                 f"[Board] encoder_dt must be between {cls.FIRST_GPIO_PIN} and {cls.LAST_GPIO_PIN}."
             )
             logging.critical("[Board] Exiting program.")
-            raise
+            sys.exit(1)
 
         cls.encoder_sw = Settings.read_variable(
             "Pinout", "encoder_sw", Importance.REQUIRED
@@ -112,7 +113,7 @@ class Board:
                 f"[Board] encoder_sw must be between {cls.FIRST_GPIO_PIN} and {cls.LAST_GPIO_PIN}."
             )
             logging.critical("[Board] Exiting program.")
-            raise
+            sys.exit(1)
 
         cls.encoder_button = Button(cls.encoder_sw, pull_up=True, bounce_time=0.1)
         cls.encoder_button.when_pressed = lambda button: cls.encoder_button_callback(
@@ -141,7 +142,7 @@ class Board:
         if cls.tilt_switch < cls.FIRST_GPIO_PIN or cls.tilt_switch > cls.LAST_GPIO_PIN:
             logging.critical("[Board] tilt_switch must be between 0 and 27.")
             logging.critical("[Board] Exiting program.")
-            raise
+            sys.exit(1)
 
         cls.tilt_switch_button = Button(cls.tilt_switch, pull_up=True)
         cls.tilt_switch_button.when_pressed = lambda button: cls.tilt_callback(button)

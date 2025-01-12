@@ -13,6 +13,7 @@ def main() -> None:
     Utils.start_logging()
     Settings.load("./config.yaml")
     Board.init_system()
+    AppManager.init_apps()
 
     matrix = Utils.create_matrix(
         Board.led_rows, Board.led_cols, Board.brightness, use_emulator=True
