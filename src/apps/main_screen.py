@@ -88,7 +88,7 @@ class MainScreen:
                 os.path.join(PathTo.MAIN_SCREEN_BACKGROUND_FOLDER, "forest-bg.png")
             ).convert("RGB"),
         }
-        self.theme_list = [self.generateSakura, self.generateCloud, self.generateForest]
+        self.theme_list = [self.generate_sakura_bg, self.generate_cloud_bg, self.generate_forest_bg]
 
         self.currentIdx = 0
         self.selectMode = False
@@ -136,7 +136,7 @@ class MainScreen:
 
         return frame
 
-    def generateSakura(self):
+    def generate_sakura_bg(self):
         currentTime = datetime.now(tz=tz.tzlocal())
         month = currentTime.month
         day = currentTime.day
@@ -151,36 +151,36 @@ class MainScreen:
         frame = self.backgrounds["sakura"].copy()
         draw = ImageDraw.Draw(frame)
 
-        draw.text((3, 6), padToTwoDigit(hours), light_pink, font=self.font)
+        draw.text((3, 6), format_to_two_digits(hours), light_pink, font=self.font)
         draw.text((10, 6), ":", light_pink, font=self.font)
-        draw.text((13, 6), padToTwoDigit(minutes), light_pink, font=self.font)
+        draw.text((13, 6), format_to_two_digits(minutes), light_pink, font=self.font)
 
         if self.on_cycle:
             if self.date_format == "MM-DD":
                 # date
-                draw.text((23, 6), padToTwoDigit(month), dark_pink, font=self.font)
+                draw.text((23, 6), format_to_two_digits(month), dark_pink, font=self.font)
                 draw.text((30, 6), ".", dark_pink, font=self.font)
-                draw.text((33, 6), padToTwoDigit(day), dark_pink, font=self.font)
+                draw.text((33, 6), format_to_two_digits(day), dark_pink, font=self.font)
             else:
                 # date
-                draw.text((23, 6), padToTwoDigit(day), dark_pink, font=self.font)
+                draw.text((23, 6), format_to_two_digits(day), dark_pink, font=self.font)
                 draw.text((30, 6), ".", dark_pink, font=self.font)
-                draw.text((33, 6), padToTwoDigit(month), dark_pink, font=self.font)
+                draw.text((33, 6), format_to_two_digits(month), dark_pink, font=self.font)
         else:
             # dayOfWeek
-            draw.text((23, 6), padToTwoDigit(dayOfWeek), dark_pink, font=self.font)
+            draw.text((23, 6), format_to_two_digits(dayOfWeek), dark_pink, font=self.font)
             # weather
             weather = self.modules["weather"]
             one_call = weather.get_weather()
             if one_call is not None:
                 curr_temp = round(one_call.current.temperature("fahrenheit")["temp"])
-                draw.text((33, 6), padToTwoDigit(curr_temp), white, font=self.font)
+                draw.text((33, 6), format_to_two_digits(curr_temp), white, font=self.font)
                 draw.point((41, 6), fill=white)
 
         # notifications
         noti_list = self.modules["notifications"].get_notification_list()
         if noti_list is not None:
-            counts = countList(noti_list)
+            counts = notification_count_dictionary(noti_list)
 
             if counts["Discord"] > 0:
                 draw.rectangle((37, 26, 38, 27), fill=discordColor)
@@ -195,7 +195,7 @@ class MainScreen:
 
         return frame
 
-    def generateCloud(self):
+    def generate_cloud_bg(self):
         currentTime = datetime.now(tz=tz.tzlocal())
         month = currentTime.month
         day = currentTime.day
@@ -208,20 +208,21 @@ class MainScreen:
         seconds = currentTime.second
 
         noti_list = self.modules["notifications"].getNotificationList()
+        if noti_list is not None:
 
-        threading.Thread(
-            target=generateNotiFramesAsync,
-            args=(
-                self.queued_frames,
-                noti_list,
-                self.old_noti_list.copy(),
-                self.font,
-                Board.led_cols,
-                Board.led_rows,
-            ),
-        ).start()
+            threading.Thread(
+                target=generateNotiFramesAsync,
+                args=(
+                    self.queued_frames,
+                    noti_list,
+                    self.old_noti_list.copy(),
+                    self.font,
+                    Board.led_cols,
+                    Board.led_rows,
+                ),
+            ).start()
 
-        self.old_noti_list = noti_list.copy()
+            self.old_noti_list = noti_list.copy()
 
         if len(self.queued_frames) == 0:
             frame = Image.new("RGBA", (Board.led_cols, Board.led_rows), washed_out_navy)
@@ -235,7 +236,7 @@ class MainScreen:
         time_y_off = 25
         draw.text(
             (time_x_off, time_y_off),
-            padToTwoDigit(hours),
+            format_to_two_digits(hours),
             orange_tinted_white,
             font=self.font,
         )
@@ -244,7 +245,7 @@ class MainScreen:
         )
         draw.text(
             (time_x_off + 10, time_y_off),
-            padToTwoDigit(minutes),
+            format_to_two_digits(minutes),
             orange_tinted_white,
             font=self.font,
         )
@@ -253,7 +254,7 @@ class MainScreen:
         )
         draw.text(
             (time_x_off + 20, time_y_off),
-            padToTwoDigit(seconds),
+            format_to_two_digits(seconds),
             orange_tinted_white,
             font=self.font,
         )
@@ -262,7 +263,7 @@ class MainScreen:
         date_y_off = 25
         draw.text(
             (date_x_off, date_y_off),
-            padToTwoDigit(month),
+            format_to_two_digits(month),
             orange_tinted_white,
             font=self.font,
         )
@@ -271,26 +272,23 @@ class MainScreen:
         )
         draw.text(
             (date_x_off + 10, date_y_off),
-            padToTwoDigit(day),
+            format_to_two_digits(day),
             orange_tinted_white,
             font=self.font,
         )
 
         return frame.convert("RGB")
 
-    def generateForest(self):
+    def generate_forest_bg(self):
         frame = self.backgrounds["forest"].copy()
         return frame
 
 
-def padToTwoDigit(num):
-    if num < 10:
-        return "0" + str(num)
-    else:
-        return str(num)
+def format_to_two_digits(number):
+    return f"{number:02}"
 
 
-def countList(noti_list):
+def notification_count_dictionary(noti_list):
     counts = {"Discord": 0, "SMS": 0, "Snapchat": 0, "Messenger": 0}
     for noti in noti_list:
         if noti.application in counts.keys():
