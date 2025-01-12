@@ -62,6 +62,15 @@ class MainScreen:
         self.use_24_hour = (
             Settings.read_variable("MainScreen", "use_24_hour") or DEFAULT_USE_24_HOUR
         )
+        self.date_format = Settings.read_variable(
+            "MainScreen", "date_format", Importance.REQUIRED
+        )
+        if self.date_format != "MM-DD" or self.date_format != "DD-MM":
+            logging.error(
+                "[MainScreen App] Invalid date format. Possible values are 'MM-DD' or 'DD-MM'."
+            )
+            self.enabled = False
+            return
 
         self.vertical = pomodoro.PomodoroScreen(modules, callbacks)
 
@@ -145,35 +154,42 @@ class MainScreen:
         draw.text((13, 6), padToTwoDigit(minutes), light_pink, font=self.font)
 
         if self.on_cycle:
-            # date
-            draw.text((23, 6), padToTwoDigit(month), dark_pink, font=self.font)
-            draw.text((30, 6), ".", dark_pink, font=self.font)
-            draw.text((33, 6), padToTwoDigit(day), dark_pink, font=self.font)
+            if self.date_format == "MM-DD":
+                # date
+                draw.text((23, 6), padToTwoDigit(month), dark_pink, font=self.font)
+                draw.text((30, 6), ".", dark_pink, font=self.font)
+                draw.text((33, 6), padToTwoDigit(day), dark_pink, font=self.font)
+            else:
+                # date
+                draw.text((23, 6), padToTwoDigit(day), dark_pink, font=self.font)
+                draw.text((30, 6), ".", dark_pink, font=self.font)
+                draw.text((33, 6), padToTwoDigit(month), dark_pink, font=self.font)
         else:
             # dayOfWeek
             draw.text((23, 6), padToTwoDigit(dayOfWeek), dark_pink, font=self.font)
             # weather
             weather = self.modules["weather"]
-            one_call = weather.getWeather()
+            one_call = weather.get_weather()
             if one_call is not None:
                 curr_temp = round(one_call.current.temperature("fahrenheit")["temp"])
                 draw.text((33, 6), padToTwoDigit(curr_temp), white, font=self.font)
                 draw.point((41, 6), fill=white)
 
         # notifications
-        noti_list = self.modules["notifications"].getNotificationList()
-        counts = countList(noti_list)
+        noti_list = self.modules["notifications"].get_notification_list()
+        if noti_list is not None:
+            counts = countList(noti_list)
 
-        if counts["Discord"] > 0:
-            draw.rectangle((37, 26, 38, 27), fill=discordColor)
-        if counts["SMS"] > 0:
-            draw.rectangle((34, 26, 35, 27), fill=smsColor)
-        if counts["Snapchat"] > 0:
-            draw.rectangle((34, 29, 35, 30), fill=snapchatColor)
-        if counts["Messenger"] > 0:
-            draw.rectangle((37, 29, 38, 30), fill=messengerColor)
+            if counts["Discord"] > 0:
+                draw.rectangle((37, 26, 38, 27), fill=discordColor)
+            if counts["SMS"] > 0:
+                draw.rectangle((34, 26, 35, 27), fill=smsColor)
+            if counts["Snapchat"] > 0:
+                draw.rectangle((34, 29, 35, 30), fill=snapchatColor)
+            if counts["Messenger"] > 0:
+                draw.rectangle((37, 29, 38, 30), fill=messengerColor)
 
-        self.old_noti_list = noti_list
+            self.old_noti_list = noti_list
 
         return frame
 

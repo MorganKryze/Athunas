@@ -55,7 +55,7 @@ class WeatherModule:
             logging.error(f"[Weather Module] Initialization error: {e}")
             self.enabled = False
 
-    def getWeather(self) -> Optional[Dict[str, Any]]:
+    def get_weather(self) -> Optional[Dict[str, Any]]:
         """
         Get the current weather information.
 
