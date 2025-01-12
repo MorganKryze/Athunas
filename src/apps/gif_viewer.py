@@ -108,7 +108,13 @@ class GifScreen:
         self.current_frame_index += 1
 
         if self.double_press_mode:
-            if self.current_frame_index >= len(current_gif):
+            frame_count = sum(
+                1
+                for _ in ImageSequence.Iterator(
+                    self.animations[self.current_animation_index % len(self.animations)]
+                )
+            )
+            if self.current_frame_index >= frame_count:
                 self.play_count += 1
                 if self.play_count >= self.play_limit:
                     self.play_count = 0
@@ -117,9 +123,11 @@ class GifScreen:
                     ) % len(self.animations)
                 self.current_frame_index = 0
 
-        draw = ImageDraw.Draw(frame)
-        if self.selection_mode:
-            draw.rectangle((0, 0, self.led_cols - 1, self.led_rows - 1), outline=WHITE)
+            draw = ImageDraw.Draw(frame)
+            if self.selection_mode:
+                draw.rectangle(
+                    (0, 0, self.led_cols - 1, self.led_rows - 1), outline=WHITE
+                )
 
         return frame
 
