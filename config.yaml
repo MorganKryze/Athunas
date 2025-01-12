@@ -43,6 +43,7 @@ Spotify-Module:
 # -------------------- App Configuration -------------------
 # Apps are the applications that are available to the user. Disabled apps will not be
 # available to the user.
+
 MainScreen:
   enabled: true
   cycle_time: 20
@@ -50,6 +51,9 @@ MainScreen:
 
 Pomodoro:
   enabled: true
+  work_duration: 25
+  break_duration: 5
+  long_break_duration: 15
 
 GifViewer:
   enabled: true

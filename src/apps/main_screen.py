@@ -1,3 +1,5 @@
+import logging
+import os
 from board import Board
 from enums.input_status import InputStatus
 from PIL import Image, ImageFont, ImageDraw
@@ -7,7 +9,9 @@ import time
 import threading
 
 from apps import pomodoro
+from enums.variable_importance import Importance
 from path import PathTo
+from settings import Settings
 
 light_pink = (255, 219, 218)
 dark_pink = (219, 127, 142)
@@ -26,29 +30,54 @@ smsColor = (110, 255, 140)
 
 spotify_color = (0, 255, 0)
 
+FONT_SIZE = 5
+DEFAULT_CYCLE_TIME = 20
+DEFAULT_USE_24_HOUR = True
+
 
 class MainScreen:
-    def __init__(self, config, modules, callbacks):
+    def __init__(self, modules, callbacks):
+        """
+        Initialize the MainScreen with modules and callbacks.
+
+        Args:
+            modules (Dict): Dictionary of modules.
+            callbacks (Dict[str, Callable]): Dictionary of callback functions.
+        """
+        self.enabled = Settings.read_variable(
+            "Main Screen", "enabled", Importance.REQUIRED
+        )
+        if not self.enabled:
+            logging.debug("[MainScreen App] MainScreen is disabled.")
+            return
+
+        logging.debug("[MainScreen App] Initializing MainScreen.")
         self.modules = modules
         self.callbacks = callbacks
 
-        self.font = ImageFont.truetype(PathTo.FONT_FILE, 5)
-        self.cycle_time = config.getint("Main Screen", "cycle_time", fallback=20)
-        self.use_24_hour = config.getboolean(
-            "Main Screen", "use_24_hour", fallback=False
+        self.font = ImageFont.truetype(PathTo.FONT_FILE, FONT_SIZE)
+        self.cycle_time = (
+            Settings.read_variable("MainScreen", "cycle_time") or DEFAULT_CYCLE_TIME
+        )
+        self.use_24_hour = (
+            Settings.read_variable("MainScreen", "use_24_hour") or DEFAULT_USE_24_HOUR
         )
 
-        self.vertical = pomodoro.PomodoroScreen(config, modules, callbacks)
+        self.vertical = pomodoro.PomodoroScreen(modules, callbacks)
 
         self.lastGenerateCall = None
         self.on_cycle = True
 
-        self.bgs = {
-            "sakura": Image.open("src/apps/res/main_screen/sakura-bg.png").convert("RGB"),
-            "cloud": Image.open("src/apps/res/main_screen/cloud-bg-clear.png").convert(
-                "RGBA"
-            ),
-            "forest": Image.open("src/apps/res/main_screen/forest-bg.png").convert("RGB"),
+        self.backgrounds = {
+            "sakura": Image.open(
+                os.path.join(PathTo.MAIN_SCREEN_BACKGROUND_FOLDER, "sakura-bg.png")
+            ).convert("RGB"),
+            "cloud": Image.open(
+                os.path.join(PathTo.MAIN_SCREEN_BACKGROUND_FOLDER, "cloud-bg-clear.png")
+            ).convert("RGBA"),
+            "forest": Image.open(
+                os.path.join(PathTo.MAIN_SCREEN_BACKGROUND_FOLDER, "forest-bg.png")
+            ).convert("RGB"),
         }
         self.theme_list = [self.generateSakura, self.generateCloud, self.generateForest]
 
@@ -80,7 +109,7 @@ class MainScreen:
             elif inputStatus is InputStatus.ENCODER_DECREASE:
                 self.callbacks["switch_prev_app"]()
 
-        if self.lastGenerateCall == None:
+        if self.lastGenerateCall is None:
             self.lastGenerateCall = time.time()
         if time.time() - self.lastGenerateCall >= self.cycle_time:
             self.on_cycle = not self.on_cycle
@@ -108,7 +137,7 @@ class MainScreen:
                 hours += 12
         minutes = currentTime.minute
 
-        frame = self.bgs["sakura"].copy()
+        frame = self.backgrounds["sakura"].copy()
         draw = ImageDraw.Draw(frame)
 
         draw.text((3, 6), padToTwoDigit(hours), light_pink, font=self.font)
@@ -126,7 +155,7 @@ class MainScreen:
             # weather
             weather = self.modules["weather"]
             one_call = weather.getWeather()
-            if one_call != None:
+            if one_call is not None:
                 curr_temp = round(one_call.current.temperature("fahrenheit")["temp"])
                 draw.text((33, 6), padToTwoDigit(curr_temp), white, font=self.font)
                 draw.point((41, 6), fill=white)
@@ -177,14 +206,12 @@ class MainScreen:
         self.old_noti_list = noti_list.copy()
 
         if len(self.queued_frames) == 0:
-            frame = Image.new(
-                "RGBA", (Board.led_cols, Board.led_rows), washed_out_navy
-            )
+            frame = Image.new("RGBA", (Board.led_cols, Board.led_rows), washed_out_navy)
         else:
             frame = self.queued_frames.pop(0)
         draw = ImageDraw.Draw(frame)
 
-        frame.paste(self.bgs["cloud"], (0, 0), self.bgs["cloud"])
+        frame.paste(self.backgrounds["cloud"], (0, 0), self.backgrounds["cloud"])
 
         time_x_off = 2
         time_y_off = 25
@@ -234,7 +261,7 @@ class MainScreen:
         return frame.convert("RGB")
 
     def generateForest(self):
-        frame = self.bgs["forest"].copy()
+        frame = self.backgrounds["forest"].copy()
         return frame
 
 

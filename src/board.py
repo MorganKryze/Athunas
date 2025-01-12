@@ -253,7 +253,6 @@ class Board:
         Returns True if the encoder has increased, False otherwise.
         """
         if cls.encoder_state > 0:
-            logging.debug(f"[Board] Encoder state: {cls.encoder_state}")
             return True
         return False
 
@@ -263,6 +262,5 @@ class Board:
         Returns True if the encoder has decreased, False otherwise.
         """
         if cls.encoder_state < 0:
-            logging.debug(f"[Board] Encoder state: {cls.encoder_state}")
             return True
         return False

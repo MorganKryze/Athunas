@@ -40,7 +40,7 @@ def load_apps(modules: Dict[str, Any], callbacks: Dict[str, Any]) -> List[Any]:
         List[Any]: A list of initialized apps.
     """
     return [
-        # main_screen.MainScreen(config, modules, callbacks),
+        main_screen.MainScreen(modules, callbacks),
         gif_viewer.GifScreen(modules, callbacks),
         life.GameOfLifeScreen(modules, callbacks),
         # weather.WeatherScreen(config, modules, callbacks),

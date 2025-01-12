@@ -13,6 +13,7 @@ class PathTo:
     RESOURCES_FOLDER: str = "resources"
     GIF_FOLDER: str = os.path.join(RESOURCES_FOLDER, "gif/horizontal/")
     LIFE_PATTERNS_FOLDER: str = os.path.join(RESOURCES_FOLDER, "life_patterns/")
+    MAIN_SCREEN_BACKGROUND_FOLDER: str = os.path.join(RESOURCES_FOLDER, "main_screen/")
     FONT_FILE: str = os.path.join(RESOURCES_FOLDER, "fonts/tiny.otf")
 
     @classmethod

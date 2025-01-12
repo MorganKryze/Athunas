@@ -33,7 +33,9 @@ class GifScreen:
             return
 
         logging.debug("[GifScreen App] Initializing GifScreen.")
+        self.modules = modules
         self.callbacks = callbacks
+        
         self.led_cols = Board.led_cols
         self.led_rows = Board.led_rows
         self.animations = self.load_animations()
