@@ -7,6 +7,7 @@ from datetime import datetime
 from dateutil import tz
 import time
 import threading
+import calendar
 
 from apps import pomodoro
 from enums.variable_importance import Importance
@@ -88,7 +89,11 @@ class MainScreen:
                 os.path.join(PathTo.MAIN_SCREEN_BACKGROUND_FOLDER, "forest-bg.png")
             ).convert("RGB"),
         }
-        self.theme_list = [self.generate_sakura_bg, self.generate_cloud_bg, self.generate_forest_bg]
+        self.theme_list = [
+            self.generate_sakura_bg,
+            self.generate_cloud_bg,
+            self.generate_forest_bg,
+        ]
 
         self.currentIdx = 0
         self.selectMode = False
@@ -137,16 +142,16 @@ class MainScreen:
         return frame
 
     def generate_sakura_bg(self):
-        currentTime = datetime.now(tz=tz.tzlocal())
-        month = currentTime.month
-        day = currentTime.day
-        dayOfWeek = currentTime.weekday() + 1
-        hours = currentTime.hour
+        current_time = datetime.now(tz=tz.tzlocal())
+        month = current_time.month
+        day = current_time.day
+        dayOfWeek = current_time.weekday()
+        hours = current_time.hour
         if not self.use_24_hour:
             hours = hours % 12
             if hours == 0:
                 hours += 12
-        minutes = currentTime.minute
+        minutes = current_time.minute
 
         frame = self.backgrounds["sakura"].copy()
         draw = ImageDraw.Draw(frame)
@@ -158,23 +163,29 @@ class MainScreen:
         if self.on_cycle:
             if self.date_format == "MM-DD":
                 # date
-                draw.text((23, 6), format_to_two_digits(month), dark_pink, font=self.font)
+                draw.text(
+                    (23, 6), format_to_two_digits(month), dark_pink, font=self.font
+                )
                 draw.text((30, 6), ".", dark_pink, font=self.font)
                 draw.text((33, 6), format_to_two_digits(day), dark_pink, font=self.font)
             else:
                 # date
                 draw.text((23, 6), format_to_two_digits(day), dark_pink, font=self.font)
                 draw.text((30, 6), ".", dark_pink, font=self.font)
-                draw.text((33, 6), format_to_two_digits(month), dark_pink, font=self.font)
+                draw.text(
+                    (33, 6), format_to_two_digits(month), dark_pink, font=self.font
+                )
         else:
             # dayOfWeek
-            draw.text((23, 6), format_to_two_digits(dayOfWeek), dark_pink, font=self.font)
+            day_abbreviation = calendar.day_abbr[dayOfWeek].upper()
+            draw.text((23, 6), day_abbreviation, dark_pink, font=self.font)
             # weather
             weather = self.modules["weather"]
-            one_call = weather.get_weather()
-            if one_call is not None:
-                curr_temp = round(one_call.current.temperature("fahrenheit")["temp"])
-                draw.text((33, 6), format_to_two_digits(curr_temp), white, font=self.font)
+            temperature = weather.get_temperature()
+            if temperature is not None:
+                draw.text(
+                    (33, 6), format_to_two_digits(temperature), white, font=self.font
+                )
                 draw.point((41, 6), fill=white)
 
         # notifications
@@ -209,7 +220,6 @@ class MainScreen:
 
         noti_list = self.modules["notifications"].getNotificationList()
         if noti_list is not None:
-
             threading.Thread(
                 target=generateNotiFramesAsync,
                 args=(

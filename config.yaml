@@ -33,6 +33,7 @@ Weather-Module:
   token:
   latitude:
   longitude:
+  temperature_unit: celcius
 
 Spotify-Module:
   enabled: false

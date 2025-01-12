@@ -11,6 +11,7 @@ from typing import Optional, Dict, Any
 # Constants
 UPDATE_INTERVAL_SECONDS = 600
 
+
 class WeatherModule:
     def __init__(self) -> None:
         """
@@ -24,7 +25,6 @@ class WeatherModule:
             return
 
         logging.debug("[Weather Module] Initializing")
-
         self.current_weather: Optional[Dict[str, Any]] = None
         self.weather_queue: LifoQueue = LifoQueue()
 
@@ -37,6 +37,15 @@ class WeatherModule:
         longitude: float = Settings.read_variable(
             "Weather-Module", "longitude", Importance.REQUIRED
         )
+        self.temperature_unit: str = Settings.read_variable(
+            "Weather-Module", "temperature_unit", Importance.REQUIRED
+        )
+        if self.temperature_unit not in ["celsius", "fahrenheit"]:
+            logging.error(
+                "[Weather Module] Invalid temperature unit. Must be 'celsius' or 'fahrenheit'."
+            )
+            self.enabled = False
+            return
 
         try:
             self.weather_manager: WeatherManager = OWM(token).weather_manager()
@@ -69,6 +78,21 @@ class WeatherModule:
             self.current_weather = self.weather_queue.get()
             self.weather_queue.queue.clear()
         return self.current_weather
+
+    def get_temperature(self) -> Optional[float]:
+        """
+        Get the current temperature.
+
+        Returns:
+            Optional[float]: The current temperature.
+        """
+        if not self.enabled:
+            return None
+
+        weather: Optional[Dict[str, Any]] = self.get_weather()
+        if weather is not None:
+            return round(weather.current.temperature(self.temperature_unit)["temp"])
+        return None
 
 
 def update_weather(

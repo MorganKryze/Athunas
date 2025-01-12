@@ -1,7 +1,5 @@
 from PIL import Image, ImageFont, ImageDraw
 import os
-import numpy as np
-import time
 from enums.input_status import InputStatus
 from datetime import datetime
 from dateutil import tz
