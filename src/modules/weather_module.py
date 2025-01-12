@@ -63,7 +63,6 @@ class WeatherModule:
             Optional[Dict[str, Any]]: The current weather information.
         """
         if not self.enabled:
-            logging.warning("[Weather Module] Module is disabled")
             return None
 
         if not self.weather_queue.empty():
