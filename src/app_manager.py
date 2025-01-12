@@ -87,7 +87,7 @@ class AppManager:
             cls.callbacks = load_callbacks()
             cls.apps = load_apps(cls.modules, cls.callbacks)
             cls.enabled_apps = [app for app in cls.apps if app.enabled]
-            logging.debug(f"[AppManager] Enabled apps: {cls.enabled_apps}")
+            logging.debug("[AppManager] All enabled app initialized.")
         except Exception as e:
             logging.critical(f"[AppManager] Failed to initialize apps: {e}")
             logging.critical("[AppManager] Exiting program.")
