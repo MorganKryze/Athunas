@@ -59,6 +59,7 @@ Pomodoro:
 
 GifViewer:
   enabled: true
+  play_limit: 5
 
 GameOfLife:
   enabled: true

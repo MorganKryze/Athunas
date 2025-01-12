@@ -12,7 +12,6 @@ from settings import Settings
 
 # Constants
 WHITE = (230, 255, 255)
-MAX_PLAY_COUNT = 5
 
 
 class GifScreen:
@@ -51,7 +50,14 @@ class GifScreen:
         self.was_horizontal = True
         self.auto_play_mode = False
         self.play_count = 0
-        self.play_limit = MAX_PLAY_COUNT
+        self.play_limit = Settings.read_variable("GifViewer", "play_limit")
+        if self.play_limit < 1 or self.play_limit is None:
+            logging.error(
+                "[GifScreen App] Play limit must be greater than or equal to 1."
+            )
+            self.enabled = False
+            return
+
         logging.debug("[GifScreen App] GifScreen initialized.")
 
     def generate(
