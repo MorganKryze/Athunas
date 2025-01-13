@@ -1,6 +1,7 @@
-import logging
 import sys
+import logging
 from typing import Callable, Dict, List, Any
+from board import Board
 from modules import weather_module, notification_module, spotify_module
 from apps import (
     main_screen,
@@ -11,7 +12,6 @@ from apps import (
     weather,
     spotify_player,
 )
-from controller import Controller
 
 
 def load_modules() -> Dict[str, Any]:
@@ -57,9 +57,9 @@ def load_callbacks() -> Dict[str, Callable[[], None]]:
         Dict[str, Callable[[], None]]: A dictionary of callback functions.
     """
     return {
-        "toggle_display": Controller.toggle_display,
-        "increase_brightness": Controller.increase_brightness,
-        "decrease_brightness": Controller.decrease_brightness,
+        "toggle_display": AppManager.toggle_display,
+        "increase_brightness": AppManager.increase_brightness,
+        "decrease_brightness": AppManager.decrease_brightness,
         "switch_next_app": AppManager.switch_next_app,
         "switch_prev_app": AppManager.switch_prev_app,
     }
@@ -118,3 +118,35 @@ class AppManager:
         """
         logging.debug("[AppManager] Switching to previous app.")
         cls.current_app_index = (cls.current_app_index - 1) % len(cls.enabled_apps)
+
+    @staticmethod
+    def toggle_display() -> None:
+        """
+        Toggle the display on or off.
+        """
+        Board.is_display_on = not Board.is_display_on
+        logging.debug(
+            f"[Controller] Display set to: {'on' if Board.is_display_on else 'off'}"
+        )
+
+    @staticmethod
+    def increase_brightness() -> None:
+        """
+        Increase the brightness of the display.
+        """
+        Board.brightness = min(
+            Board.BRIGHTNESS_MAX,
+            Board.brightness + Board.BRIGHTNESS_STEP,
+        )
+        logging.debug(f"[Controller] Brightness increased to {Board.brightness}")
+
+    @staticmethod
+    def decrease_brightness() -> None:
+        """
+        Decrease the brightness of the display.
+        """
+        Board.brightness = max(
+            Board.BRIGHTNESS_MIN,
+            Board.brightness - Board.BRIGHTNESS_STEP,
+        )
+        logging.debug(f"[Controller] Brightness decreased to {Board.brightness}")
