@@ -171,14 +171,19 @@ class Board:
     def tilt_callback(cls, tilt_switch):
         """
         Callback function for the tilt switch.
+        Only logs when orientation actually changes.
         """
         TILT_DEBOUNCE_TIME = 0.25
-        startTime = time.time()
-        while time.time() - startTime < TILT_DEBOUNCE_TIME:
-            pass
-        logging.debug("[Board] Tilt switch activated.")
-        cls.is_horizontal = tilt_switch.is_pressed
-
+        time.sleep(TILT_DEBOUNCE_TIME)
+        
+        new_state = tilt_switch.is_pressed
+        
+        if new_state != cls.is_horizontal:
+            orientation = "horizontal" if new_state else "vertical"
+            logging.debug(f"[Board] Orientation changed to {orientation}")
+            cls.is_horizontal = new_state
+        else:
+            cls.is_horizontal = new_state
     @classmethod
     def encoder_button_callback(cls, enc_button):
         """
