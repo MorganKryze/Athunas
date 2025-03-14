@@ -39,7 +39,7 @@ sudo apt-get upgrade -y
 - Install `git` and `pip`.
 
 ```bash
-sudo apt install git python3-pip micro -y
+sudo apt install git python3-pip -y
 ```
 
 ## Improve performance for Matrix
