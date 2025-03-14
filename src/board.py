@@ -28,7 +28,7 @@ class Board:
     encoder_button: Button
     tilt_switch: int
     tilt_switch_button: Button
-    tilt_switch_debounce_time: float
+    tilt_switch_bounce_time: float
     brightness: int
     is_display_on: bool = True
     encoder_queue: queue.Queue
@@ -154,15 +154,17 @@ class Board:
             logging.critical("[Board] Exiting program.")
             sys.exit(1)
 
-        cls.tilt_switch_debounce_time = Settings.read_variable(
-            "System", "tilt_switch_debounce_time", Importance.REQUIRED
+        cls.tilt_switch_bounce_time = Settings.read_variable(
+            "System", "tilt_switch_bounce_time", Importance.REQUIRED
         )
-        if cls.tilt_switch_debounce_time < 0:
-            logging.critical("[Board] tilt_switch_debounce_time must be positive.")
+        if cls.tilt_switch_bounce_time < 0:
+            logging.critical("[Board] tilt_switch_bounce_time must be positive.")
             logging.critical("[Board] Exiting program.")
             sys.exit(1)
 
-        cls.tilt_switch_button = Button(cls.tilt_switch, pull_up=True)
+        cls.tilt_switch_button = Button(
+            cls.tilt_switch, pull_up=True, bounce_time=cls.tilt_switch_bounce_time
+        )
         cls.tilt_switch_button.when_pressed = lambda button: cls.tilt_callback(button)
         cls.tilt_switch_button.when_released = lambda button: cls.tilt_callback(button)
         logging.debug("[Board] Tilt switch button initialized.")
@@ -191,15 +193,11 @@ class Board:
         Callback function for the tilt switch.
         Only logs when orientation actually changes.
         """
-        time.sleep(cls.tilt_switch_debounce_time)
-
         new_state = tilt_switch.is_pressed
 
         if new_state != cls.is_horizontal:
             orientation = "horizontal" if new_state else "vertical"
             logging.debug(f"[Board] Orientation changed to {orientation}")
-            cls.is_horizontal = new_state
-        else:
             cls.is_horizontal = new_state
 
     @classmethod
