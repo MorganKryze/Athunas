@@ -10,6 +10,7 @@ System:
   led_rows: 32
   led_cols: 64
   brightness: 100
+  tilt_switch_debounce_time: 0.25
 
 # Please note that the following values are NOT PIN numbers, but GPIO numbers.
 # See https://pinout.xyz/ for more information.
