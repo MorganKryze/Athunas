@@ -11,7 +11,6 @@ from gpiozero import Button, RotaryEncoder
 
 
 class Board:
-    FRAME_TIME: float = 0.05
     SCREEN_RATIO: int = 16
     FIRST_GPIO_PIN: int = 0
     LAST_GPIO_PIN: int = 27
@@ -21,6 +20,7 @@ class Board:
 
     led_rows: int
     led_cols: int
+    refresh_rate: float
     encoder_clk: int
     encoder_dt: int
     encoder: RotaryEncoder
@@ -77,6 +77,15 @@ class Board:
             )
             logging.critical("[Board] Exiting program.")
             sys.exit(1)
+
+        cls.refresh_rate = Settings.read_variable(
+            "System", "refresh_rate", Importance.REQUIRED
+        )
+        if cls.refresh_rate <= 0:
+            logging.critical("[Board] refresh_rate must be positive.")
+            logging.critical("[Board] Exiting program.")
+            sys.exit(1)
+
         logging.info("[Board] All display settings initialized.")
 
         cls.black_screen = Image.new("RGB", (cls.led_cols, cls.led_rows), (0, 0, 0))
@@ -144,7 +153,7 @@ class Board:
             logging.critical("[Board] tilt_switch must be between 0 and 27.")
             logging.critical("[Board] Exiting program.")
             sys.exit(1)
-        
+
         cls.tilt_switch_debounce_time = Settings.read_variable(
             "System", "tilt_switch_debounce_time", Importance.REQUIRED
         )
@@ -183,15 +192,16 @@ class Board:
         Only logs when orientation actually changes.
         """
         time.sleep(cls.tilt_switch_debounce_time)
-        
+
         new_state = tilt_switch.is_pressed
-        
+
         if new_state != cls.is_horizontal:
             orientation = "horizontal" if new_state else "vertical"
             logging.debug(f"[Board] Orientation changed to {orientation}")
             cls.is_horizontal = new_state
         else:
             cls.is_horizontal = new_state
+
     @classmethod
     def encoder_button_callback(cls, enc_button):
         """
@@ -201,7 +211,7 @@ class Board:
         DOUBLE_PRESS_TIME = 0.3
         TRIPLE_PRESS_TIME = 0.3
         SLEEP_INTERVAL = 0.1
-        
+
         start_time = time.time()
         time_diff = 0
 

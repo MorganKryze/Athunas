@@ -42,7 +42,7 @@ def main() -> None:
             matrix.SetImage(frame if Board.is_display_on else Board.black_screen)
 
             Board.reset_encoder_input_status()
-            time.sleep(Board.FRAME_TIME)
+            time.sleep(Board.refresh_rate)
         except KeyboardInterrupt:
             logging.info("[Controller] Application stopped by user.")
             break
