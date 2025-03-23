@@ -5,21 +5,48 @@ import logging
 from enums.variable_importance import Importance
 from typing import Any, Dict, Optional
 
+from path import PathTo
+
 
 class Settings:
     data: Dict[str, Any] = {}
 
     @classmethod
-    def load(cls, file_path: str) -> None:
+    def load_config(cls) -> None:
         """
         Reads a YAML file and stores its contents in the class dictionary.
         """
+        config_file_path = PathTo.CONFIG_FILE
         try:
-            with open(file_path, "r") as file:
+            with open(config_file_path, "r") as file:
                 cls.data = yaml.safe_load(file)
             logging.info("[Settings] Config file loaded successfully.")
         except FileNotFoundError:
-            logging.critical(f"[Settings] The file '{file_path}' was not found.")
+            logging.info(f"[Settings] The file '{config_file_path}' was not found.")
+            logging.info("[Settings] Creating a new config file from project template.")
+            cls.create_config()
+        except yaml.YAMLError as e:
+            logging.critical(f"[Settings] Failed to parse YAML file: {e}")
+            logging.critical("[Settings] Exiting program.")
+            sys.exit(1)
+
+    @classmethod
+    def create_config(cls) -> None:
+        """
+        Creates a new YAML file from a project template.
+        """
+        template_file_path = PathTo.TEMPLATE_CONFIG_FILE
+        config_file_path = PathTo.CONFIG_FILE
+        try:
+            with open(template_file_path, "r") as template_file:
+                data = yaml.safe_load(template_file)
+            with open(config_file_path, "w") as config_file:
+                yaml.safe_dump(data, config_file)
+            logging.info("[Settings] Config file created successfully.")
+        except FileNotFoundError:
+            logging.critical(
+                f"[Settings] The file '{template_file_path}' was not found."
+            )
             logging.critical("[Settings] Exiting program.")
             sys.exit(1)
         except yaml.YAMLError as e:

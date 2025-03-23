@@ -6,6 +6,7 @@ import sys
 class PathTo:
     base_directory: str = ""
 
+    TEMPLATE_CONFIG_FILE: str = "config.yaml.example"
     CONFIG_FILE: str = "config.yaml"
     PYPROJECT_FILE: str = "pyproject.toml"
 

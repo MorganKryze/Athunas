@@ -15,7 +15,7 @@ def main() -> None:
     PathTo.add_library_to_path()
     
     Logs.start(level=logging.DEBUG)
-    Settings.load(PathTo.CONFIG_FILE)
+    Settings.load_config()
     Board.init_system()
     AppManager.init_apps()
 
