@@ -21,6 +21,7 @@ build/
 
 # VSCode
 .vscode/
+main.sln
 
 # Config
 config.yaml
