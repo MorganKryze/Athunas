@@ -1,5 +1,6 @@
 import time
 import logging
+import argparse
 from typing import Any
 
 from enums.input_status import InputStatus
@@ -11,10 +12,17 @@ from settings import Settings
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description='Athunas LED matrix controller')
+    parser.add_argument('--debug', action='store_true', help='Run with debug logging to console')
+    args = parser.parse_args()
+    
     PathTo.set_base_directory()
     PathTo.add_library_to_path()
     
-    Logs.start(level=logging.DEBUG)
+    file_level = logging.DEBUG
+    console_level = logging.DEBUG if args.debug else logging.WARNING
+    
+    Logs.start(file_level=file_level, console_level=console_level)
     Settings.load_config()
     Board.init_system()
     AppManager.init_apps()

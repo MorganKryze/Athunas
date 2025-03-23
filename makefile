@@ -34,6 +34,10 @@ run:
 # Run project controller
 	uv run src
 
+dev:
+# Run project controller with debug-level console logging
+    uv run src -- --debug
+
 clean:
 # Clean virtual environment
 	rm -rf .venv
