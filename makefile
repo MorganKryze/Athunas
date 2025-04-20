@@ -10,7 +10,7 @@ install:
 # Add 'uv' to PATH and PYTHONPATH
 	echo "export PATH=\$${PATH}:\$${HOME}/.local/bin" >> ~/.bashrc
 	echo "export PYTHONPATH=\$${PYTHONPATH}:\$${HOME}/.local/lib/python3.11/site-packages" >> ~/.bashrc
-	source ~/.bashrc
+	. ~/.bashrc
 # Allow 'python3.11' to use 'cap_sys_nice'
 	sudo setcap 'cap_sys_nice=eip' /usr/bin/python3.11
 
@@ -22,7 +22,7 @@ build:
 # Setup virtual environment
 	uv venv
 # Enter virtual environment
-	source .venv/bin/activate
+	. .venv/bin/activate
 # Install project python dependencies
 	uv pip install .
 
