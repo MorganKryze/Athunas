@@ -36,7 +36,7 @@ run:
 
 dev:
 # Run project controller with debug-level console logging
-	uv run src -- --debug
+	uv run src --debug
 
 clean:
 # Clean virtual environment
