@@ -9,6 +9,7 @@ from path import PathTo
 from logs import Logs
 from app_manager import AppManager
 from settings import Settings
+from webserver import start_web_server, is_user_connected
 
 
 def main() -> None:
@@ -31,28 +32,36 @@ def main() -> None:
         Board.led_rows, Board.led_cols, Board.brightness, use_emulator=True
     )
 
+    web_server_thread = start_web_server(port=8080)
+
     while True:
         try:
-            if not Board.encoder_queue.empty():
-                Board.encoder_state += Board.encoder_queue.get()
+            if is_user_connected():
+                matrix.SetImage(Board.black_screen)
+            else:
+                if not Board.encoder_queue.empty():
+                    Board.encoder_state += Board.encoder_queue.get()
 
-            if Board.has_encoder_increased():
-                Board.encoder_input_status = InputStatus.ENCODER_INCREASE
-                Board.reset_encoder_state()
-            elif Board.has_encoder_decreased():
-                Board.encoder_input_status = InputStatus.ENCODER_DECREASE
-                Board.reset_encoder_state()
+                if Board.has_encoder_increased():
+                    Board.encoder_input_status = InputStatus.ENCODER_INCREASE
+                    Board.reset_encoder_state()
+                elif Board.has_encoder_decreased():
+                    Board.encoder_input_status = InputStatus.ENCODER_DECREASE
+                    Board.reset_encoder_state()
 
-            current_app = AppManager.get_current_app()
-            frame: Any = current_app.generate(
-                Board.is_horizontal, Board.encoder_input_status
-            )
-            matrix.SetImage(frame if Board.is_display_on else Board.black_screen)
+                current_app = AppManager.get_current_app()
+                frame: Any = current_app.generate(
+                    Board.is_horizontal, Board.encoder_input_status
+                )
+                matrix.SetImage(frame if Board.is_display_on else Board.black_screen)
 
-            Board.reset_encoder_input_status()
+                Board.reset_encoder_input_status()
+
             time.sleep(Board.refresh_rate)
         except KeyboardInterrupt:
             logging.info("[Controller] Application stopped by user.")
+            web_server_thread.join()
+            matrix.SetImage(Board.black_screen)
             break
 
 

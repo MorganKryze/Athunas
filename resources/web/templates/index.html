@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Athunas Configuration</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Athunas Configuration</h1>
+        
+        <div class="sections">
+            {% for section in sections %}
+            <div class="section-card">
+                <h2>{{ section }}</h2>
+                <a href="{{ url_for('edit_section', section_name=section) }}" class="btn">Edit</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="actions">
+            <button id="restart-btn" class="btn btn-warning">Restart System</button>
+            <button id="close-btn" class="btn btn-secondary">Close Connection</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('restart-btn').addEventListener('click', function() {
+            if (confirm('Are you sure you want to restart the system?')) {
+                fetch('/restart', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        alert('System is restarting...');
+                    });
+            }
+        });
+
+        document.getElementById('close-btn').addEventListener('click', function() {
+            if (confirm('Close connection and re-enable matrix control?')) {
+                fetch('/close', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        window.close();
+                    });
+            }
+        });
+    </script>
+</body>
+</html>

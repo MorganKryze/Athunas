@@ -57,3 +57,4 @@ update:
 	git pull
 # Update project dependencies
 	uv pip install --upgrade .
+ 
