@@ -14,8 +14,8 @@ from path import PathTo
 from enums.variable_importance import Importance
 
 app = Flask(__name__, 
-            template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../web/templates"),
-            static_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../web/static"))
+            template_folder=PathTo.TEMPLATES_FOLDER,
+            static_folder=PathTo.STATIC_FOLDER)
 
 # Global variable to track if someone is connected
 is_connected = False
@@ -45,14 +45,14 @@ def index():
         
     config = load_config()
     sections = list(config.keys())
-    return render_template(PathTo.INDEX_HTML_FILE, sections=sections)
+    return render_template('index.html', sections=sections)
 
 @app.route('/section/<section_name>')
 def edit_section(section_name):
     """Edit a specific section of the configuration"""
     config = load_config()
     if section_name in config:
-        return render_template(PathTo.SECTION_HTML_FILE, 
+        return render_template('section.html', 
                               section_name=section_name, 
                               section_data=config[section_name])
     return redirect(url_for('index'))
