@@ -121,6 +121,16 @@ class Board:
             logging.critical("[Board] Exiting program.")
             sys.exit(1)
 
+        cls.encoder_queue = queue.Queue()
+        cls.encoder = RotaryEncoder(cls.encoder_clk, cls.encoder_dt)
+        cls.encoder.when_rotated_clockwise = lambda enc: cls.rotate_clockwise_callback(
+            enc
+        )
+        cls.encoder.when_rotated_counter_clockwise = (
+            lambda enc: cls.rotate_counter_clockwise_callback(enc)
+        )
+        logging.info("[Board] Encoder rotation initialized.")
+
         cls.encoder_sw = Configuration.read_variable(
             "System", "Encoder", "gpio_sw", Importance.REQUIRED
         )
@@ -136,16 +146,6 @@ class Board:
             button
         )
         logging.info("[Board] Encoder button initialized.")
-
-        cls.encoder_queue = queue.Queue()
-        cls.encoder = RotaryEncoder(cls.encoder_clk, cls.encoder_dt)
-        cls.encoder.when_rotated_clockwise = lambda enc: cls.rotate_clockwise_callback(
-            enc
-        )
-        cls.encoder.when_rotated_counter_clockwise = (
-            lambda enc: cls.rotate_counter_clockwise_callback(enc)
-        )
-        logging.info("[Board] Encoder initialized.")
 
     @classmethod
     def _init_tilt_switch(cls):
@@ -329,7 +329,7 @@ class Board:
             logging.debug("[Config] RGBMatrix options set.")
 
             matrix = RGBMatrix(options=options)
-            logging.info("[Config] RGBMatrix object created.")
+            logging.debug("[Config] RGBMatrix object created.")
             return matrix
         except Exception as e:
             logging.critical(f"[Config] failed to create RGBMatrix object: {e}")

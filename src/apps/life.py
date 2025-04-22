@@ -30,6 +30,7 @@ class GameOfLifeScreen:
             logging.debug("[GameOfLife] GameOfLife is disabled.")
             return
 
+        logging.debug("[GameOfLife] Initializing GameOfLifeScreen.")
         self.modules = modules
         self.callbacks = callbacks
         self.color = (255, 255, 255)
@@ -47,6 +48,8 @@ class GameOfLifeScreen:
         ]
         self.current_state_index = 0
         self.state = self.initial_states[self.current_state_index]()
+        
+        logging.debug("[GameOfLife] GameOfLifeScreen initialized.")
 
     def generate(self, is_horizontal: bool, input_status: InputStatus) -> Image.Image:
         """
