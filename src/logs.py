@@ -4,6 +4,7 @@ import os
 
 from path import PathTo
 from settings import Settings
+import socket
 
 
 class Logs:
@@ -23,6 +24,15 @@ class Logs:
             f"file log level: {logging.getLevelName(file_level)}, "
             f"console log level: {logging.getLevelName(console_level)}."
         )
+        try:
+
+            hostname = socket.gethostname()
+            local_hostname = f"{hostname}.local"
+            local_ip = socket.gethostbyname(hostname)
+
+            logging.info(f"[Utils] Hostname: {local_hostname}, Local IP: {local_ip}")
+        except Exception as e:
+            logging.warning(f"[Utils] Failed to retrieve hostname or public IP: {e}")
 
     @classmethod
     def create_logger(cls, file_level: int = logging.DEBUG, console_level: int = logging.WARNING) -> None:
