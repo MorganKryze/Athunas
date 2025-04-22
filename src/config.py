@@ -1,4 +1,5 @@
 import os
+import socket
 import subprocess
 import sys
 import yaml
@@ -215,3 +216,25 @@ class Configuration:
 
         version = data.get("project", {}).get("version", "unknown")
         return version
+
+    @classmethod
+    def get_addresses(cls) -> str:
+        """
+        Retrieves the local IP address of the machine and the hostname.
+
+        :return: A tuple of the hostname and local IP address.
+        """
+        try:
+            hostname = socket.gethostname()
+            local_hostname = f"{hostname}.local"
+
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("10.255.255.255", 1))
+            local_ip = s.getsockname()[0]
+
+            return local_hostname, local_ip
+        except Exception as e:
+            logging.warning(f"[Config] Failed to retrieve hostname or public IP: {e}")
+            return "unknown", "unknown"
+        finally:
+            s.close()

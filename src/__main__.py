@@ -8,7 +8,7 @@ from board import Board
 from path import PathTo
 from logs import Logs
 from app_manager import AppManager
-from settings import Configuration
+from config import Configuration
 from webserver import WebServer
 
 
@@ -37,7 +37,7 @@ def main() -> None:
     AppManager.init_apps()
 
     server = WebServer()
-    server.start(port= 9000, debug=args.debug)
+    server.start(port=9000, debug=args.debug)
 
     while True:
         try:

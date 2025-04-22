@@ -12,7 +12,7 @@ import calendar
 from apps import pomodoro
 from enums.variable_importance import Importance
 from path import PathTo
-from settings import Configuration
+from config import Configuration
 
 light_pink = (255, 219, 218)
 dark_pink = (219, 127, 142)

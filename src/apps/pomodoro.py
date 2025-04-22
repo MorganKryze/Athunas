@@ -7,7 +7,7 @@ from PIL import Image, ImageFont, ImageDraw
 
 from enums.variable_importance import Importance
 from path import PathTo
-from settings import Configuration
+from config import Configuration
 
 # Constants
 DEFAULT_FONT_SIZE = 5

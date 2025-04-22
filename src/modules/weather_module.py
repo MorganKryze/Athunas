@@ -4,7 +4,7 @@ from threading import Thread
 from queue import LifoQueue
 import time
 import logging
-from settings import Configuration
+from config import Configuration
 from enums.variable_importance import Importance
 from typing import Optional, Dict, Any
 

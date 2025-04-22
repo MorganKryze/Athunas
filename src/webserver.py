@@ -6,7 +6,7 @@ from typing import Dict, Any
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 import time
 
-from settings import Configuration
+from config import Configuration
 from path import PathTo
 
 

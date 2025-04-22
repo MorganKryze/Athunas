@@ -10,7 +10,7 @@ from board import Board
 from enums.variable_importance import Importance
 from enums.input_status import InputStatus
 from path import PathTo
-from settings import Configuration
+from config import Configuration
 
 
 class GameOfLifeScreen:

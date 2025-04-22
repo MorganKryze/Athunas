@@ -7,7 +7,7 @@ import queue
 
 from enums.input_status import InputStatus
 from enums.variable_importance import Importance
-from settings import Configuration
+from config import Configuration
 from gpiozero import Button, RotaryEncoder
 
 

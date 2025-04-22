@@ -3,13 +3,14 @@ import logging
 import os
 
 from path import PathTo
-from settings import Configuration
-import socket
+from config import Configuration
 
 
 class Logs:
     @classmethod
-    def start(cls, file_level: int = logging.DEBUG, console_level: int = logging.WARNING) -> None:
+    def start(
+        cls, file_level: int = logging.DEBUG, console_level: int = logging.WARNING
+    ) -> None:
         """
         Starts logging with the specified log levels.
 
@@ -18,24 +19,21 @@ class Logs:
             :param console_level: The log level for console logging (default is logging.WARNING).
         """
         cls.create_logger(file_level, console_level)
-        logging.info("-------------------------------------------------------------")
         logging.info(
-            f"[Utils] Application started, version: {Configuration.get_version_from_pyproject()}, "
+            "--------------------------------------------------------------------------------------------------------------------------------"
+        )
+        logging.info(
+            f"[Init] Application started, version: {Configuration.get_version_from_pyproject()}, "
             f"file log level: {logging.getLevelName(file_level)}, "
             f"console log level: {logging.getLevelName(console_level)}."
         )
-        try:
-
-            hostname = socket.gethostname()
-            local_hostname = f"{hostname}.local"
-            local_ip = socket.gethostbyname(hostname)
-
-            logging.info(f"[Utils] Hostname: {local_hostname}, Local IP: {local_ip}")
-        except Exception as e:
-            logging.warning(f"[Utils] Failed to retrieve hostname or public IP: {e}")
+        hostname, ip_address = Configuration.get_addresses()
+        logging.info(f"[Init] Application running on {hostname} ({ip_address}).")
 
     @classmethod
-    def create_logger(cls, file_level: int = logging.DEBUG, console_level: int = logging.WARNING) -> None:
+    def create_logger(
+        cls, file_level: int = logging.DEBUG, console_level: int = logging.WARNING
+    ) -> None:
         """
         Creates a logger with the specified log levels.
 
@@ -49,7 +47,9 @@ class Logs:
         log_file_path = os.path.join(PathTo.LOGS_FOLDER, log_filename)
 
         logger = logging.getLogger()
-        logger.setLevel(min(file_level, console_level))  # Set to the lowest level to capture all relevant logs
+        logger.setLevel(
+            min(file_level, console_level)
+        )  # Set to the lowest level to capture all relevant logs
 
         # Remove any existing handlers to avoid conflicts
         if logger.hasHandlers():

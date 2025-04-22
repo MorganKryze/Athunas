@@ -1,7 +1,7 @@
 import spotipy
 import os
 import logging
-from settings import Configuration
+from config import Configuration
 from enums.variable_importance import Importance
 from typing import Optional, Tuple, Dict, Any
 

@@ -1,7 +1,7 @@
 from threading import Thread
 from queue import Queue
 from enums.variable_importance import Importance
-from settings import Configuration
+from config import Configuration
 import websocket
 import json
 import time
