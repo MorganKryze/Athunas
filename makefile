@@ -38,6 +38,10 @@ dev:
 # Run project controller with debug-level console logging
 	uv run src --debug
 
+dev-emulator:
+# Run project controller with debug-level console logging and emulator
+	uv run src --debug --emulator
+
 clean:
 # Clean virtual environment
 	rm -rf .venv
