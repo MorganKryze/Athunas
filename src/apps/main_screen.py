@@ -12,7 +12,7 @@ import calendar
 from apps import pomodoro
 from enums.variable_importance import Importance
 from path import PathTo
-from settings import Settings
+from settings import Configuration
 
 light_pink = (255, 219, 218)
 dark_pink = (219, 127, 142)
@@ -45,8 +45,8 @@ class MainScreen:
             modules (Dict): Dictionary of modules.
             callbacks (Dict[str, Callable]): Dictionary of callback functions.
         """
-        self.enabled = Settings.read_variable(
-            "MainScreen", "enabled", Importance.REQUIRED
+        self.enabled = Configuration.read_variable(
+            "Apps", "MainScreen", "enabled", Importance.REQUIRED
         )
         if not self.enabled:
             logging.debug("[MainScreen App] MainScreen is disabled.")
@@ -58,14 +58,17 @@ class MainScreen:
 
         self.font = ImageFont.truetype(PathTo.FONT_FILE, FONT_SIZE)
         self.cycle_duration_in_seconds = (
-            Settings.read_variable("MainScreen", "cycle_duration_in_seconds")
+            Configuration.read_variable(
+                "Apps", "MainScreen", "cycle_duration_in_seconds"
+            )
             or DEFAULT_CYCLE_TIME
         )
         self.use_24_hour = (
-            Settings.read_variable("MainScreen", "use_24_hour") or DEFAULT_USE_24_HOUR
+            Configuration.read_variable("Apps", "MainScreen", "use_24_hour")
+            or DEFAULT_USE_24_HOUR
         )
-        self.date_format = Settings.read_variable(
-            "MainScreen", "date_format", Importance.REQUIRED
+        self.date_format = Configuration.read_variable(
+            "Apps", "MainScreen", "date_format", Importance.REQUIRED
         )
         if self.date_format != "MM-DD" and self.date_format != "DD-MM":
             logging.error(

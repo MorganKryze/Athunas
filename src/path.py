@@ -6,8 +6,10 @@ import sys
 class PathTo:
     base_directory: str = ""
 
-    TEMPLATE_CONFIG_FILE: str = "config.yaml.example"
-    CONFIG_FILE: str = "config.yaml"
+    CONFIG_FILE: str = "configs/config.yaml"
+    TEMPLATE_CONFIG_FILE: str = "configs/example.config.yaml"
+    TEMPORARY_CONFIG_FILE: str = "configs/temp.config.yaml"
+    RECOVERY_CONFIG_FILE: str = "configs/recovery.config.yaml"
     PYPROJECT_FILE: str = "pyproject.toml"
 
     LOGS_FOLDER: str = "logs"

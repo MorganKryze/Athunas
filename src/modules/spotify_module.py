@@ -1,7 +1,7 @@
 import spotipy
 import os
 import logging
-from settings import Settings
+from settings import Configuration
 from enums.variable_importance import Importance
 from typing import Optional, Tuple, Dict, Any
 
@@ -15,8 +15,8 @@ class SpotifyModule:
         """
         Initialize the SpotifyModule with the given configuration.
         """
-        self.enabled: bool = Settings.read_variable(
-            "Spotify-Module", "enabled", Importance.REQUIRED
+        self.enabled: bool = Configuration.read_variable(
+            "Modules", "Spotify", "enabled", Importance.REQUIRED
         )
         if not self.enabled:
             logging.info("[Spotify Module] Disabled")
@@ -24,14 +24,14 @@ class SpotifyModule:
 
         logging.debug("[Spotify Module] Initializing")
 
-        client_id: str = Settings.read_variable(
-            "Spotify-Module", "client_id", Importance.REQUIRED
+        client_id: str = Configuration.read_variable(
+            "Modules", "Spotify", "client_id", Importance.REQUIRED
         )
-        client_secret: str = Settings.read_variable(
-            "Spotify-Module", "client_secret", Importance.REQUIRED
+        client_secret: str = Configuration.read_variable(
+            "Modules", "Spotify", "client_secret", Importance.REQUIRED
         )
-        redirect_uri: str = Settings.read_variable(
-            "Spotify-Module", "redirect_uri", Importance.REQUIRED
+        redirect_uri: str = Configuration.read_variable(
+            "Modules", "Spotify", "redirect_uri", Importance.REQUIRED
         )
 
         try:

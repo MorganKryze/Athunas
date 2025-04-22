@@ -8,9 +8,8 @@ from board import Board
 from enums.variable_importance import Importance
 from enums.input_status import InputStatus
 from path import PathTo
-from settings import Settings
+from settings import Configuration
 
-# Constants
 WHITE = (230, 255, 255)
 
 
@@ -23,8 +22,8 @@ class GifScreen:
             modules (Dict): Dictionary of modules.
             callbacks (Dict[str, Callable]): Dictionary of callback functions.
         """
-        self.enabled = Settings.read_variable(
-            "GifViewer", "enabled", Importance.REQUIRED
+        self.enabled = Configuration.read_variable(
+            "Apps", "GifViewer", "enabled", Importance.REQUIRED
         )
         if not self.enabled:
             logging.debug("[GifScreen App] GifViewer is disabled.")
@@ -50,7 +49,7 @@ class GifScreen:
         self.was_horizontal = True
         self.auto_play_mode = False
         self.play_count = 0
-        self.play_limit = Settings.read_variable("GifViewer", "play_limit")
+        self.play_limit = Configuration.read_variable("Apps", "GifViewer", "play_limit")
         if self.play_limit < 1 or self.play_limit is None:
             logging.error(
                 "[GifScreen App] Play limit must be greater than or equal to 1."
@@ -160,7 +159,7 @@ class GifScreen:
         except Exception as e:
             logging.error(f"[GifScreen App] Error loading GIFs: {e}")
             logging.debug("[GifScreen App] Disabling GifScreen for safety.")
-            Settings.update_variable("GifViewer", "enabled", False)
+            Configuration.update_variable("Apps", "GifViewer", "enabled", False)
             self.enabled = False
             logging.debug(
                 "[GifScreen App] Due to loading error, GifViewer has been disabled."

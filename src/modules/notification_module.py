@@ -1,7 +1,7 @@
 from threading import Thread
 from queue import Queue
 from enums.variable_importance import Importance
-from settings import Settings
+from settings import Configuration
 import websocket
 import json
 import time
@@ -18,23 +18,23 @@ class NotificationModule:
         """
         Initialize the NotificationModule with the given configuration.
         """
-        self.enabled: bool = Settings.read_variable(
-            "Notification-Module", "enabled", Importance.REQUIRED
+        self.enabled: bool = Configuration.read_variable(
+            "Modules", "Notification", "enabled", Importance.REQUIRED
         )
         if not self.enabled:
             logging.info("[Notification Module] Disabled")
             return
 
         logging.debug("[Notification Module] Initializing")
-        self.app_white_list: Dict[str, str] = Settings.read_variable(
-            "Notification-Module", "app_white_list"
+        self.app_white_list: Dict[str, str] = Configuration.read_variable(
+            "Modules", "Notification", "app_white_list"
         )
         if len(self.app_white_list) == 0:
             logging.warning(
                 "[Notification Module] No applications found in the white list, no notifications will be received."
             )
-        self.websocket_url: str = Settings.read_variable(
-            "Notification-Module", "websocket_url", Importance.REQUIRED
+        self.websocket_url: str = Configuration.read_variable(
+            "Modules", "Notification", "websocket_url", Importance.REQUIRED
         )
         self.notifications_list: List[Notification] = []
         self.notification_queue: Queue = Queue()

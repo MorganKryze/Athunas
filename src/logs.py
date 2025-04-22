@@ -3,7 +3,7 @@ import logging
 import os
 
 from path import PathTo
-from settings import Settings
+from settings import Configuration
 import socket
 
 
@@ -20,7 +20,7 @@ class Logs:
         cls.create_logger(file_level, console_level)
         logging.info("-------------------------------------------------------------")
         logging.info(
-            f"[Utils] Application started, version: {Settings.get_version_from_pyproject()}, "
+            f"[Utils] Application started, version: {Configuration.get_version_from_pyproject()}, "
             f"file log level: {logging.getLevelName(file_level)}, "
             f"console log level: {logging.getLevelName(console_level)}."
         )

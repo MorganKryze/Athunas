@@ -1,12 +1,13 @@
 import logging
 import sys
 import time
+from typing import Any
 from PIL import Image
 import queue
 
 from enums.input_status import InputStatus
 from enums.variable_importance import Importance
-from settings import Settings
+from settings import Configuration
 from gpiozero import Button, RotaryEncoder
 
 
@@ -45,6 +46,7 @@ class Board:
         cls._init_display()
         cls._init_encoder()
         cls._init_tilt_switch()
+
         logging.debug("[Board] All system components initialized.")
 
     @classmethod
@@ -52,7 +54,9 @@ class Board:
         """
         Initializes the display settings.
         """
-        cls.led_rows = Settings.read_variable("System", "led_rows", Importance.REQUIRED)
+        cls.led_rows = Configuration.read_variable(
+            "System", "Matrix", "led_rows", Importance.REQUIRED
+        )
         if cls.led_rows % cls.SCREEN_RATIO != 0 or cls.led_rows <= 0:
             logging.critical(
                 f"[Board] led_rows must be a positive multiple of {cls.SCREEN_RATIO} to work with the 'rpi-rgb-led-matrix' library."
@@ -60,7 +64,9 @@ class Board:
             logging.critical("[Board] Exiting program.")
             sys.exit(1)
 
-        cls.led_cols = Settings.read_variable("System", "led_cols", Importance.REQUIRED)
+        cls.led_cols = Configuration.read_variable(
+            "System", "Matrix", "led_cols", Importance.REQUIRED
+        )
         if cls.led_cols % cls.SCREEN_RATIO != 0 or cls.led_cols <= 0:
             logging.critical(
                 f"[Board] led_cols must be a multiple of {cls.SCREEN_RATIO} to work with the 'rpi-rgb-led-matrix' library."
@@ -68,8 +74,8 @@ class Board:
             logging.critical("[Board] Exiting program.")
             sys.exit(1)
 
-        cls.brightness = Settings.read_variable(
-            "System", "brightness", Importance.REQUIRED
+        cls.brightness = Configuration.read_variable(
+            "System", "Matrix", "brightness", Importance.REQUIRED
         )
         if cls.brightness < cls.BRIGHTNESS_MIN or cls.brightness > cls.BRIGHTNESS_MAX:
             logging.critical(
@@ -78,8 +84,8 @@ class Board:
             logging.critical("[Board] Exiting program.")
             sys.exit(1)
 
-        cls.refresh_rate = Settings.read_variable(
-            "System", "refresh_rate", Importance.REQUIRED
+        cls.refresh_rate = Configuration.read_variable(
+            "System", "Matrix", "refresh_rate", Importance.REQUIRED
         )
         if cls.refresh_rate <= 0:
             logging.critical("[Board] refresh_rate must be positive.")
@@ -95,8 +101,8 @@ class Board:
         """
         Initializes the encoder settings.
         """
-        cls.encoder_clk = Settings.read_variable(
-            "Pinout", "encoder_clk", Importance.REQUIRED
+        cls.encoder_clk = Configuration.read_variable(
+            "System", "Encoder", "gpio_clk", Importance.REQUIRED
         )
         if cls.encoder_clk < cls.FIRST_GPIO_PIN or cls.encoder_clk > cls.LAST_GPIO_PIN:
             logging.critical(
@@ -105,8 +111,8 @@ class Board:
             logging.critical("[Board] Exiting program.")
             sys.exit(1)
 
-        cls.encoder_dt = Settings.read_variable(
-            "Pinout", "encoder_dt", Importance.REQUIRED
+        cls.encoder_dt = Configuration.read_variable(
+            "System", "Encoder", "gpio_dt", Importance.REQUIRED
         )
         if cls.encoder_dt < cls.FIRST_GPIO_PIN or cls.encoder_dt > cls.LAST_GPIO_PIN:
             logging.critical(
@@ -115,8 +121,8 @@ class Board:
             logging.critical("[Board] Exiting program.")
             sys.exit(1)
 
-        cls.encoder_sw = Settings.read_variable(
-            "Pinout", "encoder_sw", Importance.REQUIRED
+        cls.encoder_sw = Configuration.read_variable(
+            "System", "Encoder", "gpio_sw", Importance.REQUIRED
         )
         if cls.encoder_sw < cls.FIRST_GPIO_PIN or cls.encoder_sw > cls.LAST_GPIO_PIN:
             logging.critical(
@@ -146,16 +152,16 @@ class Board:
         """
         Initializes the tilt switch settings.
         """
-        cls.tilt_switch = Settings.read_variable(
-            "Pinout", "tilt_switch", Importance.REQUIRED
+        cls.tilt_switch = Configuration.read_variable(
+            "System", "Tilt-switch", "gpio", Importance.REQUIRED
         )
         if cls.tilt_switch < cls.FIRST_GPIO_PIN or cls.tilt_switch > cls.LAST_GPIO_PIN:
             logging.critical("[Board] tilt_switch must be between 0 and 27.")
             logging.critical("[Board] Exiting program.")
             sys.exit(1)
 
-        cls.tilt_switch_bounce_time = Settings.read_variable(
-            "System", "tilt_switch_bounce_time", Importance.REQUIRED
+        cls.tilt_switch_bounce_time = Configuration.read_variable(
+            "System", "Tilt-switch", "bounce_time", Importance.REQUIRED
         )
         if cls.tilt_switch_bounce_time < 0:
             logging.critical("[Board] tilt_switch_bounce_time must be positive.")
@@ -285,3 +291,47 @@ class Board:
         if cls.encoder_state < 0:
             return True
         return False
+
+    @staticmethod
+    def init_matrix(
+        pixel_rows: int,
+        pixel_cols: int,
+        brightness: int,
+        disable_hardware_pulsing: bool = True,
+        hardware_mapping: str = "regular",
+        use_emulator: bool = False,
+    ) -> Any:
+        """
+        Creates an RGBMatrix object with the specified parameters.
+
+        :param pixel_rows: The number of rows of the screen.
+        :param pixel_cols: The number of columns of the screen.
+        :param brightness: The brightness of the screen (default is 100).
+        :param disable_hardware_pulsing: Disables hardware pulsing (default is True).
+        :param hardware_mapping: The hardware mapping of the screen (default is 'regular'). For Adafruit HAT: 'adafruit-hat'.
+        :return: An RGBMatrix object.
+        """
+        if use_emulator:
+            from RGBMatrixEmulator import RGBMatrix, RGBMatrixOptions  # type: ignore
+        else:
+            from rgbmatrix import RGBMatrix, RGBMatrixOptions  # type: ignore
+
+        logging.debug(
+            f"[Config] Creating RGBMatrix options with screen height: {pixel_rows}, screen width: {pixel_cols}, brightness: {brightness}, disable hardware pulsing: {disable_hardware_pulsing}, hardware mapping: {hardware_mapping}"
+        )
+        try:
+            options = RGBMatrixOptions()
+            options.rows = pixel_rows
+            options.cols = pixel_cols
+            options.brightness = brightness
+            options.disable_hardware_pulsing = disable_hardware_pulsing
+            options.hardware_mapping = hardware_mapping
+            logging.debug("[Config] RGBMatrix options set.")
+
+            matrix = RGBMatrix(options=options)
+            logging.info("[Config] RGBMatrix object created.")
+            return matrix
+        except Exception as e:
+            logging.critical(f"[Config] failed to create RGBMatrix object: {e}")
+            logging.critical("[Config] Exiting program.")
+            sys.exit(1)

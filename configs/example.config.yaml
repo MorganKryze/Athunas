@@ -1,0 +1,79 @@
+# WARNING: Bad configuration of modules can lead to apps not loading correctly and bad
+# system configuration will lead to system crashes. Please be careful when editing this
+# file. Feel free to ask for help on the GitHub repository and read the documentation.
+
+# ------------------ System Configuration ------------------
+# System configuration is used to declare the hardware configuration of the matrix and
+# the pinout of the connected peripherals.
+
+# Please note that the following "gpio" values are NOT PIN numbers, but GPIO numbers.
+# See https://pinout.xyz/ for more information.
+
+System:
+  Matrix:
+    led_rows: 32
+    led_cols: 64
+    brightness: 100
+    refresh_rate: 0.05
+  Tilt-switch:
+    gpio: 19
+    bounce_time: 0.25
+  Encoder:
+    gpio_clk: 5
+    gpio_dt: 6
+    gpio_sw: 13
+
+# ------------------ Module Configuration ------------------
+# Modules are the toolboxes used by applications. Disabled modules will result in the
+# corresponding applications not being available and disabled.
+
+Modules:
+  Notification:
+    enabled: false
+    app_white_list:
+    websocket_url:
+  Weather:
+    enabled: false
+    token:
+    latitude:
+    longitude:
+    temperature_unit: celcius
+  Spotify:
+    enabled: false
+    client_id:
+    client_secret:
+    redirect_uri:
+
+# -------------------- App Configuration -------------------
+# Apps are the applications that are available to the user. Disabled apps will not be
+# available to the user.
+
+Apps:
+  MainScreen:
+    enabled: true
+    use_24_hour: true
+    date_format: DD-MM
+    cycle_duration_in_seconds: 20
+  Pomodoro:
+    enabled: true
+    work_duration: 25
+    break_duration: 5
+    long_break_duration: 15
+  GifViewer:
+    enabled: true
+    play_limit: 5
+  GameOfLife:
+    enabled: true
+  Spotify:
+    enabled: false
+  Notion:
+    enabled: false
+    token_v2:
+    source:
+  Youtube:
+    enabled: false
+    key:
+  Pushbullet:
+    enabled: false
+  Weather:
+    enabled: false

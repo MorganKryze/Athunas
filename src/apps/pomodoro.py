@@ -7,7 +7,7 @@ from PIL import Image, ImageFont, ImageDraw
 
 from enums.variable_importance import Importance
 from path import PathTo
-from settings import Settings
+from settings import Configuration
 
 # Constants
 DEFAULT_FONT_SIZE = 5
@@ -22,8 +22,8 @@ class PomodoroScreen:
             modules (Dict): Dictionary of modules.
             callbacks (Dict[str, Callable]): Dictionary of callback functions.
         """
-        self.enabled = Settings.read_variable(
-            "Pomodoro", "enabled", Importance.REQUIRED
+        self.enabled = Configuration.read_variable(
+            "Apps", "Pomodoro", "enabled", Importance.REQUIRED
         )
         if not self.enabled:
             logging.debug("[PomodoroScreen App] Pomodoro is disabled.")
@@ -39,18 +39,18 @@ class PomodoroScreen:
         self.canvas_height = Board.led_rows
 
         self.work_duration = timedelta(
-            minutes=Settings.read_variable(
-                "Pomodoro", "work_duration", Importance.REQUIRED
+            minutes=Configuration.read_variable(
+                "Apps", "Pomodoro", "work_duration", Importance.REQUIRED
             )
         )
         self.short_duration = timedelta(
-            minutes=Settings.read_variable(
-                "Pomodoro", "break_duration", Importance.REQUIRED
+            minutes=Configuration.read_variable(
+                "Apps", "Pomodoro", "break_duration", Importance.REQUIRED
             )
         )
         self.long_duration = timedelta(
-            minutes=Settings.read_variable(
-                "Pomodoro", "long_break_duration", Importance.REQUIRED
+            minutes=Configuration.read_variable(
+                "Apps", "Pomodoro", "long_break_duration", Importance.REQUIRED
             )
         )
         self.cycle_order = "WSWSWL"

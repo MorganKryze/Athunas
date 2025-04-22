@@ -10,7 +10,7 @@ from board import Board
 from enums.variable_importance import Importance
 from enums.input_status import InputStatus
 from path import PathTo
-from settings import Settings
+from settings import Configuration
 
 
 class GameOfLifeScreen:
@@ -23,8 +23,8 @@ class GameOfLifeScreen:
             modules (Dict): Dictionary of modules.
             default_actions (Dict[str, Callable]): Dictionary of callback functions.
         """
-        self.enabled = Settings.read_variable(
-            "GameOfLife", "enabled", Importance.REQUIRED
+        self.enabled = Configuration.read_variable(
+            "Apps", "GameOfLife", "enabled", Importance.REQUIRED
         )
         if not self.enabled:
             logging.debug("[GameOfLife] GameOfLife is disabled.")

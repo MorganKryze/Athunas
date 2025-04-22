@@ -4,7 +4,7 @@ from threading import Thread
 from queue import LifoQueue
 import time
 import logging
-from settings import Settings
+from settings import Configuration
 from enums.variable_importance import Importance
 from typing import Optional, Dict, Any
 
@@ -17,8 +17,8 @@ class WeatherModule:
         """
         Initialize the WeatherModule with the given configuration.
         """
-        self.enabled: bool = Settings.read_variable(
-            "Weather-Module", "enabled", Importance.REQUIRED
+        self.enabled: bool = Configuration.read_variable(
+            "Modules", "Weather", "enabled", Importance.REQUIRED
         )
         if not self.enabled:
             logging.info("[Weather Module] Disabled")
@@ -28,17 +28,17 @@ class WeatherModule:
         self.current_weather: Optional[Dict[str, Any]] = None
         self.weather_queue: LifoQueue = LifoQueue()
 
-        token: str = Settings.read_variable(
-            "Weather-Module", "token", Importance.REQUIRED
+        token: str = Configuration.read_variable(
+            "Modules", "Weather", "token", Importance.REQUIRED
         )
-        latitude: float = Settings.read_variable(
-            "Weather-Module", "latitude", Importance.REQUIRED
+        latitude: float = Configuration.read_variable(
+            "Modules", "Weather", "latitude", Importance.REQUIRED
         )
-        longitude: float = Settings.read_variable(
-            "Weather-Module", "longitude", Importance.REQUIRED
+        longitude: float = Configuration.read_variable(
+            "Modules", "Weather", "longitude", Importance.REQUIRED
         )
-        self.temperature_unit: str = Settings.read_variable(
-            "Weather-Module", "temperature_unit", Importance.REQUIRED
+        self.temperature_unit: str = Configuration.read_variable(
+            "Modules", "Weather", "temperature_unit", Importance.REQUIRED
         )
         if self.temperature_unit not in ["celsius", "fahrenheit"]:
             logging.error(

@@ -8,35 +8,40 @@ from board import Board
 from path import PathTo
 from logs import Logs
 from app_manager import AppManager
-from settings import Settings
-from webserver import start_web_server, is_user_connected
+from settings import Configuration
+from webserver import WebServer
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description='Athunas LED matrix controller')
-    parser.add_argument('--debug', action='store_true', help='Run with debug logging to console')
+    parser = argparse.ArgumentParser(description="Athunas LED matrix controller")
+    parser.add_argument("--debug", action="store_true", help="Run with debug console")
+    parser.add_argument("--emulator", action="store_true", help="Run in emulator mode")
     args = parser.parse_args()
-    
+
     PathTo.set_base_directory()
     PathTo.add_library_to_path()
-    
+
     file_level = logging.DEBUG
     console_level = logging.DEBUG if args.debug else logging.WARNING
-    
-    Logs.start(file_level=file_level, console_level=console_level)
-    Settings.load_config()
-    Board.init_system()
-    AppManager.init_apps()
 
-    matrix = Settings.create_matrix(
-        Board.led_rows, Board.led_cols, Board.brightness, use_emulator=True
+    Logs.start(file_level=file_level, console_level=console_level)
+
+    Configuration.load()
+
+    Board.init_system()
+
+    matrix = Board.init_matrix(
+        Board.led_rows, Board.led_cols, Board.brightness, use_emulator=args.emulator
     )
 
-    web_server_thread = start_web_server(port=8080)
+    AppManager.init_apps()
+
+    server = WebServer()
+    server.start(port= 9000, debug=args.debug)
 
     while True:
         try:
-            if is_user_connected():
+            if server.is_user_connected():
                 matrix.SetImage(Board.black_screen)
             else:
                 if not Board.encoder_queue.empty():
@@ -60,7 +65,6 @@ def main() -> None:
             time.sleep(Board.refresh_rate)
         except KeyboardInterrupt:
             logging.info("[Controller] Application stopped by user.")
-            web_server_thread.join()
             matrix.SetImage(Board.black_screen)
             break
 
