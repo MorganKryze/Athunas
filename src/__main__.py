@@ -37,7 +37,7 @@ def main() -> None:
     AppManager.init_apps()
 
     server = WebServer()
-    server.start(port=9000, debug=args.debug)
+    server.start(port=9000, debug=False)
 
     while True:
         try:
