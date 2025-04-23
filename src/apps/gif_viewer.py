@@ -60,7 +60,7 @@ class GifScreen:
         logging.debug("[GifScreen App] GifScreen initialized.")
 
     def generate(
-        self, encoder_input_status: InputStatus
+        self, is_horizontal: bool, encoder_input_status: InputStatus
     ) -> Image.Image:
         """
         Generate the frame to draw on the LED matrix.
@@ -81,7 +81,9 @@ class GifScreen:
             self.auto_play_mode = not self.auto_play_mode
             if self.auto_play_mode:
                 self.play_count = 0
-                self.current_animation_index = (self.current_animation_index + 1) % len(self.animations)
+                self.current_animation_index = (self.current_animation_index + 1) % len(
+                    self.animations
+                )
 
         if self.selection_mode:
             if encoder_input_status == InputStatus.ENCODER_INCREASE:
@@ -136,9 +138,7 @@ class GifScreen:
 
         draw = ImageDraw.Draw(frame)
         if self.selection_mode:
-            draw.rectangle(
-                (0, 0, self.led_cols - 1, self.led_rows - 1), outline=WHITE
-            )
+            draw.rectangle((0, 0, self.led_cols - 1, self.led_rows - 1), outline=WHITE)
 
         return frame
 
