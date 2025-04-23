@@ -134,11 +134,11 @@ class GifScreen:
                     ) % len(self.animations)
                 self.current_frame_index = 0
 
-            draw = ImageDraw.Draw(frame)
-            if self.selection_mode:
-                draw.rectangle(
-                    (0, 0, self.led_cols - 1, self.led_rows - 1), outline=WHITE
-                )
+        draw = ImageDraw.Draw(frame)
+        if self.selection_mode:
+            draw.rectangle(
+                (0, 0, self.led_cols - 1, self.led_rows - 1), outline=WHITE
+            )
 
         return frame
 
