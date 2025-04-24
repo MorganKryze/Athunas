@@ -1,6 +1,6 @@
-COMMANDS=install build run
+COMMANDS=install build
 
-all: $(COMMANDS)
+setup: $(COMMANDS)
 
 install:
 # Install dependencies to build 'rpi-rgb-led-matrix'
@@ -14,13 +14,13 @@ install:
 # Allow 'python3.11' to use 'cap_sys_nice'
 	sudo setcap 'cap_sys_nice=eip' /usr/bin/python3.11
 
-build:
+build: install
 # Build 'rpi-rgb-led-matrix' examples
 	make -C ./rpi-rgb-led-matrix/examples-api-use
 # Build 'rpi-rgb-led-matrix' python bindings
 	make -C ./rpi-rgb-led-matrix build-python
 # Setup virtual environment
-	uv venv
+	$HOME/.local/bin/uv venv
 # Enter virtual environment
 	. .venv/bin/activate
 # Install project python dependencies

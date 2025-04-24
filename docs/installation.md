@@ -39,7 +39,7 @@ sudo apt-get upgrade -y
 - Install `git` and `pip`.
 
 ```bash
-sudo apt install git python3-pip -y
+sudo apt install git python3-pip make -y
 ```
 
 ## Improve performance for Matrix
@@ -97,13 +97,7 @@ cd Athunas
 - We use our `Makefile` to install the project dependencies.
 
 ```bash
-make install
-```
-
-- Build the dependencies.
-
-```bash
-make build
+make setup
 ```
 
 - (Optional) If you did the wiring, you may try the demo.
