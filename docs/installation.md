@@ -109,8 +109,8 @@ make example
 > [!TIP]
 > If you get any error with the display, open the `Makefile` and try the following steps:
 >
-> - Check the wiring;
 > - Add/remove: `--led-no-hardware-pulse`;
+> - Check the wiring;
 > - Breathe in, breathe out, do it again.
 
 - Finally, run the project.
