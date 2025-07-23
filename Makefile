@@ -22,10 +22,10 @@ install:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Adding 'uv' to PATH...$(RESET)"
 	@echo "export PATH=\$${PATH}:\$${HOME}/.local/bin" >> ~/.bashrc || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to update PATH. Please check the logs for error.$(RESET)"; exit 1; }
+	@export PATH=$$PATH:$$HOME/.local/bin
 	@echo "export PYTHONPATH=\$${PYTHONPATH}:\$${HOME}/.local/lib/python3.11/site-packages" >> ~/.bashrc || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to update PYTHONPATH. Please check the logs for error.$(RESET)"; exit 1; }
-	@. ~/.bashrc || . ~/.bashrc || \
-		{ echo "[$(ORANGE)  WARNING  $(RESET)] $(ORANGE)Failed to source .bashrc. Please run 'source ~/.bashrc' manually.$(RESET)"; }
+	@export PYTHONPATH=$$PYTHONPATH:$$HOME/.local/lib/python3.11/site-packages
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)System dependencies installed successfully.$(RESET)"
 
@@ -36,6 +36,9 @@ build:
 	@make -C ./rpi-rgb-led-matrix build-python
 
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Creating python virtual environment...$(RESET)"
+	@. ~/.bashrc || \
+		{ echo "[$(ORANGE)  WARNING  $(RESET)] $(ORANGE)Failed to source .bashrc. Please run 'source ~/.bashrc' manually.$(RESET)"; }
+
 	@uv venv || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to create virtual environment. Please check the logs for error.$(RESET)"; exit 1; }
 	@. .venv/bin/activate
