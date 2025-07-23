@@ -91,13 +91,7 @@ sudo reboot
 - Clone the repository.
 
 ```bash
-git clone --recurse-submodules https://github.com/MorganKryze/Athunas.git
-```
-
-- Move to the project directory for the next steps.
-
-```bash
-cd Athunas
+git clone --recurse-submodules https://github.com/MorganKryze/Athunas.git && cd Athunas
 ```
 
 ## Build & Run
