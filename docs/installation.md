@@ -6,17 +6,13 @@
 
 ### Configure the OS
 
-First, plug a microSD card (at least 16GB) into your computer and format it using the [Raspberry Pi Imager](https://www.raspberrypi.com/software/) to FAT32 format. The device should be a `Raspberry Pi Zero 2W` or any other model that supports the `rpi-rgb-led-matrix` library.
-
-![Pi Zero 2W](assets/img/install/pi-zero-2W.png)
+First, plug a microSD card (at least 16GB) into your computer and format it using the [Raspberry Pi Imager](https://www.raspberrypi.com/software/) to FAT32 format. The device should be a `Raspberry Pi Zero 2W` or any other model you choose that supports the `rpi-rgb-led-matrix` library.
 
 Then, choose the OS `Raspberry Pi OS Lite` (64-bit) and select the SD card you just formatted.
 
-After pressing "Next", you will be prompted to configure the following settings under the `General` tab:
+After pressing "Next", you will be prompted to edit the settings. Click on `Edit setttings`.
 
-![Prompt](assets/img/install/edit.png)
-
-![Settings](assets/img/install/settings-general.png)
+Under the `General` tab, set up as follows:
 
 - **Hostname**: `athunas`
 - **Username**: `admin`
@@ -26,15 +22,13 @@ After pressing "Next", you will be prompted to configure the following settings 
 - **Wireless LAN country**: `your_country` (e.g., `US`, `FR`, etc.)
 - **Timezone**: `your_timezone` (e.g., `Europe/Paris`, `America/New_York`, etc.)
 
-In the `Services` tab, enable `SSH` and tick the box to allow `Password authentication` (you may want to go with `Public key` authentication later).
-
-![Services](assets/img/install/settings-services.png)
+Under the `Services` tab, enable `SSH` and tick the box to allow `Password authentication` (you may want to go with `Public key` authentication later).
 
 Finally, click on `Save` and `Yes` to write the image to the SD card. Once the process is complete, safely eject the SD card from your computer and plug it into your Raspberry Pi.
 
 ### Boot the Pi
 
-- Connect to your machine via SSH (be sure to be connected to the same network) **or** using a monitor + keyboard.
+Power up your Pi, wait for one minute or two, then connect to your Pi via SSH from your PC terminal (be sure to be connected to the same network) **or** using a monitor + keyboard.
 
 ```bash
 ssh admin@athunas.local
@@ -48,7 +42,7 @@ And enter the password you set earlier (`raspberry`).
 sudo apt-get update && sudo apt-get upgrade -y
 ```
 
-- Install `git` and `pip`.
+- Install `git`, `pip` and `make`.
 
 ```bash
 sudo apt install git python3-pip make -y
@@ -100,7 +94,7 @@ sudo reboot
 git clone --recurse-submodules https://github.com/MorganKryze/Athunas.git
 ```
 
-- Change directory to the project.
+- Move to the project directory for the next steps.
 
 ```bash
 cd Athunas
@@ -108,13 +102,13 @@ cd Athunas
 
 ## Build & Run
 
-- We use our `Makefile` to install the project dependencies.
+- We use our `Makefile` to install the project dependencies. If you encounter any issue at this point, please check that `git` `pip` and `make` are installed correctly.
 
 ```bash
 make setup
 ```
 
-- (Optional) If and only if you did the wiring, you may try the demo.
+- If and only if you did the wiring, you may try the demo.
 
 ```bash
 make example
