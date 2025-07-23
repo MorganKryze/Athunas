@@ -8,23 +8,23 @@ RESET := $(shell tput sgr0)
 .PHONY: install
 install:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Installing system dependencies...$(RESET)"
-	sudo apt-get install libsixel-dev python3-tk cython3 python3-pip -y ||  \
+	@sudo apt-get install libsixel-dev python3-tk cython3 python3-pip -y ||  \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to install system dependencies. Please check the logs for error.$(RESET)"; exit 1; }
 	
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Adding 'cap_sys_nice' capability to 'python3.11'...$(RESET)"
-	sudo setcap 'cap_sys_nice=eip' /usr/bin/python3.11 || \
+	@sudo setcap 'cap_sys_nice=eip' /usr/bin/python3.11 || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to set capabilities. Please check the logs for error.$(RESET)"; exit 1; }
 	
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Installing 'uv' python package manager...$(RESET)"
-	pip install uv --break-system-packages || \
+	@pip install uv --break-system-packages || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to install 'uv'. Please check the logs for error.$(RESET)"; exit 1; }
 	
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Adding 'uv' to PATH...$(RESET)"
-	echo "export PATH=\$${PATH}:\$${HOME}/.local/bin" >> ~/.bashrc || \
+	@echo "export PATH=\$${PATH}:\$${HOME}/.local/bin" >> ~/.bashrc || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to update PATH. Please check the logs for error.$(RESET)"; exit 1; }
-	echo "export PYTHONPATH=\$${PYTHONPATH}:\$${HOME}/.local/lib/python3.11/site-packages" >> ~/.bashrc || \
+	@echo "export PYTHONPATH=\$${PYTHONPATH}:\$${HOME}/.local/lib/python3.11/site-packages" >> ~/.bashrc || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to update PYTHONPATH. Please check the logs for error.$(RESET)"; exit 1; }
-	source ~/.bashrc || . ~/.bashrc || \
+	@source ~/.bashrc || . ~/.bashrc || \
 		{ echo "[$(ORANGE)  WARNING  $(RESET)] $(ORANGE)Failed to source .bashrc. Please run 'source ~/.bashrc' manually.$(RESET)"; }
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)System dependencies installed successfully.$(RESET)"
@@ -32,16 +32,16 @@ install:
 .PHONY: build
 build:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Building 'rpi-rgb-led-matrix' library...$(RESET)"
-	make -C ./rpi-rgb-led-matrix/examples-api-use
-	make -C ./rpi-rgb-led-matrix build-python
+	@make -C ./rpi-rgb-led-matrix/examples-api-use
+	@make -C ./rpi-rgb-led-matrix build-python
 
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Creating python virtual environment...$(RESET)"
-	uv venv || \
+	@uv venv || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to create virtual environment. Please check the logs for error.$(RESET)"; exit 1; }
-	source .venv/bin/activate
+	@source .venv/bin/activate
 
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Installing project python dependencies...$(RESET)"
-	uv pip install . || \
+	@uv pip install . || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to install project dependencies. Please check the logs for error.$(RESET)"; exit 1; }
 	
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Project built successfully.$(RESET)"
@@ -50,7 +50,7 @@ build:
 .PHONY: example
 example:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Running example demo...$(RESET)"
-	sudo ./rpi-rgb-led-matrix/examples-api-use/demo -D 0 --led-no-hardware-pulse --led-rows=32 --led-cols=64 || \
+	@sudo ./rpi-rgb-led-matrix/examples-api-use/demo -D 0 --led-no-hardware-pulse --led-rows=32 --led-cols=64 || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to run example demo. Please check the logs for error.$(RESET)"; exit 1; }
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Example demo completed.$(RESET)"
@@ -58,21 +58,21 @@ example:
 .PHONY: run
 run:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Running project...$(RESET)"
-	uv run src
+	@uv run src
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Project stopped.$(RESET)"
 
 .PHONY: dev
 dev:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Running project with debug-level console logging...$(RESET)"
-	uv run src --debug
+	@uv run src --debug
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Project running with debug logging.$(RESET)"
 
 .PHONY: dev-emulator
 dev-emulator:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Running project with debug-level console logging in emulator mode...$(RESET)"
-	uv run src --debug --emulator
+	@uv run src --debug --emulator
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Project running in emulator mode with debug logging.$(RESET)"
 
@@ -90,8 +90,8 @@ clean-python:
 .PHONY: clean-library
 clean-library:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Cleaning up 'rpi-rgb-led-matrix' build artifacts...$(RESET)"
-	make -C ./rpi-rgb-led-matrix/examples-api-use clean
-	make -C ./rpi-rgb-led-matrix clean
+	@make -C ./rpi-rgb-led-matrix/examples-api-use clean
+	@make -C ./rpi-rgb-led-matrix clean
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)'rpi-rgb-led-matrix' build artifacts cleaned up.$(RESET)"
 
