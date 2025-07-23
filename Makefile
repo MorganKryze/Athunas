@@ -15,26 +15,22 @@ install:
 	@sudo setcap 'cap_sys_nice=eip' /usr/bin/python3.11 || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to set capabilities. Please check the logs for error.$(RESET)"; exit 1; }
 	
-	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Installing 'uv' python package manager...$(RESET)"
-	@pip install uv --break-system-packages || \
+	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Installing 'uv' (you may ignore their recommendation)...$(RESET)"
+	@curl -LsSf https://astral.sh/uv/install.sh | sh || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to install 'uv'. Please check the logs for error.$(RESET)"; exit 1; }
 	
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Adding 'uv' to PATH...$(RESET)"
 	@echo "export PATH=\$${PATH}:\$${HOME}/.local/bin" >> ~/.bashrc || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to update PATH. Please check the logs for error.$(RESET)"; exit 1; }
 	@export PATH=$$PATH:$$HOME/.local/bin
-	@echo "export PYTHONPATH=\$${PYTHONPATH}:\$${HOME}/.local/lib/python3.11/site-packages" >> ~/.bashrc || \
-		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to update PYTHONPATH. Please check the logs for error.$(RESET)"; exit 1; }
-	@export PYTHONPATH=$$PYTHONPATH:$$HOME/.local/lib/python3.11/site-packages
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)System dependencies installed successfully.$(RESET)"
 
 .PHONY: build
 build:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Creating python virtual environment...$(RESET)"
-	@. ~/.bashrc || \
-		{ echo "[$(ORANGE)  WARNING  $(RESET)] $(ORANGE)Failed to source .bashrc. Please run 'source ~/.bashrc' manually.$(RESET)"; }
-
+	@. ${HOME}/.local/bin || \
+		{ echo "[$(ORANGE)  WARNING  $(RESET)] $(ORANGE)Failed to source binaries directory. Please run 'source ~/.bashrc' manually.$(RESET)"; }
 	@uv venv || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to create virtual environment. Please check the logs for error.$(RESET)"; exit 1; }
 	@. .venv/bin/activate
@@ -105,7 +101,8 @@ clean: clean-python clean-library
 .PHONY: update
 update:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Updating 'uv'...$(RESET)"
-	pip install --upgrade uv --break-system-packages
+	uv self update || \
+		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to update 'uv'. Please check the logs for error.$(RESET)"; exit 1; }
 
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Updating project repository...$(RESET)"
 	git submodule update --remote --merge
