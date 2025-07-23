@@ -6,27 +6,16 @@
 
 - Flash the Raspberry Pi OS Lite image to your SD card using the Raspberry Pi Imager. Then boot your Raspberry Pi Zero 2W (or any other model) with the SD card.
 
+```plaintext
+Username: admin
+Password: raspberry (you can change it later)
+Hostname: athunas
+```
+
 - Connect to your machine via SSH **or** using a monitor + keyboard. Be sure to be connected to the same network.
 
 ```bash
-ssh rasp@pi.local
-```
-
-```plaintext
-Username: raspberry
-Password: raspberry
-Hostname: pi
-```
-
-- Reset the locale settings.
-
-```bash
-sudo dpkg-reconfigure locales
-```
-
-```bash
-sudo update-locale LANG=en_GB.UTF-8 LC_ALL=en_GB.UTF-8
-sudo reboot
+ssh admin@athunas.local
 ```
 
 - Update your system.
