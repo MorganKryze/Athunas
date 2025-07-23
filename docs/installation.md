@@ -105,7 +105,13 @@ cd Athunas
 - We use our `Makefile` to install the project dependencies. If you encounter any issue at this point, please check that `git` `pip` and `make` are installed correctly.
 
 ```bash
-make setup
+make install
+```
+
+Then build the `rpi-rgb-led-matrix` library and the Python bindings.
+
+```bash
+make build
 ```
 
 - If and only if you did the wiring, you may try the demo.
