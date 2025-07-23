@@ -32,8 +32,7 @@ sudo reboot
 - Update your system.
 
 ```bash
-sudo apt-get update -y
-sudo apt-get upgrade -y
+sudo apt-get update && sudo apt-get upgrade -y
 ```
 
 - Install `git` and `pip`.
