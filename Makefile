@@ -28,11 +28,11 @@ install:
 .PHONY: build
 build:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Creating python virtual environment...$(RESET)"
-	@$HOME/.local/bin/uv venv || \
+	@${HOME}/.local/bin/uv venv || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to create virtual environment. Please check the logs for error.$(RESET)"; exit 1; }
 
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Installing project python dependencies...$(RESET)"
-	@$HOME/.local/bin/uv pip install || \
+	@${HOME}/.local/bin/uv pip install || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to install project dependencies. Please check the logs for error.$(RESET)"; exit 1; }
 
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Building 'rpi-rgb-led-matrix' library...$(RESET)"
@@ -53,21 +53,21 @@ example:
 .PHONY: run
 run:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Running project...$(RESET)"
-	@$HOME/.local/bin/uv run src
+	@${HOME}/.local/bin/uv run src
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Project stopped.$(RESET)"
 
 .PHONY: dev
 dev:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Running project with debug-level console logging...$(RESET)"
-	@$HOME/.local/bin/uv run src --debug
+	@${HOME}/.local/bin/uv run src --debug
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Project running with debug logging.$(RESET)"
 
 .PHONY: dev-emulator
 dev-emulator:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Running project with debug-level console logging in emulator mode...$(RESET)"
-	@$HOME/.local/bin/uv run src --debug --emulator
+	@${HOME}/.local/bin/uv run src --debug --emulator
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Project running in emulator mode with debug logging.$(RESET)"
 
@@ -97,7 +97,7 @@ clean: clean-python clean-library
 .PHONY: update
 update:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Updating 'uv'...$(RESET)"
-	$HOME/.local/bin/uv self update || \
+	${HOME}/.local/bin/uv self update || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to update 'uv'. Please check the logs for error.$(RESET)"; exit 1; }
 
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Updating project repository...$(RESET)"
@@ -105,7 +105,7 @@ update:
 	git pull
 
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Updating project dependencies...$(RESET)"
-	$HOME/.local/bin/uv pip install --upgrade .
+	${HOME}/.local/bin/uv pip install --upgrade .
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Project and dependencies updated successfully.$(RESET)"
  
