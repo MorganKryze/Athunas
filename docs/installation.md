@@ -36,13 +36,19 @@ ssh admin@athunas.local
 
 And enter the password you set earlier (`raspberry`).
 
-- Update your system.
+Update your system.
 
 ```bash
-sudo apt-get update && sudo apt-get upgrade -y
+sudo apt update && sudo apt upgrade -y
 ```
 
-- Install `git`, `pip` and `make`.
+Remove unnecessary packages.
+
+```bash
+sudo apt autoremove -y
+```
+
+Install `git`, `pip` and `make`.
 
 ```bash
 sudo apt install git python3-pip make -y
@@ -52,7 +58,7 @@ sudo apt install git python3-pip make -y
 
 #### Improve performance for Matrix
 
-- Add a small flag at the end of the line to add better results:
+Add a small flag at the end of the line to add better results:
 
 ```bash
 sudo nano /boot/firmware/cmdline.txt
@@ -64,7 +70,7 @@ isolcpus=3
 
 #### Disable sound module
 
-- Edit the file `/etc/modprobe.d/raspi-blacklist.conf` and add the following line:
+Edit the file `/etc/modprobe.d/raspi-blacklist.conf` and add the following line:
 
 ```bash
 sudo nano /etc/modprobe.d/blacklist-rgb-matrix.conf
@@ -74,13 +80,13 @@ sudo nano /etc/modprobe.d/blacklist-rgb-matrix.conf
 blacklist snd_bcm2835
 ```
 
-- Update the kernel modules.
+Update the kernel modules.
 
 ```bash
 sudo update-initramfs -u
 ```
 
-- Reboot the Raspberry Pi.
+Reboot the Raspberry Pi.
 
 ```bash
 sudo reboot
@@ -88,7 +94,7 @@ sudo reboot
 
 ## Install the project
 
-- Clone the repository.
+Clone the repository.
 
 ```bash
 git clone --recurse-submodules https://github.com/MorganKryze/Athunas.git && cd Athunas
@@ -96,7 +102,7 @@ git clone --recurse-submodules https://github.com/MorganKryze/Athunas.git && cd 
 
 ## Build & Run
 
-- We use our `Makefile` to install the project dependencies. If you encounter any issue at this point, please check that `git` `pip` and `make` are installed correctly.
+We use our `Makefile` to install the project dependencies. If you encounter any issue at this point, please check that `git` `pip` and `make` are installed correctly.
 
 ```bash
 make install
@@ -108,7 +114,7 @@ Then build the `rpi-rgb-led-matrix` library and the Python bindings.
 make build
 ```
 
-- If and only if you did the wiring, you may try the demo.
+If and only if you did the wiring, you may try the demo.
 
 ```bash
 make example
@@ -121,7 +127,7 @@ make example
 > - Check the wiring;
 > - Breathe in, breathe out, do it again.
 
-- Finally, run the project.
+Finally, run the project.
 
 ```bash
 make run
