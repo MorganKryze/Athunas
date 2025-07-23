@@ -22,21 +22,19 @@ install:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Adding 'uv' to PATH...$(RESET)"
 	@echo "export PATH=\$${PATH}:\$${HOME}/.local/bin" >> ~/.bashrc || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to update PATH. Please check the logs for error.$(RESET)"; exit 1; }
-	@export PATH=$$PATH:$$HOME/.local/bin
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)System dependencies installed successfully.$(RESET)"
 
 .PHONY: build
 build:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Creating python virtual environment...$(RESET)"
-	@. ${HOME}/.local/bin || \
+	@export PATH=$$PATH:$$HOME/.local/bin || \
 		{ echo "[$(ORANGE)  WARNING  $(RESET)] $(ORANGE)Failed to source binaries directory. Please run 'source ~/.bashrc' manually.$(RESET)"; }
 	@uv venv || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to create virtual environment. Please check the logs for error.$(RESET)"; exit 1; }
-	@. .venv/bin/activate
 
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Installing project python dependencies...$(RESET)"
-	@uv pip install . || \
+	@uv pip install || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to install project dependencies. Please check the logs for error.$(RESET)"; exit 1; }
 
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Building 'rpi-rgb-led-matrix' library...$(RESET)"
