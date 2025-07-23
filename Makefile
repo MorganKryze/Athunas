@@ -31,10 +31,6 @@ install:
 
 .PHONY: build
 build:
-	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Building 'rpi-rgb-led-matrix' library...$(RESET)"
-	@make -C ./rpi-rgb-led-matrix/examples-api-use
-	@make -C ./rpi-rgb-led-matrix build-python
-
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Creating python virtual environment...$(RESET)"
 	@. ~/.bashrc || \
 		{ echo "[$(ORANGE)  WARNING  $(RESET)] $(ORANGE)Failed to source .bashrc. Please run 'source ~/.bashrc' manually.$(RESET)"; }
@@ -46,6 +42,10 @@ build:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Installing project python dependencies...$(RESET)"
 	@uv pip install . || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to install project dependencies. Please check the logs for error.$(RESET)"; exit 1; }
+
+	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Building 'rpi-rgb-led-matrix' library...$(RESET)"
+	@make -C ./rpi-rgb-led-matrix/examples-api-use
+	@make -C ./rpi-rgb-led-matrix build-python
 	
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Project built successfully.$(RESET)"
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)To test the library, run 'make example' or 'make run' to run the project.$(RESET)"
