@@ -32,6 +32,7 @@ Modules:
     enabled: false
     app_white_list:
     websocket_url:
+    retry_delay_on_error: 1000
   Weather:
     enabled: false
     token:

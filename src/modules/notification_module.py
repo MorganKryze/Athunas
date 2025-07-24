@@ -9,9 +9,6 @@ from functools import cmp_to_key
 import logging
 from typing import List, Dict, Any
 
-# Constants
-RETRY_DELAY_SECONDS = 1000
-
 
 class NotificationModule:
     def __init__(self) -> None:
@@ -24,8 +21,9 @@ class NotificationModule:
         if not self.enabled:
             logging.info("[Notification Module] Disabled")
             return
+        else:
+            logging.debug("[Notification Module] Initializing")
 
-        logging.debug("[Notification Module] Initializing")
         self.app_white_list: Dict[str, str] = Configuration.read_variable(
             "Modules", "Notification", "app_white_list"
         )
@@ -39,9 +37,17 @@ class NotificationModule:
         self.notifications_list: List[Notification] = []
         self.notification_queue: Queue = Queue()
 
+        self.retry_delay_on_error: int = Configuration.read_variable(
+            "Modules", "Notification", "retry_delay_on_error", Importance.REQUIRED
+        )
+        logging.debug(
+            f"[Notification Module] Retry delay on error set to {self.retry_delay_on_error} ms"
+        )
+        Notification.retry_delay_on_error = self.retry_delay_on_error
+
         logging.debug("[Notification Module] Starting websocket service")
         Thread(
-            target=start_service,
+            target=Notification.start_service,
             args=(self.notification_queue, self.websocket_url, self.app_white_list),
         ).start()
 
@@ -86,6 +92,8 @@ class NotificationModule:
 
 
 class Notification:
+    retry_delay_on_error: int = 0  # Default value, will be set in the module
+
     def __init__(
         self,
         application: str,
@@ -132,111 +140,112 @@ class Notification:
         else:
             return 0
 
+    @classmethod
+    def on_message(
+        _: websocket.WebSocket,
+        message: str,
+        noti_queue: Queue,
+        app_white_list: Dict[str, str],
+    ) -> None:
+        """
+        Handle incoming messages from the websocket.
 
-def on_message(
-    _: websocket.WebSocket,
-    message: str,
-    noti_queue: Queue,
-    app_white_list: Dict[str, str],
-) -> None:
-    """
-    Handle incoming messages from the websocket.
+        Args:
+            _ (WebSocketApp): The websocket app (unused).
+            message (str): The message received.
+            noti_queue (Queue): The notification queue.
+            app_white_list (dict): The application white list.
+        """
+        logging.debug(f"[Notification Module] Received message: {message}")
+        message = json.loads(message)
 
-    Args:
-        _ (WebSocketApp): The websocket app (unused).
-        message (str): The message received.
-        noti_queue (Queue): The notification queue.
-        app_white_list (dict): The application white list.
-    """
-    logging.debug(f"[Notification Module] Received message: {message}")
-    message = json.loads(message)
-
-    if message["type"] == "push":
-        contents = message["push"]
-        if contents["package_name"] in app_white_list:
-            if contents["type"] == "mirror":
-                noti_queue.put(
-                    Notification(
-                        app_white_list[contents["package_name"]],
-                        True,
-                        int(contents["notification_id"]),
-                        contents["title"],
-                        contents["body"],
-                        time.time(),
+        if message["type"] == "push":
+            contents = message["push"]
+            if contents["package_name"] in app_white_list:
+                if contents["type"] == "mirror":
+                    noti_queue.put(
+                        Notification(
+                            app_white_list[contents["package_name"]],
+                            True,
+                            int(contents["notification_id"]),
+                            contents["title"],
+                            contents["body"],
+                            time.time(),
+                        )
                     )
-                )
-                logging.info(
-                    f"[Notification Module] Added new notification from {contents['package_name']}"
-                )
-            elif contents["type"] == "dismissal":
-                noti_queue.put(
-                    Notification(
-                        app_white_list[contents["package_name"]],
-                        False,
-                        int(contents["notification_id"]),
-                        "",
-                        "",
-                        time.time(),
+                    logging.info(
+                        f"[Notification Module] Added new notification from {contents['package_name']}"
                     )
-                )
-                logging.info(
-                    f"[Notification Module] Dismissed notification from {contents['package_name']}"
-                )
+                elif contents["type"] == "dismissal":
+                    noti_queue.put(
+                        Notification(
+                            app_white_list[contents["package_name"]],
+                            False,
+                            int(contents["notification_id"]),
+                            "",
+                            "",
+                            time.time(),
+                        )
+                    )
+                    logging.info(
+                        f"[Notification Module] Dismissed notification from {contents['package_name']}"
+                    )
 
+    @classmethod
+    def on_error(
+        cls,
+        _: websocket.WebSocket,
+        error: Exception,
+        noti_queue: Queue,
+        pushbullet_ws: str,
+        app_white_list: Dict[str, str],
+    ) -> None:
+        """
+        Handle errors from the websocket.
 
-def on_error(
-    _: websocket.WebSocket,
-    error: Exception,
-    noti_queue: Queue,
-    pushbullet_ws: str,
-    app_white_list: Dict[str, str],
-) -> None:
-    """
-    Handle errors from the websocket.
+        Args:
+            _ (WebSocketApp): The websocket app (unused).
+            error (Exception): The error encountered.
+            noti_queue (Queue): The notification queue.
+            pushbullet_ws (str): The pushbullet websocket URL.
+            app_white_list (dict): The application white list.
+        """
+        logging.error(f"[Notification Module] WebSocket error: {error}")
+        time.sleep(cls.retry_delay_on_error)
+        logging.info("[Notification Module] Restarting websocket service")
+        cls.start_service(noti_queue, pushbullet_ws, app_white_list)
 
-    Args:
-        _ (WebSocketApp): The websocket app (unused).
-        error (Exception): The error encountered.
-        noti_queue (Queue): The notification queue.
-        pushbullet_ws (str): The pushbullet websocket URL.
-        app_white_list (dict): The application white list.
-    """
-    logging.error(f"[Notification Module] WebSocket error: {error}")
-    time.sleep(RETRY_DELAY_SECONDS)
-    logging.info("[Notification Module] Restarting websocket service")
-    start_service(noti_queue, pushbullet_ws, app_white_list)
+    @classmethod
+    def on_close(cls, _: websocket.WebSocket) -> None:
+        """
+        Handle the websocket close event.
 
+        Args:
+            _ (WebSocketApp): The websocket app (unused).
+        """
+        logging.warning("[Notification Module] Websocket closed")
 
-def on_close(_: websocket.WebSocket) -> None:
-    """
-    Handle the websocket close event.
+    @classmethod
+    def start_service(
+        cls, noti_queue: Queue, pushbullet_ws: str, app_white_list: Dict[str, str]
+    ) -> None:
+        """
+        Start the websocket service.
 
-    Args:
-        _ (WebSocketApp): The websocket app (unused).
-    """
-    logging.warning("[Notification Module] Websocket closed")
-
-
-def start_service(
-    noti_queue: Queue, pushbullet_ws: str, app_white_list: Dict[str, str]
-) -> None:
-    """
-    Start the websocket service.
-
-    Args:
-        noti_queue (Queue): The notification queue.
-        pushbullet_ws (str): The pushbullet websocket URL.
-        app_white_list (dict): The application white list.
-    """
-    logging.info("[Notification Module] Starting websocket service")
-    ws = websocket.WebSocket(
-        pushbullet_ws,
-        on_message=lambda ws, message: on_message(
-            ws, message, noti_queue, app_white_list
-        ),
-        on_error=lambda ws, error: on_error(
-            ws, error, noti_queue, pushbullet_ws, app_white_list
-        ),
-        on_close=on_close,
-    )
-    ws.run_forever()
+        Args:
+            noti_queue (Queue): The notification queue.
+            pushbullet_ws (str): The pushbullet websocket URL.
+            app_white_list (dict): The application white list.
+        """
+        logging.info("[Notification Module] Starting websocket service")
+        ws = websocket.WebSocket(
+            pushbullet_ws,
+            on_message=lambda ws, message: cls.on_message(
+                ws, message, noti_queue, app_white_list
+            ),
+            on_error=lambda ws, error: cls.on_error(
+                ws, error, noti_queue, pushbullet_ws, app_white_list
+            ),
+            on_close=cls.on_close,
+        )
+        ws.run_forever()
