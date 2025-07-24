@@ -3,7 +3,6 @@ import urllib.request
 import json
 from PIL import Image, ImageFont, ImageDraw
 import threading
-import numpy as np
 from enums.input_status import InputStatus
 from queue import LifoQueue
 from ast import literal_eval
