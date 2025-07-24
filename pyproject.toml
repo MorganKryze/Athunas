@@ -5,18 +5,17 @@ description = "RGB led matrix controller, providing apps and modules for various
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "flask>=3.1.0",
+    "gpiozero==2.0.1",
     "numpy==2.0.0",
+    "pyyaml==6.0.2",
     "Pillow==10.4.0",
     "pyowm==3.3.0",
     "python-dateutil==2.9.0.post0",
     "requests==2.32.3",
+    "RGBMatrixEmulator==0.11.6",
     "spotipy==2.24.0",
+    "scipy==1.14.0",
     "websocket==0.2.1",
     "yfinance==0.2.40",
-    "pyyaml==6.0.2",
-    "scipy==1.14.0",
-    "lgpio==0.2.2.0",
-    "gpiozero==2.0.1",
-    "RGBMatrixEmulator==0.11.6",
-    "flask>=3.1.0",
 ]
