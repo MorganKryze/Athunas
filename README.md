@@ -1,4 +1,4 @@
-![screenshot](./docs/assets/img/screenshot.png)
+![screenshot](./docs/assets/img/render.png)
 
 ## Overview
 
