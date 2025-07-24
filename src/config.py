@@ -110,16 +110,20 @@ class Configuration:
         subprocess.call(["sudo", "reboot"])
 
     @classmethod
-    def save(cls) -> None:
+    def save(cls) -> bool:
         """
         Writes the class dictionary to a YAML file.
+
+        :return: True if the file was written successfully, False otherwise.
         """
         try:
             with open(cls.file_path, "w") as file:
                 yaml.safe_dump(cls.data, file)
             logging.info("[Config] saved successfully.")
+            return True
         except IOError as e:
             logging.error(f"[Config] Failed to write to file: {e}")
+            return False
 
     @staticmethod
     def backup_file(file_path: str) -> None:
@@ -181,13 +185,30 @@ class Configuration:
         return value
 
     @classmethod
+    def read_module_variable(
+        cls,
+        module_name: str,
+        var: str,
+        importance: Importance = Importance.OPTIONAL,
+    ) -> Optional[Any]:
+        """
+        Reads a specific variable from the module's configuration.
+
+        :param module_name: The name of the module.
+        :param var: The variable key within the module.
+        :param importance: The importance level of the variable. Defaults to Importance.NORMAL.
+        :return: The value of the variable if it exists, otherwise None.
+        """
+        return cls.read_variable("Modules", module_name, var, importance)
+
+    @classmethod
     def update_variable(
         cls,
         category: str,
         subcategory: str,
         var: str,
         value: Any,
-    ) -> None:
+    ) -> bool:
         """
         Updates a specific variable in the class dictionary.
 
@@ -195,14 +216,39 @@ class Configuration:
         :param subcategory: The subcategory key in the dictionary.
         :param var: The variable key within the category.
         :param value: The new value of the variable.
+        :return: True if the variable was updated successfully, False otherwise.
         """
-        if category not in cls.data:
-            cls.data[category] = {}
-        if subcategory not in cls.data[category]:
-            cls.data[category][subcategory] = {}
-        cls.data[category][subcategory][var] = value
-        cls.save()
-        logging.info(f"[Config] updated variable: {category} -> {subcategory} -> {var}")
+        try:
+            if category not in cls.data:
+                cls.data[category] = {}
+            if subcategory not in cls.data[category]:
+                cls.data[category][subcategory] = {}
+            cls.data[category][subcategory][var] = value
+            cls.save()
+            logging.info(
+                f"[Config] updated variable: {category} -> {subcategory} -> {var}"
+            )
+            return True
+        except Exception as e:
+            logging.error(f"[Config] Failed to update variable: {e}")
+            return False
+
+    @classmethod
+    def update_module_variable(
+        cls,
+        module_name: str,
+        var: str,
+        value: Any,
+    ) -> bool:
+        """
+        Updates a specific variable in the module's configuration.
+
+        :param module_name: The name of the module.
+        :param var: The variable key within the module.
+        :param value: The new value of the variable.
+        :return: True if the variable was updated successfully, False otherwise.
+        """
+        return cls.update_variable("Modules", module_name, var, value)
 
     @classmethod
     def get_version_from_pyproject(cls) -> str:

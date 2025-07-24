@@ -9,49 +9,74 @@ from functools import cmp_to_key
 import logging
 from typing import List, Dict, Any
 
+from models.module import Module
 
-class NotificationModule:
+
+class Notifications(Module):
     def __init__(self) -> None:
         """
         Initialize the NotificationModule with the given configuration.
         """
-        self.enabled: bool = Configuration.read_variable(
-            "Modules", "Notification", "enabled", Importance.REQUIRED
-        )
+        super().__init__()
         if not self.enabled:
-            logging.info("[Notification Module] Disabled")
             return
-        else:
-            logging.debug("[Notification Module] Initializing")
 
-        self.app_white_list: Dict[str, str] = Configuration.read_variable(
-            "Modules", "Notification", "app_white_list"
+        self.app_white_list: Dict[str, str] = Configuration.read_module_variable(
+            self.__class__.__name__, "app_white_list"
         )
         if len(self.app_white_list) == 0:
             logging.warning(
-                "[Notification Module] No applications found in the white list, no notifications will be received."
+                "[Notifications Module] No applications found in the white list, no notifications will be received."
             )
-        self.websocket_url: str = Configuration.read_variable(
-            "Modules", "Notification", "websocket_url", Importance.REQUIRED
+        self.websocket_url: str = Configuration.read_module_variable(
+            self.__class__.__name__, "websocket_url", Importance.REQUIRED
         )
         self.notifications_list: List[Notification] = []
         self.notification_queue: Queue = Queue()
 
-        self.retry_delay_on_error: int = Configuration.read_variable(
-            "Modules", "Notification", "retry_delay_on_error", Importance.REQUIRED
+        self.retry_delay_on_error: int = Configuration.read_module_variable(
+            self.__class__.__name__, "retry_delay_on_error", Importance.REQUIRED
         )
         logging.debug(
-            f"[Notification Module] Retry delay on error set to {self.retry_delay_on_error} ms"
+            f"[Notifications Module] Retry delay on error set to {self.retry_delay_on_error} ms"
         )
         Notification.retry_delay_on_error = self.retry_delay_on_error
-
-        logging.debug("[Notification Module] Starting websocket service")
+        
+        if not self.self_test():
+            logging.error(
+                "[Notifications Module] Self-test failed, disabling the module."
+            )
+            self.disable_on_error()
+            return
+        
+        logging.debug("[Notifications Module] Starting websocket service")
         Thread(
             target=Notification.start_service,
             args=(self.notification_queue, self.websocket_url, self.app_white_list),
         ).start()
 
-        logging.info("[Notification Module] Initialized")
+        logging.info("[Notifications Module] Initialized")
+
+    def self_test(self) -> bool:
+        """
+        Perform a self-test to ensure the module is functioning correctly.
+        This method checks if the websocket service is running and can receive notifications.
+
+        Returns:
+            bool: True if the self-test passes, False otherwise.
+        """
+        logging.info("[Notifications Module] Performing self-test...")
+        try:
+            ws = websocket.WebSocket()
+            ws.connect(self.websocket_url)
+            ws.close()
+            logging.info("[Notifications Module] Websocket service is reachable.")
+            return True
+        except Exception as e:
+            logging.error(
+                f"[Notifications Module] Websocket service is not reachable: {e}"
+            )
+            return False
 
     def get_notification_list(self) -> List[Any]:
         """
@@ -65,7 +90,7 @@ class NotificationModule:
         need_to_sort = False
         while not self.notification_queue.empty():
             new_noti: Notification = self.notification_queue.get()
-            logging.debug(f"[Notification Module] Processing notification: {new_noti}")
+            logging.debug(f"[Notifications Module] Processing notification: {new_noti}")
             if new_noti.add_to_count:
                 found = any(
                     noti.noti_id == new_noti.noti_id for noti in self.notifications_list
@@ -74,7 +99,7 @@ class NotificationModule:
                     need_to_sort = True
                     self.notifications_list.append(new_noti)
                     logging.info(
-                        f"[Notification Module] Added new notification: {new_noti}"
+                        f"[Notifications Module] Added new notification: {new_noti}"
                     )
             else:
                 self.notifications_list = [
@@ -82,11 +107,11 @@ class NotificationModule:
                     for noti in self.notifications_list
                     if noti.noti_id != new_noti.noti_id
                 ]
-                logging.info(f"[Notification Module] Removed notification: {new_noti}")
+                logging.info(f"[Notifications Module] Removed notification: {new_noti}")
 
         if need_to_sort:
             self.notifications_list.sort(key=cmp_to_key(Notification.compare))
-            logging.debug("[Notification Module] Sorted notification list")
+            logging.debug("[Notifications Module] Sorted notification list")
 
         return self.notifications_list
 
@@ -156,7 +181,7 @@ class Notification:
             noti_queue (Queue): The notification queue.
             app_white_list (dict): The application white list.
         """
-        logging.debug(f"[Notification Module] Received message: {message}")
+        logging.debug(f"[Notifications Module] Received message: {message}")
         message = json.loads(message)
 
         if message["type"] == "push":
@@ -174,7 +199,7 @@ class Notification:
                         )
                     )
                     logging.info(
-                        f"[Notification Module] Added new notification from {contents['package_name']}"
+                        f"[Notifications Module] Added new notification from {contents['package_name']}"
                     )
                 elif contents["type"] == "dismissal":
                     noti_queue.put(
@@ -188,7 +213,7 @@ class Notification:
                         )
                     )
                     logging.info(
-                        f"[Notification Module] Dismissed notification from {contents['package_name']}"
+                        f"[Notifications Module] Dismissed notification from {contents['package_name']}"
                     )
 
     @classmethod
@@ -223,7 +248,7 @@ class Notification:
         Args:
             _ (WebSocketApp): The websocket app (unused).
         """
-        logging.warning("[Notification Module] Websocket closed")
+        logging.warning("[Notifications Module] Websocket closed")
 
     @classmethod
     def start_service(
@@ -237,7 +262,7 @@ class Notification:
             pushbullet_ws (str): The pushbullet websocket URL.
             app_white_list (dict): The application white list.
         """
-        logging.info("[Notification Module] Starting websocket service")
+        logging.info("[Notifications Module] Starting websocket service")
         ws = websocket.WebSocket(
             pushbullet_ws,
             on_message=lambda ws, message: cls.on_message(

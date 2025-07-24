@@ -28,7 +28,7 @@ System:
 # corresponding applications not being available and disabled.
 
 Modules:
-  Notification:
+  Notifications:
     enabled: false
     app_white_list:
     websocket_url:

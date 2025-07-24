@@ -23,7 +23,7 @@ def load_modules() -> Dict[str, Any]:
     """
     return {
         "weather": weather_module.WeatherModule(),
-        "notifications": notification_module.NotificationModule(),
+        "notifications": notification_module.Notifications(),
         "spotify": spotify_module.SpotifyModule(),
     }
 
