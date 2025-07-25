@@ -45,7 +45,12 @@ build:
 .PHONY: example
 example:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Running example demo...$(RESET)"
-	@sudo ./rpi-rgb-led-matrix/examples-api-use/demo -D 0 --led-no-hardware-pulse --led-rows=32 --led-cols=64 || \
+	@D=""; \
+	while [ -z "$$D" ]; do \
+		TMP=$$(shuf -i 0-11 -n 1); \
+		case "$$TMP" in 1|2|3) ;; *) D=$$TMP ;; esac; \
+	done; \
+	sudo ./rpi-rgb-led-matrix/examples-api-use/demo -D $$D --led-no-hardware-pulse --led-rows=32 --led-cols=64 || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to run example demo. Please check the logs for error.$(RESET)"; exit 1; }
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Example demo completed.$(RESET)"
