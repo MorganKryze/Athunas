@@ -1,7 +1,7 @@
-import yaml
 import threading
 import logging
 import subprocess
+import socket
 from typing import Dict, Any
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 import time
@@ -56,10 +56,8 @@ class WebServer:
 
     def save_config(self, config: Dict[str, Any]) -> None:
         """Save configuration to a temporary file"""
-        temp_config_path = PathTo.TEMPORARY_CONFIG_FILE
-        with open(temp_config_path, "w") as f:
-            yaml.safe_dump(config, f)
-        logging.info("Configuration saved to temporary file")
+        config["Metadata"]["id"] += 1
+        Configuration.save(config)
 
     def index(self):
         """Welcome page with warnings"""
@@ -69,7 +67,7 @@ class WebServer:
 
     def homepage(self):
         """Main page showing configuration categories"""
-        config = Configuration.data
+        config = Configuration.configuration_dictionary
 
         # Split configuration into three main categories
         apps = config.get("Apps", {})
@@ -80,7 +78,7 @@ class WebServer:
 
     def edit_section(self, section_name, subsection=None):
         """Edit a specific section/subsection of the configuration"""
-        config = Configuration.data
+        config = Configuration.configuration_dictionary
 
         if section_name in config:
             if subsection and subsection in config[section_name]:
@@ -103,7 +101,7 @@ class WebServer:
 
     def update_config(self):
         """Update the configuration with form data"""
-        config = Configuration.data
+        config = Configuration.configuration_dictionary
         data = request.form.to_dict()
 
         section = data.get("section")
@@ -190,3 +188,24 @@ class WebServer:
 
         logging.info(f"Web server started on port {port}")
         return self.server_thread
+
+    @staticmethod
+    def check_internet_connectivity() -> bool:
+        """
+        Check if internet connectivity is available by trying to reach a reliable host.
+
+        :return: bool: True if internet is reachable, False otherwise.
+        """
+        GOOGLE_DNS = "8.8.8.8"
+        CLOUDFLARE_DNS = "1.1.1.1"
+        DNS_PORT = 53
+        TIMEOUT = 5
+        try:
+            socket.create_connection((GOOGLE_DNS, DNS_PORT), timeout=TIMEOUT)
+            return True
+        except OSError:
+            try:
+                socket.create_connection((CLOUDFLARE_DNS, DNS_PORT), timeout=TIMEOUT)
+                return True
+            except OSError:
+                return False

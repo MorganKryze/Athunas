@@ -13,7 +13,6 @@ from path import PathTo
 from config import Configuration
 from enums.input_status import InputStatus
 from enums.service_status import ServiceStatus
-from enums.variable_importance import Importance
 from models.application import Application
 
 light_pink = (255, 219, 218)
@@ -51,24 +50,29 @@ class MainScreen(Application):
             return
 
         self.use_24_hour = Configuration.read_app_config_variable(
-            {self.__class__.__name__}, "use_24_hour", Importance.REQUIRED
+            self.__class__.__name__, "use_24_hour", required=True
         )
+        if self.use_24_hour not in [True, False]:
+            self.status = ServiceStatus.ERROR_APP_CONFIG
+            logging.error(
+                "[MainScreen App] Invalid use_24_hour value. Must be True or False."
+            )
         self.date_format = Configuration.read_app_config_variable(
-            {self.__class__.__name__}, "date_format", Importance.REQUIRED
+            self.__class__.__name__, "date_format", required=True
         )
         if self.date_format != "MM-DD" and self.date_format != "DD-MM":
+            self.status = ServiceStatus.ERROR_APP_CONFIG
             logging.error(
                 "[MainScreen App] Invalid date format. Possible values are 'MM-DD' or 'DD-MM'."
             )
-            self.status = ServiceStatus.ERROR_APP_CONFIG
         self.cycle_duration_in_seconds = Configuration.read_app_variable(
-            {self.__class__.__name__}, "cycle_duration_in_seconds"
+            self.__class__.__name__, "cycle_duration_in_seconds", required=True
         )
         if self.cycle_duration_in_seconds <= 0:
+            self.status = ServiceStatus.ERROR_APP_CONFIG
             logging.error(
                 "[MainScreen App] Invalid cycle duration in seconds. Must be greater than 0."
             )
-            self.status = ServiceStatus.ERROR_APP_CONFIG
         self.font = ImageFont.truetype(PathTo.FONT_FILE, FONT_SIZE)
         self.lastGenerateCall = None
         self.is_on_cycle = True

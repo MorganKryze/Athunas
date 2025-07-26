@@ -28,14 +28,14 @@ class GifPlayer(Application):
             )
             return
 
-        self.play_limit = Configuration.read_app_config_variable(
-            {self.__class__.__name__}, "play_limit"
+        self.play_limit = Configuration.get_from_app_config(
+            self.__class__.__name__, "play_limit", required=True
         )
-        if self.play_limit < 1 or self.play_limit is None:
+        if self.play_limit < 1:
+            self.status = ServiceStatus.ERROR_APP_CONFIG
             logging.error(
                 "[GifPlayer App] Play limit must be greater than or equal to 1."
             )
-            self.status = ServiceStatus.ERROR_APP_CONFIG
         self.led_cols = Board.led_cols
         self.led_rows = Board.led_rows
         self.animations = self.load_animations()

@@ -1,12 +1,10 @@
 import logging
-import sys
 import time
 from typing import Any
 import queue
 
 from custom_frames import CustomFrames
 from enums.input_status import InputStatus
-from enums.variable_importance import Importance
 from config import Configuration
 from gpiozero import Button, RotaryEncoder
 
@@ -58,57 +56,49 @@ class Board:
         """
         Initializes the display settings.
         """
-        cls.led_rows = Configuration.read_variable(
-            "System", "Matrix", "led_rows", Importance.REQUIRED
-        )
+        cls.led_rows = Configuration.get("System", "Matrix", "led_rows", required=True)
         if cls.led_rows % cls.SCREEN_RATIO != 0 or cls.led_rows <= 0:
-            logging.critical(
-                f"[Board] led_rows must be a positive multiple of {cls.SCREEN_RATIO} to work with the 'rpi-rgb-led-matrix' library."
+            Configuration.critical_exit(
+                f"System.Matrix.led_rows must be a positive multiple of {cls.SCREEN_RATIO} to work with the 'rpi-rgb-led-matrix' library."
             )
-            logging.critical("[Board] Exiting program.")
-            sys.exit(1)
 
-        cls.led_cols = Configuration.read_variable(
-            "System", "Matrix", "led_cols", Importance.REQUIRED
-        )
+        cls.led_cols = Configuration.get("System", "Matrix", "led_cols", required=True)
         if cls.led_cols % cls.SCREEN_RATIO != 0 or cls.led_cols <= 0:
-            logging.critical(
-                f"[Board] led_cols must be a multiple of {cls.SCREEN_RATIO} to work with the 'rpi-rgb-led-matrix' library."
+            Configuration.critical_exit(
+                f"System.Matrix.led_cols must be a positive multiple of {cls.SCREEN_RATIO} to work with the 'rpi-rgb-led-matrix' library."
             )
-            logging.critical("[Board] Exiting program.")
-            sys.exit(1)
 
-        cls.brightness = Configuration.read_variable(
-            "System", "Matrix", "brightness", Importance.REQUIRED
+        cls.brightness = Configuration.get(
+            "System", "Matrix", "brightness", required=True
         )
         if cls.brightness < cls.BRIGHTNESS_MIN or cls.brightness > cls.BRIGHTNESS_MAX:
-            logging.critical(
-                f"[Board] brightness must be between {cls.BRIGHTNESS_MIN} and {cls.BRIGHTNESS_MAX}."
+            Configuration.critical_exit(
+                f"System.Matrix.brightness must be between {cls.BRIGHTNESS_MIN} and {cls.BRIGHTNESS_MAX}."
             )
-            logging.critical("[Board] Exiting program.")
-            sys.exit(1)
 
-        cls.disable_hardware_pulsing = Configuration.read_variable(
-            "System", "Matrix", "disable_hardware_pulsing", Importance.REQUIRED
+        cls.disable_hardware_pulsing = Configuration.get(
+            "System", "Matrix", "disable_hardware_pulsing", required=True
         )
+        if not isinstance(cls.disable_hardware_pulsing, bool):
+            Configuration.critical_exit(
+                "System.Matrix.disable_hardware_pulsing must be a boolean value."
+            )
 
-        cls.hardware_mapping = Configuration.read_variable(
-            "System", "Matrix", "hardware_mapping", Importance.REQUIRED
+        cls.hardware_mapping = Configuration.get(
+            "System", "Matrix", "hardware_mapping", required=True
         )
         if cls.hardware_mapping not in ["regular", "adafruit-hat"]:
-            logging.critical(
-                "[Board] hardware_mapping must be either 'regular' or 'adafruit-hat'."
+            Configuration.critical_exit(
+                "System.Matrix.hardware_mapping must be either 'regular' or 'adafruit-hat'."
             )
-            logging.critical("[Board] Exiting program.")
-            sys.exit(1)
 
-        cls.refresh_rate = Configuration.read_variable(
-            "System", "Matrix", "refresh_rate", Importance.REQUIRED
+        cls.refresh_rate = Configuration.get(
+            "System", "Matrix", "refresh_rate", required=True
         )
         if cls.refresh_rate <= 0:
-            logging.critical("[Board] refresh_rate must be positive.")
-            logging.critical("[Board] Exiting program.")
-            sys.exit(1)
+            Configuration.critical_exit(
+                "System.Matrix.refresh_rate must be a positive number."
+            )
 
         logging.info("[Board] All display settings initialized.")
 
@@ -142,34 +132,26 @@ class Board:
             cls.matrix = RGBMatrix(options=options)
             logging.debug("[Config] RGBMatrix object created.")
         except Exception as e:
-            logging.critical(f"[Config] failed to create RGBMatrix object: {e}")
-            logging.critical("[Config] Exiting program.")
-            sys.exit(1)
+            Configuration.critical_exit(
+                f"Failed to create RGBMatrix object: {e}. Please check your configuration."
+            )
 
     @classmethod
     def _init_encoder(cls):
         """
         Initializes the encoder settings.
         """
-        cls.encoder_clk = Configuration.read_variable(
-            "System", "Encoder", "gpio_clk", Importance.REQUIRED
-        )
+        cls.encoder_clk = Configuration.get("System", "Encoder", "gpio_clk", required=True)
         if cls.encoder_clk < cls.FIRST_GPIO_PIN or cls.encoder_clk > cls.LAST_GPIO_PIN:
-            logging.critical(
-                f"[Board] encoder_clk must be between {cls.FIRST_GPIO_PIN} and {cls.LAST_GPIO_PIN}."
+            Configuration.critical_exit(
+                f"System.Encoder.gpio_clk must be between {cls.FIRST_GPIO_PIN} and {cls.LAST_GPIO_PIN}."
             )
-            logging.critical("[Board] Exiting program.")
-            sys.exit(1)
 
-        cls.encoder_dt = Configuration.read_variable(
-            "System", "Encoder", "gpio_dt", Importance.REQUIRED
-        )
+        cls.encoder_dt = Configuration.get("System", "Encoder", "gpio_dt", required=True)
         if cls.encoder_dt < cls.FIRST_GPIO_PIN or cls.encoder_dt > cls.LAST_GPIO_PIN:
-            logging.critical(
-                f"[Board] encoder_dt must be between {cls.FIRST_GPIO_PIN} and {cls.LAST_GPIO_PIN}."
+            Configuration.critical_exit(
+                f"System.Encoder.gpio_dt must be between {cls.FIRST_GPIO_PIN} and {cls.LAST_GPIO_PIN}."
             )
-            logging.critical("[Board] Exiting program.")
-            sys.exit(1)
 
         cls.encoder_queue = queue.Queue()
         cls.encoder = RotaryEncoder(cls.encoder_clk, cls.encoder_dt)
@@ -181,15 +163,11 @@ class Board:
         )
         logging.info("[Board] Encoder rotation initialized.")
 
-        cls.encoder_sw = Configuration.read_variable(
-            "System", "Encoder", "gpio_sw", Importance.REQUIRED
-        )
+        cls.encoder_sw = Configuration.get("System", "Encoder", "gpio_sw", required=True)
         if cls.encoder_sw < cls.FIRST_GPIO_PIN or cls.encoder_sw > cls.LAST_GPIO_PIN:
-            logging.critical(
-                f"[Board] encoder_sw must be between {cls.FIRST_GPIO_PIN} and {cls.LAST_GPIO_PIN}."
+            Configuration.critical_exit(
+                f"System.Encoder.gpio_sw must be between {cls.FIRST_GPIO_PIN} and {cls.LAST_GPIO_PIN}."
             )
-            logging.critical("[Board] Exiting program.")
-            sys.exit(1)
 
         cls.encoder_button = Button(cls.encoder_sw, pull_up=True, bounce_time=0.1)
         cls.encoder_button.when_pressed = lambda button: cls.encoder_button_callback(
@@ -202,21 +180,19 @@ class Board:
         """
         Initializes the tilt switch settings.
         """
-        cls.tilt_switch = Configuration.read_variable(
-            "System", "Tilt-switch", "gpio", Importance.REQUIRED
-        )
+        cls.tilt_switch = Configuration.get("System", "Tilt-switch", "gpio", required=True)
         if cls.tilt_switch < cls.FIRST_GPIO_PIN or cls.tilt_switch > cls.LAST_GPIO_PIN:
-            logging.critical("[Board] tilt_switch must be between 0 and 27.")
-            logging.critical("[Board] Exiting program.")
-            sys.exit(1)
+            Configuration.critical_exit(
+                f"System.Tilt-switch.gpio must be between {cls.FIRST_GPIO_PIN} and {cls.LAST_GPIO_PIN}."
+            )
 
-        cls.tilt_switch_bounce_time = Configuration.read_variable(
-            "System", "Tilt-switch", "bounce_time", Importance.REQUIRED
+        cls.tilt_switch_bounce_time = Configuration.get(
+            "System", "Tilt-switch", "bounce_time", required=True
         )
         if cls.tilt_switch_bounce_time < 0:
-            logging.critical("[Board] tilt_switch_bounce_time must be positive.")
-            logging.critical("[Board] Exiting program.")
-            sys.exit(1)
+            Configuration.critical_exit(
+                "System.Tilt-switch.bounce_time must be a non-negative number."
+            )
 
         cls.tilt_switch_button = Button(
             cls.tilt_switch, pull_up=True, bounce_time=cls.tilt_switch_bounce_time

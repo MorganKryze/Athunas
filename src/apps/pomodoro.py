@@ -7,7 +7,6 @@ from datetime import timedelta, datetime
 from PIL import Image, ImageFont, ImageDraw
 
 from enums.service_status import ServiceStatus
-from enums.variable_importance import Importance
 from models.application import Application
 from path import PathTo
 from config import Configuration
@@ -31,10 +30,10 @@ class PomodoroScreen(Application):
             return
 
         self.work_duration = timedelta(
-            minutes=Configuration.read_app_config_variable(
-                {self.__class__.__name__},
+            minutes=Configuration.get_from_app_config(
+                self.__class__.__name__,
                 "work_duration_in_minutes",
-                Importance.REQUIRED,
+                required=True,
             )
         )
         if self.work_duration <= timedelta(seconds=0):
@@ -43,10 +42,10 @@ class PomodoroScreen(Application):
                 f"[{self.__class__.__name__}] Work duration must be greater than 0."
             )
         self.short_duration = timedelta(
-            minutes=Configuration.read_app_config_variable(
-                {self.__class__.__name__},
+            minutes=Configuration.get_from_app_config(
+                self.__class__.__name__,
                 "break_duration_in_minutes",
-                Importance.REQUIRED,
+                required=True,
             )
         )
         if (
@@ -58,10 +57,10 @@ class PomodoroScreen(Application):
                 f"[{self.__class__.__name__}] Break duration must be greater than 0 and less than work duration."
             )
         self.long_duration = timedelta(
-            minutes=Configuration.read_app_config_variable(
-                {self.__class__.__name__},
+            minutes=Configuration.get_from_app_config(
+                self.__class__.__name__,
                 "long_break_duration_in_minutes",
-                Importance.REQUIRED,
+                required=True,
             )
         )
         if (

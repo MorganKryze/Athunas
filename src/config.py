@@ -94,10 +94,10 @@ class Configuration:
         cls.lastest_working_generation_id = cls.lastest_generation_id
         generation_file_path = os.path.join(
             PathTo.GENERATIONS_FOLDER,
-            f"generation_{cls.lastest_generation_id}.yaml",
+            f"generation_{config['Metadata']['id']}.yaml",
         )
 
-        is_saved = cls.save_config(config, generation_file_path)
+        is_saved = cls.save(config)
         if not is_saved:
             logging.error(
                 f"[Config] Failed to save the new generation at {generation_file_path}"
@@ -107,28 +107,43 @@ class Configuration:
         return True
 
     @classmethod
-    def save_config(cls, config: Dict[str, Any], path: str) -> bool:
+    def save(cls, config: Dict[str, Any], is_broken: bool = False) -> bool:
         """
         Save the configuration dictionary to a YAML file.
 
         :return: True if the file was written successfully, False otherwise.
         """
+        normal_path = os.path.join(
+            PathTo.GENERATIONS_FOLDER, f"generation_{config['Metadata']['id']}.yaml"
+        )
+        broken_path = normal_path.replace(".yaml", ".broken.yaml")
+
         try:
-            with open(path, "w") as file:
-                yaml.safe_dump(config, file)
-            logging.info(f"[Config] File saved successfully at '{path}'.")
+            if os.path.exists(normal_path) and not is_broken:
+                logging.warning(
+                    f"[Config] Configuration file already exists: {normal_path}. Overwriting."
+                )
+            with open(normal_path, "w") as f:
+                yaml.safe_dump(config, f, default_flow_style=False)
+            logging.info(f"[Config] Configuration saved to {normal_path}")
+            if is_broken:
+                os.rename(normal_path, broken_path)
+                logging.info(
+                    f"[Config] Configuration marked as broken and saved to {broken_path}"
+                )
             return True
-        except IOError as e:
-            logging.error(f"[Config] Failed to write to file: {e}")
+        except Exception as e:
+            logging.error(f"[Config] Failed to save configuration: {e}")
             return False
 
     @classmethod
-    def get(cls, *keys: str, default: Any = None) -> Any:
+    def get(cls, *keys: str, default: Any = None, required: bool = False) -> Any:
         """
         Reads a value from the class dictionary using a variable number of keys.
 
         :param keys: Variable number of keys to navigate through the dictionary hierarchy.
         :param default: Default value to return if the key path doesn't exist.
+        :param required: If True, flags the configuration as broken if key is missing or None.
         :return: The value at the specified key path, or the default value if not found.
         """
         if not keys:
@@ -140,58 +155,83 @@ class Configuration:
                 current = current[key]
             else:
                 logging.debug(f"[Config] Key path not found: {' -> '.join(keys)}")
+                if required and default is None:
+                    cls.critical_exit(
+                        f"Required key path not found: {' -> '.join(keys)}"
+                    )
                 return default
+
+        if required and current is None:
+            cls.critical_exit(f"Required key path has None value: {' -> '.join(keys)}")
 
         logging.debug(f"[Config] Found value at: {' -> '.join(keys)}")
         return current
 
     @classmethod
-    def get_from_module(cls, module_name: str, *keys: str, default: Any = None) -> Any:
+    def get_from_module(
+        cls, module_name: str, *keys: str, default: Any = None, required: bool = False
+    ) -> Any:
         """
         Reads a value from the module's configuration using a variable number of keys.
 
         :param module_name: The name of the module.
         :param keys: Variable number of keys to navigate through the module's dictionary hierarchy.
         :param default: Default value to return if the key path doesn't exist.
+        :param required: If True, flags the configuration as broken if the key path is not found.
         :return: The value at the specified key path, or the default value if not found.
         """
-        return cls.get("Modules", module_name, *keys, default=default)
+        return cls.get(
+            "Modules", module_name, *keys, default=default, required=required
+        )
 
     @classmethod
-    def get_from_app(cls, app_name: str, *keys: str, default: Any = None) -> Any:
+    def get_from_app(
+        cls, app_name: str, *keys: str, default: Any = None, required: bool = False
+    ) -> Any:
         """
         Reads a value from the application's configuration using a variable number of keys.
 
         :param app_name: The name of the application.
         :param keys: Variable number of keys to navigate through the application's dictionary hierarchy.
         :param default: Default value to return if the key path doesn't exist.
+        :param required: If True, flags the configuration as broken if the key path is not found.
         :return: The value at the specified key path, or the default value if not found.
         """
-        return cls.get("Apps", app_name, *keys, default=default)
+        return cls.get("Apps", app_name, *keys, default=default, required=required)
 
     @classmethod
-    def get_from_app_meta(cls, app_name: str, *keys: str, default: Any = None) -> Any:
+    def get_from_app_meta(
+        cls, app_name: str, *keys: str, default: Any = None, required: bool = False
+    ) -> Any:
         """
         Reads a value from the application's meta configuration using a variable number of keys.
 
         :param app_name: The name of the application.
         :param keys: Variable number of keys to navigate through the application's meta dictionary hierarchy.
         :param default: Default value to return if the key path doesn't exist.
+        :param required: If True, flags the configuration as broken if the key path is not found.
         :return: The value at the specified key path, or the default value if not found.
         """
-        return cls.get("Apps", app_name, "meta", *keys, default=default)
+        return cls.get(
+            "Apps", app_name, "meta", *keys, default=default, required=required
+        )
 
     @classmethod
-    def get_from_app_config(cls, app_name: str, *keys: str, default: Any = None) -> Any:
+    def get_from_app_config(
+        cls, app_name: str, *keys: str, default: Any = None, required: bool = False
+    ) -> Any:
         """
         Reads a value from the application's config using a variable number of keys.
 
         :param app_name: The name of the application.
         :param keys: Variable number of keys to navigate through the application's config dictionary hierarchy.
         :param default: Default value to return if the key path doesn't exist.
+        :param required: If True, flags the configuration as broken if the key path is not found.
         :return: The value at the specified key path, or the default value if not found.
         """
-        return cls.get("Apps", app_name, "config", *keys, default=default)
+        return cls.get(
+            "Apps", app_name, "config", *keys, default=default, required=required
+        )
 
     @classmethod
     def set(cls, *keys: str, value: Any) -> bool:
@@ -351,16 +391,13 @@ class Configuration:
             original_path = cls.file_path
             broken_path = original_path.replace(".yaml", ".broken.yaml")
 
-            if cls.save_config(cls.configuration_dictionary, broken_path):
-                try:
-                    os.remove(original_path)
-                    logging.info(f"[Config] Renamed {original_path} to {broken_path}")
-                except OSError as e:
-                    logging.error(f"[Config] Failed to remove original file: {e}")
-            else:
+            if not cls.save(cls.configuration_dictionary, is_broken=True):
                 logging.error(
                     f"[Config] Failed to save broken configuration to {broken_path}"
                 )
+            logging.info(
+                f"[Config] Current generation flagged as broken and saved to {broken_path}"
+            )
 
         except Exception as e:
             logging.error(f"[Config] Failed to flag generation as broken: {e}")

@@ -1,7 +1,5 @@
 from threading import Thread
 from queue import Queue
-from enums.variable_importance import Importance
-from config import Configuration
 import websocket
 import json
 import time
@@ -9,41 +7,55 @@ from functools import cmp_to_key
 import logging
 from typing import List, Dict, Any
 
+
+from config import Configuration
+from webserver import WebServer
+from enums.service_status import ServiceStatus
 from models.module import Module
 
 
 class Notifications(Module):
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__()
-
-        self.app_white_list: Dict[str, str] = Configuration.read_module_variable(
+        self.app_white_list: Dict[str, str] = Configuration.get_from_module(
             self.__class__.__name__, "app_white_list"
         )
         if len(self.app_white_list) == 0:
             logging.warning(
                 "[Notifications Module] No applications found in the white list, no notifications will be received."
             )
-        self.websocket_url: str = Configuration.read_module_variable(
-            self.__class__.__name__, "websocket_url", Importance.REQUIRED
+        self.websocket_url: str = Configuration.get_from_module(
+            self.__class__.__name__, "websocket_url"
         )
+        if not self.websocket_url:
+            logging.error(
+                "[Notifications Module] Websocket URL is not set, setting the module on error."
+            )
+            self.status = ServiceStatus.ERROR_MODULE_CONFIG
         self.notifications_list: List[Notification] = []
         self.notification_queue: Queue = Queue()
 
-        self.retry_delay_on_error: int = Configuration.read_module_variable(
-            self.__class__.__name__, "retry_delay_on_error", Importance.REQUIRED
+        self.retry_delay_on_error: int = Configuration.get_from_module(
+            self.__class__.__name__, "retry_delay_on_error"
         )
-        logging.debug(
-            f"[Notifications Module] Retry delay on error set to {self.retry_delay_on_error} ms"
-        )
+        if not self.retry_delay_on_error or self.retry_delay_on_error <= 0:
+            logging.error(
+                "[Notifications Module] Retry delay on error is not set or invalid, setting the module on error."
+            )
+            self.status = ServiceStatus.ERROR_MODULE_CONFIG
         Notification.retry_delay_on_error = self.retry_delay_on_error
 
         if not self.self_test():
             logging.error(
-                "[Notifications Module] Self-test failed, disabling the module."
+                "[Notifications Module] Self-test failed, setting the module on error."
             )
-            self.disable_on_error()
-            return
+            self.status = ServiceStatus.ERROR_MODULE_CONFIG
 
+        if self.status == ServiceStatus.ERROR_MODULE_CONFIG:
+            logging.error(
+                "[Notifications Module] Configuration error, module will not start."
+            )
+            return
         logging.debug("[Notifications Module] Starting websocket service")
         Thread(
             target=Notification.start_service,
@@ -51,26 +63,41 @@ class Notifications(Module):
         ).start()
 
         logging.info("[Notifications Module] Initialized")
+        self.status = ServiceStatus.RUNNING
 
     def self_test(self) -> bool:
         """
         Perform a self-test to ensure the module is functioning correctly.
         This method checks if the websocket service is running and can receive notifications.
 
-        Returns:
-            bool: True if the self-test passes, False otherwise.
+        :returns: bool: True if the self-test passes, False otherwise.
         """
         logging.info("[Notifications Module] Performing self-test...")
         try:
+            if not WebServer.check_internet_connectivity():
+                logging.error(
+                    "[Notifications Module] No internet connectivity detected."
+                )
+                self.status = ServiceStatus.ERROR_NO_INTERNET
+                return False
+
             ws = websocket.WebSocket()
             ws.connect(self.websocket_url)
             ws.close()
             logging.info("[Notifications Module] Websocket service is reachable.")
             return True
+
+        except (ConnectionRefusedError, ConnectionError, OSError) as e:
+            # Connection issues, invalid address, DNS resolution failed
+            logging.error(f"[Notifications Module] Connection error: {e}")
+            self.status = ServiceStatus.ERROR_MODULE_CONFIG
+            return False
+
         except Exception as e:
             logging.error(
-                f"[Notifications Module] Websocket service is not reachable: {e}"
+                f"[Notifications Module] Unexpected error during self-test: {e}"
             )
+            self.status = ServiceStatus.ERROR_MODULE_INTERNAL
             return False
 
     def get_notification_list(self) -> List[Any]:

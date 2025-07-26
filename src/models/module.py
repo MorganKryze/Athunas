@@ -4,7 +4,6 @@ import logging
 
 from config import Configuration
 from enums.service_status import ServiceStatus
-from enums.variable_importance import Importance
 
 
 class Module:
@@ -13,13 +12,13 @@ class Module:
     def __init__(self):
         self.status: ServiceStatus = ServiceStatus.INITIALIZING
         logging.debug(f"[{self.__class__.__name__}] Initializing metadata...")
-        self.name: str = Configuration.read_module_variable(
-            self.__class__.__name__, "name", Importance.REQUIRED
+        self.name: str = Configuration.get_from_module(
+            self.__class__.__name__, "name", required=True
         )
-        self.description: str = Configuration.read_module_variable(
-            self.__class__.__name__, "description", Importance.REQUIRED
+        self.description: str = Configuration.get_from_module(
+            self.__class__.__name__, "description", required=True
         )
-        
+        logging.debug(f"[{self.__class__.__name__}] Initializing configuration...")
 
     def self_test(self) -> None:
         """

@@ -9,7 +9,6 @@ from config import Configuration
 from custom_frames import CustomFrames
 from enums.input_status import InputStatus
 from enums.service_status import ServiceStatus
-from enums.variable_importance import Importance
 
 
 class Application:
@@ -18,31 +17,29 @@ class Application:
     def __init__(self, callbacks: Dict[str, Callable]):
         self.status: ServiceStatus = ServiceStatus.INITIALIZING
         logging.debug(f"[{self.__class__.__name__}] Initializing metadata...")
-        self.enabled = Configuration.read_app_variable(
-            self.__class__.__name__, "enabled", Importance.REQUIRED
+        self.enabled = Configuration.get_from_app(
+            self.__class__.__name__, "enabled", required=True
         )
-        self.name: str = Configuration.read_app_meta_variable(
-            self.__class__.__name__, "name", Importance.REQUIRED
+        self.name: str = Configuration.get_from_app_meta(
+            self.__class__.__name__, "name", required=True
         )
-        self.description: str = Configuration.read_app_meta_variable(
-            self.__class__.__name__, "description", Importance.REQUIRED
+        self.description: str = Configuration.get_from_app_meta(
+            self.__class__.__name__, "description", required=True
         )
-        self.provides_horizontal_content = Configuration.read_app_meta_variable(
-            {self.__class__.__name__},
-            "provides_horizontal_content",
-            Importance.REQUIRED,
+        self.provides_horizontal_content = Configuration.get_from_app_meta(
+            self.__class__.__name__, "provides_horizontal_content", required=True
         )
-        self.provides_vertical_content = Configuration.read_app_meta_variable(
-            {self.__class__.__name__}, "provides_vertical_content", Importance.REQUIRED
+        self.provides_vertical_content = Configuration.get_from_app_meta(
+            self.__class__.__name__, "provides_vertical_content", required=True
         )
 
         logging.debug(f"[{self.__class__.__name__}] Initializing configuration...")
         self.callbacks = callbacks
-        self.horizontal_replacement_app_name = Configuration.read_app_config_variable(
-            {self.__class__.__name__}, "horizontal_replacement_app", Importance.OPTIONAL
+        self.horizontal_replacement_app_name = Configuration.get_from_app_config(
+            self.__class__.__name__, "horizontal_replacement_app"
         )
-        self.vertical_replacement_app_name = Configuration.read_app_config_variable(
-            {self.__class__.__name__}, "vertical_replacement_app", Importance.OPTIONAL
+        self.vertical_replacement_app_name = Configuration.get_from_app_config(
+            self.__class__.__name__, "vertical_replacement_app"
         )
 
         if not self.enabled:
