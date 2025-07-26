@@ -337,9 +337,10 @@ class Configuration:
         try:
             hostname = socket.gethostname()
             local_hostname = f"{hostname}.local"
+            dummy_target = "10.255.255.255"
 
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            s.connect(("10.255.255.255", 1))
+            s.connect((dummy_target, 1))
             local_ip = s.getsockname()[0]
 
             return local_hostname, local_ip
