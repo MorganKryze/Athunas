@@ -1,6 +1,6 @@
 from enum import Enum
 
-class InputStatus(Enum):
+class EncoderInputStatus(Enum):
     """
     Enum to represent the status of an input.
     

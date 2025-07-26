@@ -5,7 +5,7 @@ from typing import Any
 from PIL import Image
 
 from custom_frames import CustomFrames
-from enums.input_status import InputStatus
+from enums.encoder_input_status import EncoderInputStatus
 from board import Board
 from models.application import Application
 from path import PathTo
@@ -54,10 +54,10 @@ def main() -> None:
                     Board.encoder_state += Board.encoder_queue.get()
 
                 if Board.has_encoder_increased():
-                    Board.encoder_input_status = InputStatus.ENCODER_INCREASE
+                    Board.encoder_input_status = EncoderInputStatus.ENCODER_INCREASE
                     Board.reset_encoder_state()
                 elif Board.has_encoder_decreased():
-                    Board.encoder_input_status = InputStatus.ENCODER_DECREASE
+                    Board.encoder_input_status = EncoderInputStatus.ENCODER_DECREASE
                     Board.reset_encoder_state()
 
                 current_app: Application = AppManager.get_current_app()

@@ -1,6 +1,6 @@
 from PIL import Image, ImageFont, ImageDraw
 import os
-from enums.input_status import InputStatus
+from enums.encoder_input_status import EncoderInputStatus
 from datetime import datetime
 from dateutil import tz
 from ast import literal_eval
@@ -20,11 +20,11 @@ class WeatherScreen:
         self.high_color = literal_eval(config.get('Weather Screen', 'high_color', fallback="(255,255,255)"))
 
     def generate(self, isHorizontal, inputStatus):
-        if (inputStatus is InputStatus.SINGLE_PRESS):
+        if inputStatus is EncoderInputStatus.SINGLE_PRESS:
             self.default_actions['toggle_display']()
-        elif (inputStatus is InputStatus.ENCODER_INCREASE):
+        elif inputStatus is EncoderInputStatus.ENCODER_INCREASE:
             self.default_actions['switch_next_app']()
-        elif (inputStatus is InputStatus.ENCODER_DECREASE):
+        elif inputStatus is EncoderInputStatus.ENCODER_DECREASE:
             self.default_actions['switch_prev_app']()
         
         frame = Image.new("RGB", (self.canvas_width, self.canvas_height), (0,0,0))

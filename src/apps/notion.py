@@ -2,7 +2,7 @@ import time
 from PIL import Image, ImageFont, ImageDraw
 import threading
 from queue import LifoQueue
-from enums.input_status import InputStatus
+from enums.encoder_input_status import EncoderInputStatus
 import requests, json
 from datetime import date
 from datetime import timedelta
@@ -44,12 +44,12 @@ class NotionScreen:
                 self.queue.queue.clear()
                 self.animation_cnt = [0,0,0,0,0,0,0,0,0,0]
 
-        if (inputStatus is InputStatus.SINGLE_PRESS):
+        if inputStatus is EncoderInputStatus.SINGLE_PRESS:
             self.paused = not self.paused
             self.animation_cnt = [0,0,0,0,0,0,0,0,0,0]
-        elif (inputStatus is InputStatus.ENCODER_INCREASE):
+        elif inputStatus is EncoderInputStatus.ENCODER_INCREASE:
             self.default_actions['switch_next_app']()
-        elif (inputStatus is InputStatus.ENCODER_DECREASE):
+        elif inputStatus is EncoderInputStatus.ENCODER_DECREASE:
             self.default_actions['switch_prev_app']()
 
         frame = None

@@ -1,7 +1,7 @@
 from PIL import Image, ImageFont, ImageDraw
 import requests
 from io import BytesIO
-from enums.input_status import InputStatus
+from enums.encoder_input_status import EncoderInputStatus
 from ast import literal_eval
 
 class SpotifyScreen:
@@ -29,33 +29,33 @@ class SpotifyScreen:
         self.control_mode = False
     
     def generate(self, isHorizontal, inputStatus):
-        if (inputStatus is InputStatus.LONG_PRESS):
+        if inputStatus is EncoderInputStatus.LONG_PRESS:
             self.control_mode = not self.control_mode
 
         spotify_module = self.modules['spotify']
         
         if not self.control_mode:
-            if (inputStatus is InputStatus.SINGLE_PRESS):
+            if inputStatus is EncoderInputStatus.SINGLE_PRESS:
                 self.default_actions['toggle_display']()
                 self.title_animation_cnt = 0
                 self.artist_animation_cnt = 0
-            elif (inputStatus is InputStatus.ENCODER_INCREASE):
+            elif inputStatus is EncoderInputStatus.ENCODER_INCREASE:
                 self.default_actions['switch_next_app']()
-            elif (inputStatus is InputStatus.ENCODER_DECREASE):
+            elif inputStatus is EncoderInputStatus.ENCODER_DECREASE:
                 self.default_actions['switch_prev_app']()
         else:
-            if (inputStatus is InputStatus.SINGLE_PRESS):
+            if inputStatus is EncoderInputStatus.SINGLE_PRESS:
                 if self.is_playing:
                     spotify_module.pause_playback()
                 else:
                     spotify_module.resume_playback()
-            elif (inputStatus is InputStatus.DOUBLE_PRESS):
+            elif inputStatus is EncoderInputStatus.DOUBLE_PRESS:
                 spotify_module.next_track()
-            elif (inputStatus is InputStatus.TRIPLE_PRESS):
+            elif inputStatus is EncoderInputStatus.TRIPLE_PRESS:
                 spotify_module.previous_track()
-            elif (inputStatus is InputStatus.ENCODER_INCREASE and self.is_playing):
+            elif inputStatus is EncoderInputStatus.ENCODER_INCREASE and self.is_playing:
                 spotify_module.increase_volume()
-            elif (inputStatus is InputStatus.ENCODER_DECREASE and self.is_playing):
+            elif inputStatus is EncoderInputStatus.ENCODER_DECREASE and self.is_playing:
                 spotify_module.decrease_volume()
 
         response = spotify_module.getCurrentPlayback()

@@ -8,7 +8,7 @@ from scipy.signal import convolve2d
 
 from board import Board
 from enums.variable_importance import Importance
-from enums.input_status import InputStatus
+from enums.encoder_input_status import EncoderInputStatus
 from path import PathTo
 from config import Configuration
 
@@ -51,7 +51,9 @@ class GameOfLifeScreen:
         
         logging.debug("[GameOfLife] GameOfLifeScreen initialized.")
 
-    def generate(self, is_horizontal: bool, input_status: InputStatus) -> Image.Image:
+    def generate(
+        self, is_horizontal: bool, input_status: EncoderInputStatus
+    ) -> Image.Image:
         """
         Generate the frame to draw on the LED matrix.
 
@@ -62,16 +64,19 @@ class GameOfLifeScreen:
         Returns:
             Image.Image: The generated frame.
         """
-        if input_status in [InputStatus.SINGLE_PRESS, InputStatus.LONG_PRESS]:
-            if input_status == InputStatus.LONG_PRESS:
+        if input_status in [
+            EncoderInputStatus.SINGLE_PRESS,
+            EncoderInputStatus.LONG_PRESS,
+        ]:
+            if input_status == EncoderInputStatus.LONG_PRESS:
                 self.current_state_index = (self.current_state_index + 1) % len(
                     self.initial_states
                 )
             self.state = self.initial_states[self.current_state_index]()
             self.color = generate_new_color()
-        elif input_status == InputStatus.ENCODER_INCREASE:
+        elif input_status == EncoderInputStatus.ENCODER_INCREASE:
             self.callbacks["switch_next_app"]()
-        elif input_status == InputStatus.ENCODER_DECREASE:
+        elif input_status == EncoderInputStatus.ENCODER_DECREASE:
             self.callbacks["switch_prev_app"]()
 
         end_time = datetime.now() + timedelta(seconds=0.1)

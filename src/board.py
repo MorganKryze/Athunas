@@ -4,7 +4,7 @@ from typing import Any
 import queue
 
 from custom_frames import CustomFrames
-from enums.input_status import InputStatus
+from enums.encoder_input_status import EncoderInputStatus
 from config import Configuration
 from gpiozero import Button, RotaryEncoder
 
@@ -35,7 +35,7 @@ class Board:
     encoder_queue: queue.Queue
     encoder_state: int = 0
     is_horizontal: bool = True
-    encoder_input_status: InputStatus = InputStatus.NOTHING
+    encoder_input_status: EncoderInputStatus = EncoderInputStatus.NOTHING
     matrix: Any
 
     @classmethod
@@ -250,7 +250,7 @@ class Board:
 
         if time_diff >= HOLD_TIME:
             logging.debug("[Board] Long press detected (5).")
-            cls.encoder_input_status = InputStatus.LONG_PRESS
+            cls.encoder_input_status = EncoderInputStatus.LONG_PRESS
         else:
             enc_button.when_pressed = None
             start_time = time.time()
@@ -263,19 +263,19 @@ class Board:
                         time.sleep(SLEEP_INTERVAL)
                         if enc_button.is_pressed:
                             logging.debug("[Board] Triple press detected (3).")
-                            cls.encoder_input_status = InputStatus.TRIPLE_PRESS
+                            cls.encoder_input_status = EncoderInputStatus.TRIPLE_PRESS
                             enc_button.when_pressed = (
                                 lambda button: cls.encoder_button_callback(button)
                             )
                             return
                         logging.debug("[Board] Double press detected (2).")
-                        cls.encoder_input_status = InputStatus.DOUBLE_PRESS
+                        cls.encoder_input_status = EncoderInputStatus.DOUBLE_PRESS
                         enc_button.when_pressed = (
                             lambda button: cls.encoder_button_callback(button)
                         )
                         return
             logging.debug("[Board] Single press detected (1).")
-            cls.encoder_input_status = InputStatus.SINGLE_PRESS
+            cls.encoder_input_status = EncoderInputStatus.SINGLE_PRESS
             enc_button.when_pressed = lambda button: cls.encoder_button_callback(button)
             return
 
@@ -298,7 +298,7 @@ class Board:
         """
         Resets the encoder input status to NOTHING.
         """
-        cls.encoder_input_status = InputStatus.NOTHING
+        cls.encoder_input_status = EncoderInputStatus.NOTHING
 
     @classmethod
     def has_encoder_increased(cls):
