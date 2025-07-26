@@ -1,317 +1,222 @@
 import os
 import socket
-import subprocess
 import sys
 import yaml
 import tomllib
 import logging
-from enums.config_type import ConfigType
-from enums.variable_importance import Importance
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from path import PathTo
 from datetime import datetime
 
 
 class Configuration:
-    data: Dict[str, Any] = {}
-
-    @classmethod
-    def init_from_template(cls) -> None:
-        """
-        Initialize the configuration from a template file.
-        """
-        template_file_path = PathTo.TEMPLATE_CONFIG_FILE
-        config_file_path = PathTo.CONFIG_FILE
-        try:
-            with open(template_file_path, "r") as template_file:
-                data = yaml.safe_load(template_file)
-            with open(config_file_path, "w") as config_file:
-                yaml.safe_dump(data, config_file)
-            logging.info("[Config] Config file created successfully.")
-        except FileNotFoundError:
-            logging.critical(f"[Config] The file '{template_file_path}' was not found.")
-            logging.critical("[Config] Exiting program.")
-            sys.exit(1)
-        except yaml.YAMLError as e:
-            logging.critical(f"[Config] Failed to parse YAML file: {e}")
-            logging.critical("[Config] Exiting program.")
-            sys.exit(1)
+    file_path: str
+    lastest_generation_id: int
+    lastest_working_generation_id: int
+    configuration_dictionary: Dict[str, Any]
 
     @classmethod
     def load(cls) -> None:
         """
         Load configuration from file or create a new one from the template if it doesn't exist.
         """
-        if os.path.exists(PathTo.TEMPORARY_CONFIG_FILE):
-            try:
-                with open(PathTo.TEMPORARY_CONFIG_FILE, "r") as f:
-                    cls.data = yaml.safe_load(f)
-                logging.info("[Config] Successfully loaded temporary config")
-            except Exception as e:
-                logging.error(f"[Config] Failed to load temporary config: {e}")
-                cls.handle_fail_from(ConfigType.Temporary)
-        else:
-            try:
-                with open(PathTo.CONFIG_FILE, "r") as f:
-                    cls.data = yaml.safe_load(f)
-                logging.info("[Config] Successfully loaded config")
-            except Exception as e:
-                logging.error(f"[Config] Failed to load config: {e}")
-                cls.handle_fail_from(ConfigType.Current)
+        logging.info("[Config] Loading configuration...")
+        cls.latest_generation_id = cls.get_latest_generation_id()
+        cls.latest_working_generation_id = cls.get_latest_working_generation_id()
+
+        if cls.latest_generation_id == 0:
+            logging.info("[Config] No generations found.")
+            cls.create_new_configuration_from_template()
+
+        cls.file_path = cls.get_latest_working_generation_filepath()
+        try:
+            with open(cls.file_path, "r") as f:
+                cls.configuration_dictionary = yaml.safe_load(f)
+            logging.info("[Config] Successfully loaded the configuration file.")
+        except Exception:
+            cls.critical_exit(f"Failed to load configuration file '{cls.file_path}'")
 
     @classmethod
-    def handle_fail_from(cls, config: ConfigType) -> None:
+    def create_new_configuration_from_template(cls) -> None:
         """
-        Handle the failure of loading the configuration by backing up and deleting the current config file,
-        and creating a new one from the template.
-
-        :param config: The type of configuration that failed to load.
+        Initialize the configuration from a template file.
         """
-        match config:
-            case ConfigType.Temporary:
-                if os.path.exists(PathTo.TEMPORARY_CONFIG_FILE):
-                    try:
-                        cls.backup_file(PathTo.TEMPORARY_CONFIG_FILE)
-                        os.remove(PathTo.TEMPORARY_CONFIG_FILE)
-                        logging.info(
-                            "[Config] Backed up and deleted temporary config file"
-                        )
-                    except Exception as e:
-                        logging.error(
-                            f"[Config] Failed to delete temporary config: {e}"
-                        )
-                logging.warning("[Config] Temporary config does not exist, skipping...")
-            case ConfigType.Current:
-                if os.path.exists(PathTo.CONFIG_FILE):
-                    try:
-                        cls.backup_file(PathTo.CONFIG_FILE)
-                        os.remove(PathTo.CONFIG_FILE)
-                        logging.info(
-                            "[Config] Backed up and deleted current config file"
-                        )
-                        cls.init_from_template()
-                    except Exception as e:
-                        logging.error(f"[Config] Failed to delete current config: {e}")
-                logging.warning(
-                    "[Config] Current config does not exist, creating a new one..."
+        logging.info("[Config] Using template config file to create a new config.")
+        template_file_path = PathTo.TEMPLATE_CONFIG_FILE
+        try:
+            with open(template_file_path, "r") as template_file:
+                data = yaml.safe_load(template_file)
+                logging.debug("[Config] Template config file loaded successfully.")
+            data["Metadata"]["id"] = 1
+            data["Metadata"]["version"] = cls.get_version_from_pyproject()
+            # TODO: TZ should come from the execution environment or config
+            data["Metadata"]["created_at"] = datetime.now().isoformat(
+                sep=" ", timespec="minutes"
+            )
+            logging.debug("[Config] Metadata updated with current time and version.")
+            if not cls.create_new_config_generation(data):
+                cls.critical_exit(
+                    "Failed to create a new configuration generation from the template."
                 )
-                cls.init_from_template()
-                logging.info("[Config] New config file created successfully.")
-            case _:
-                logging.error(
-                    "[Config] Unknown or inapropriate configuration type, skipping..."
-                )
-                return
+        except FileNotFoundError:
+            Configuration.critical_exit(
+                f"Template config file not found: {template_file_path}"
+            )
+        except yaml.YAMLError:
+            Configuration.critical_exit(
+                f"Error parsing template config file: {template_file_path}"
+            )
 
-        logging.critical(
-            f"[Config] {config.name} configuration has failed to load properly, falling back to previous working config and restarting the system..."
+    @classmethod
+    def create_new_config_generation(cls, config: Dict[str, Any]) -> bool:
+        """
+        Create a new configuration generation by saving the current configuration to a new file.
+
+        :param config: The configuration dictionary to save.
+        :return: True if the generation was created successfully, False otherwise.
+        """
+        if not os.path.exists(PathTo.GENERATIONS_FOLDER):
+            os.makedirs(PathTo.GENERATIONS_FOLDER)
+            logging.debug("[Config] Generations folder created.")
+        if config["Metadata"]["id"] != cls.latest_generation_id + 1:
+            logging.error(
+                "[Config] The provided configuration ID does not match the expected next ID."
+            )
+            return False
+        if config["Metadata"]["id"] > 1 and config["Metadata"]["origin"] != "user":
+            logging.error(
+                "[Config] The provided configuration is not from a user and cannot be used to create a new generation."
+            )
+            config["Metadata"]["origin"] = "user"
+
+        cls.lastest_generation_id += 1
+        cls.lastest_working_generation_id = cls.lastest_generation_id
+        generation_file_path = os.path.join(
+            PathTo.GENERATIONS_FOLDER,
+            f"generation_{cls.lastest_generation_id}.yaml",
         )
-        subprocess.call(["sudo", "reboot"])
+
+        is_saved = cls.save_config(config, generation_file_path)
+        if not is_saved:
+            logging.error(
+                f"[Config] Failed to save the new generation at {generation_file_path}"
+            )
+            return False
+        logging.info(f"[Config] New generation created: {generation_file_path}")
+        return True
 
     @classmethod
-    def save(cls) -> bool:
+    def save_config(cls, config: Dict[str, Any], path: str) -> bool:
         """
-        Writes the class dictionary to a YAML file.
+        Save the configuration dictionary to a YAML file.
 
         :return: True if the file was written successfully, False otherwise.
         """
         try:
-            with open(cls.file_path, "w") as file:
-                yaml.safe_dump(cls.data, file)
-            logging.info("[Config] saved successfully.")
+            with open(path, "w") as file:
+                yaml.safe_dump(config, file)
+            logging.info(f"[Config] File saved successfully at '{path}'.")
             return True
         except IOError as e:
             logging.error(f"[Config] Failed to write to file: {e}")
             return False
 
-    @staticmethod
-    def backup_file(file_path: str) -> None:
+    @classmethod
+    def get(cls, *keys: str, default: Any = None) -> Any:
         """
-        Creates a backup of the specified file by appending a .bak and a timestamp to its name,
-        without deleting the original file.
+        Reads a value from the class dictionary using a variable number of keys.
 
-        :param file_path: The path of the file to back up.
+        :param keys: Variable number of keys to navigate through the dictionary hierarchy.
+        :param default: Default value to return if the key path doesn't exist.
+        :return: The value at the specified key path, or the default value if not found.
         """
-        if not os.path.exists(file_path):
-            logging.error(f"[Config] File not found: {file_path}")
-            return
+        if not keys:
+            return cls.configuration_dictionary
 
-        try:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            backup_path = f"{file_path}.bak.{timestamp}"
-            with open(file_path, "rb") as original_file:
-                with open(backup_path, "wb") as backup_file:
-                    backup_file.write(original_file.read())
-            logging.info(f"[Config] Backup created: {backup_path}")
-        except Exception as e:
-            logging.error(f"[Config] Failed to create backup for {file_path}: {e}")
+        current = cls.configuration_dictionary
+        for key in keys:
+            if isinstance(current, dict) and key in current:
+                current = current[key]
+            else:
+                logging.debug(f"[Config] Key path not found: {' -> '.join(keys)}")
+                return default
+
+        logging.debug(f"[Config] Found value at: {' -> '.join(keys)}")
+        return current
 
     @classmethod
-    def read_variable(
-        cls,
-        category: str,
-        subcategory: str,
-        var: str,
-        importance: Importance = Importance.OPTIONAL,
-    ) -> Optional[Any]:
+    def get_from_module(cls, module_name: str, *keys: str, default: Any = None) -> Any:
         """
-        Reads a specific variable from the class dictionary.
-
-        :param category: The category key in the dictionary.
-        :param subcategory: The subcategory key in the dictionary.
-        :param var: The variable key within the category.
-        :param importance: The importance level of the variable. Defaults to Importance.NORMAL.
-        :return: The value of the variable if it exists, otherwise None.
-        """
-        value = cls.data.get(category, {}).get(subcategory, {}).get(var)
-        if value is None:
-            logging.warning(
-                f"[Config] variable not found: {category} -> {subcategory} -> {var}"
-            )
-            if importance == Importance.REQUIRED:
-                logging.critical(
-                    f"[Config] required variable not found: {category} -> {subcategory} -> {var}"
-                )
-                logging.critical("[Config] Exiting program.")
-                sys.exit(1)
-            elif importance == Importance.OPTIONAL:
-                logging.info(
-                    f"[Config] optional variable not found: {category} -> {subcategory} -> {var}"
-                )
-                return None
-
-        logging.info(f"[Config] variable found: {category} -> {subcategory} -> {var}")
-        return value
-
-    @classmethod
-    def read_module_variable(
-        cls,
-        module_name: str,
-        var: str,
-        importance: Importance = Importance.OPTIONAL,
-    ) -> Optional[Any]:
-        """
-        Reads a specific variable from the module's configuration.
+        Reads a value from the module's configuration using a variable number of keys.
 
         :param module_name: The name of the module.
-        :param var: The variable key within the module.
-        :param importance: The importance level of the variable. Defaults to Importance.NORMAL.
-        :return: The value of the variable if it exists, otherwise None.
+        :param keys: Variable number of keys to navigate through the module's dictionary hierarchy.
+        :param default: Default value to return if the key path doesn't exist.
+        :return: The value at the specified key path, or the default value if not found.
         """
-        return cls.read_variable("Modules", module_name, var, importance)
+        return cls.get("Modules", module_name, *keys, default=default)
 
     @classmethod
-    def read_app_variable(
-        cls,
-        app_name: str,
-        var: str,
-        importance: Importance = Importance.OPTIONAL,
-    ) -> Optional[Any]:
+    def get_from_app(cls, app_name: str, *keys: str, default: Any = None) -> Any:
         """
-        Reads a specific variable from the application's configuration.
+        Reads a value from the application's configuration using a variable number of keys.
 
         :param app_name: The name of the application.
-        :param var: The variable key within the application.
-        :param importance: The importance level of the variable. Defaults to Importance.NORMAL.
-        :return: The value of the variable if it exists, otherwise None.
+        :param keys: Variable number of keys to navigate through the application's dictionary hierarchy.
+        :param default: Default value to return if the key path doesn't exist.
+        :return: The value at the specified key path, or the default value if not found.
         """
-        return cls.read_variable("Apps", app_name, var, importance)
+        return cls.get("Apps", app_name, *keys, default=default)
 
     @classmethod
-    def read_app_meta_variable(
-        cls,
-        app_name: str,
-        var: str,
-        importance: Importance = Importance.OPTIONAL,
-    ) -> Optional[Any]:
+    def get_from_app_meta(cls, app_name: str, *keys: str, default: Any = None) -> Any:
         """
-        Reads a specific variable from the class dictionary.
+        Reads a value from the application's meta configuration using a variable number of keys.
 
-        :return: The value of the variable if it exists, otherwise None.
+        :param app_name: The name of the application.
+        :param keys: Variable number of keys to navigate through the application's meta dictionary hierarchy.
+        :param default: Default value to return if the key path doesn't exist.
+        :return: The value at the specified key path, or the default value if not found.
         """
-        value = cls.data.get("Apps", {}).get(app_name, {}).get("meta").get(var)
-        if value is None:
-            logging.warning(
-                f"[Config] variable not found: Apps -> {app_name} -> meta -> {var}"
-            )
-            if importance == Importance.REQUIRED:
-                logging.critical(
-                    f"[Config] required variable not found: Apps -> {app_name} -> meta -> {var}"
-                )
-                logging.critical("[Config] Exiting program.")
-                sys.exit(1)
-            elif importance == Importance.OPTIONAL:
-                logging.info(
-                    f"[Config] optional variable not found: Apps -> {app_name} -> meta -> {var}"
-                )
-                return None
-
-        logging.info(f"[Config] variable found: Apps -> {app_name} -> meta -> {var}")
-        return value
+        return cls.get("Apps", app_name, "meta", *keys, default=default)
 
     @classmethod
-    def read_app_config_variable(
-        cls,
-        app_name: str,
-        var: str,
-        importance: Importance = Importance.OPTIONAL,
-    ) -> Optional[Any]:
+    def get_from_app_config(cls, app_name: str, *keys: str, default: Any = None) -> Any:
         """
-        Reads a specific variable from the class dictionary.
+        Reads a value from the application's config using a variable number of keys.
 
-        :return: The value of the variable if it exists, otherwise None.
+        :param app_name: The name of the application.
+        :param keys: Variable number of keys to navigate through the application's config dictionary hierarchy.
+        :param default: Default value to return if the key path doesn't exist.
+        :return: The value at the specified key path, or the default value if not found.
         """
-        value = cls.data.get("Apps", {}).get(app_name, {}).get("config").get(var)
-        if value is None:
-            logging.warning(
-                f"[Config] variable not found: Apps -> {app_name} -> config -> {var}"
-            )
-            if importance == Importance.REQUIRED:
-                logging.critical(
-                    f"[Config] required variable not found: Apps -> {app_name} -> config -> {var}"
-                )
-                logging.critical("[Config] Exiting program.")
-                sys.exit(1)
-            elif importance == Importance.OPTIONAL:
-                logging.info(
-                    f"[Config] optional variable not found: Apps -> {app_name} -> config -> {var}"
-                )
-                return None
-
-        logging.info(f"[Config] variable found: Apps -> {app_name} -> config -> {var}")
-        return value
+        return cls.get("Apps", app_name, "config", *keys, default=default)
 
     @classmethod
-    def update_variable(
-        cls,
-        category: str,
-        subcategory: str,
-        var: str,
-        value: Any,
-    ) -> bool:
+    def set(cls, *keys: str, value: Any) -> bool:
         """
-        Updates a specific variable in the class dictionary.
+        Sets a value in the configuration dictionary using a variable number of keys.
 
-        :param category: The category key in the dictionary.
-        :param subcategory: The subcategory key in the dictionary.
-        :param var: The variable key within the category.
-        :param value: The new value of the variable.
-        :return: True if the variable was updated successfully, False otherwise.
+        :param keys: Variable number of keys to navigate through the dictionary hierarchy.
+        :param value: The value to set at the specified key path.
+        :return: True if the value was set successfully, False otherwise.
         """
+        if not keys:
+            logging.error("[Config] No keys provided to set a value.")
+            return False
         try:
-            if category not in cls.data:
-                cls.data[category] = {}
-            if subcategory not in cls.data[category]:
-                cls.data[category][subcategory] = {}
-            cls.data[category][subcategory][var] = value
-            cls.save()
-            logging.info(
-                f"[Config] updated variable: {category} -> {subcategory} -> {var}"
-            )
+            current = cls.configuration_dictionary
+            for key in keys[:-1]:
+                if key not in current or not isinstance(current[key], dict):
+                    current[key] = {}
+                current = current[key]
+
+            current[keys[-1]] = value
+            logging.info(f"[Config] Set value at: {' -> '.join(keys)} to {value}")
             return True
         except Exception as e:
-            logging.error(f"[Config] Failed to update variable: {e}")
+            logging.error(f"[Config] Failed to set value at {' -> '.join(keys)}: {e}")
             return False
 
     @classmethod
@@ -326,6 +231,88 @@ class Configuration:
 
         version = data.get("project", {}).get("version", "unknown")
         return version
+
+    @classmethod
+    def get_generation_filenames(cls) -> list[str]:
+        """
+        Retrieves all generation filenames from the generations folder.
+
+        :return: A list of generation filenames.
+        """
+        try:
+            return [
+                f for f in os.listdir(PathTo.GENERATIONS_FOLDER) if f.endswith(".yaml")
+            ]
+        except FileNotFoundError:
+            logging.error(
+                f"[Config] Generations folder not found: {PathTo.GENERATIONS_FOLDER}"
+            )
+            return []
+
+    @classmethod
+    def get_latest_generation_id(cls) -> int:
+        """
+        Retrieves the latest generation ID from all the generations available in the generations folder.
+
+        :return: The latest generation ID.
+        """
+        generation_files = cls.get_generation_filenames()
+        if not generation_files:
+            logging.warning("[Config] No generation files found.")
+            return 0
+
+        latest_id = 0
+        for file in generation_files:
+            try:
+                # The file format is expected to be like: generation_<id>.yaml
+                generation_id = int(file.split("_")[1].split(".")[0])
+                if generation_id > latest_id:
+                    latest_id = generation_id
+            except (ValueError, IndexError):
+                logging.error(f"[Config] Invalid generation file name: {file}")
+
+        cls.lastest_generation_id = latest_id
+        return latest_id
+
+    @classmethod
+    def get_latest_working_generation_id(cls) -> int:
+        """
+        Retrieves the latest working generation ID from all the generations available in the generations folder.
+
+        :return: The latest working generation ID.
+        """
+        generation_files = cls.get_generation_filenames()
+        if not generation_files:
+            logging.warning("[Config] No generation files found.")
+            return 0
+
+        latest_id = 0
+        for file in generation_files:
+            try:
+                # The file format is expected to be like:
+                # generation_<id>.broken.yaml for broken generations
+                if file.endswith(".broken.yaml"):
+                    continue  # Skip broken generations
+                generation_id = int(file.split("_")[1].split(".")[0])
+                if generation_id > latest_id:
+                    latest_id = generation_id
+            except (ValueError, IndexError):
+                logging.error(f"[Config] Invalid generation file name: {file}")
+
+        return latest_id
+
+    @classmethod
+    def get_latest_working_generation_filepath(cls) -> str:
+        """
+        Retrieves the filepath of the latest working generation.
+
+        :return: The filepath of the latest working generation.
+        """
+        latest_id = cls.get_latest_working_generation_id()
+        if latest_id == 0:
+            return ""
+
+        return os.path.join(PathTo.GENERATIONS_FOLDER, f"generation_{latest_id}.yaml")
 
     @classmethod
     def get_addresses(cls) -> str:
@@ -349,3 +336,44 @@ class Configuration:
             return "unknown", "unknown"
         finally:
             s.close()
+
+    @classmethod
+    def flag_current_generation_as_broken(cls, reason: str) -> None:
+        """
+        Flags the current generation as broken and saves the reason.
+
+        :param reason: The reason for marking the generation as broken.
+        """
+        try:
+            cls.set("Metadata", "is_broken", value=True)
+            cls.set("Metadata", "broken_reason", value=reason)
+
+            original_path = cls.file_path
+            broken_path = original_path.replace(".yaml", ".broken.yaml")
+
+            if cls.save_config(cls.configuration_dictionary, broken_path):
+                try:
+                    os.remove(original_path)
+                    logging.info(f"[Config] Renamed {original_path} to {broken_path}")
+                except OSError as e:
+                    logging.error(f"[Config] Failed to remove original file: {e}")
+            else:
+                logging.error(
+                    f"[Config] Failed to save broken configuration to {broken_path}"
+                )
+
+        except Exception as e:
+            logging.error(f"[Config] Failed to flag generation as broken: {e}")
+
+    @classmethod
+    def critical_exit(cls, reason: str) -> None:
+        """
+        Handles critical errors by logging the reason, flagging the current generation as broken,
+        and exiting the program.
+
+        :param reason: The reason for the critical exit.
+        """
+        cls.flag_current_generation_as_broken(reason)
+        logging.critical(f"[Config] Critical error occurred: {reason}")
+        logging.critical("[Config] Exiting program.")
+        sys.exit(1)
