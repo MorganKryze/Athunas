@@ -1,7 +1,6 @@
 import logging
 import os
-from board import Board
-from enums.input_status import InputStatus
+from typing import Callable, Dict
 from PIL import Image, ImageFont, ImageDraw
 from datetime import datetime
 from dateutil import tz
@@ -9,10 +8,13 @@ import time
 import threading
 import calendar
 
-from apps import pomodoro
-from enums.variable_importance import Importance
+from board import Board
 from path import PathTo
 from config import Configuration
+from enums.input_status import InputStatus
+from enums.service_status import ServiceStatus
+from enums.variable_importance import Importance
+from models.application import Application
 
 light_pink = (255, 219, 218)
 dark_pink = (219, 127, 142)
@@ -32,56 +34,48 @@ smsColor = (110, 255, 140)
 spotify_color = (0, 255, 0)
 
 FONT_SIZE = 5
-DEFAULT_CYCLE_TIME = 20
-DEFAULT_USE_24_HOUR = True
 
 
-class MainScreen:
-    def __init__(self, modules, callbacks):
+class MainScreen(Application):
+    def __init__(self, callbacks: Dict[str, Callable]):
         """
-        Initialize the MainScreen with modules and callbacks.
+        Initialize the MainScreen with callbacks.
 
-        Args:
-            modules (Dict): Dictionary of modules.
-            callbacks (Dict[str, Callable]): Dictionary of callback functions.
+        :param callbacks: Dict[str, Callable]: Dictionary of callback functions.
         """
-        self.enabled = Configuration.read_variable(
-            "Apps", "MainScreen", "enabled", Importance.REQUIRED
-        )
-        if not self.enabled:
-            logging.debug("[MainScreen App] MainScreen is disabled.")
+        super().__init__(callbacks)
+        if self.status == ServiceStatus.DISABLED:
+            logging.info(
+                f"[{self.__class__.__name__}] Stopped initialization due to disabled status."
+            )
             return
 
-        logging.debug("[MainScreen App] Initializing MainScreen.")
-        self.modules = modules
-        self.callbacks = callbacks
-
-        self.font = ImageFont.truetype(PathTo.FONT_FILE, FONT_SIZE)
-        self.cycle_duration_in_seconds = (
-            Configuration.read_variable(
-                "Apps", "MainScreen", "cycle_duration_in_seconds"
-            )
-            or DEFAULT_CYCLE_TIME
+        self.use_24_hour = Configuration.read_app_config_variable(
+            {self.__class__.__name__}, "use_24_hour", Importance.REQUIRED
         )
-        self.use_24_hour = (
-            Configuration.read_variable("Apps", "MainScreen", "use_24_hour")
-            or DEFAULT_USE_24_HOUR
-        )
-        self.date_format = Configuration.read_variable(
-            "Apps", "MainScreen", "date_format", Importance.REQUIRED
+        self.date_format = Configuration.read_app_config_variable(
+            {self.__class__.__name__}, "date_format", Importance.REQUIRED
         )
         if self.date_format != "MM-DD" and self.date_format != "DD-MM":
             logging.error(
                 "[MainScreen App] Invalid date format. Possible values are 'MM-DD' or 'DD-MM'."
             )
-            self.enabled = False
-            return
-
-        self.vertical = pomodoro.PomodoroScreen(modules, callbacks)
-
+            self.status = ServiceStatus.ERROR_APP_CONFIG
+        self.cycle_duration_in_seconds = Configuration.read_app_variable(
+            {self.__class__.__name__}, "cycle_duration_in_seconds"
+        )
+        if self.cycle_duration_in_seconds <= 0:
+            logging.error(
+                "[MainScreen App] Invalid cycle duration in seconds. Must be greater than 0."
+            )
+            self.status = ServiceStatus.ERROR_APP_CONFIG
+        self.font = ImageFont.truetype(PathTo.FONT_FILE, FONT_SIZE)
         self.lastGenerateCall = None
         self.is_on_cycle = True
-
+        self.currentIdx = 0
+        self.selectMode = False
+        # self.old_noti_list = []
+        self.queued_frames = []
         self.backgrounds = {
             "sakura": Image.open(
                 os.path.join(PathTo.MAIN_SCREEN_BACKGROUND_FOLDER, "sakura-bg.png")
@@ -99,51 +93,62 @@ class MainScreen:
             self.generate_forest_bg,
         ]
 
-        self.currentIdx = 0
-        self.selectMode = False
-
-        self.old_noti_list = []
-        self.queued_frames = []
-
-        logging.info("[MainScreen App] Initialized.")
-
-    def generate(self, isHorizontal, inputStatus):
-        if not isHorizontal:
-            return self.vertical.generate(isHorizontal, inputStatus)
-
-        if inputStatus == InputStatus.LONG_PRESS:
-            self.selectMode = not self.selectMode
-
-        if self.selectMode:
-            if inputStatus is InputStatus.ENCODER_INCREASE:
-                self.currentIdx += 1
-                self.queued_frames = []
-            elif inputStatus is InputStatus.ENCODER_DECREASE:
-                self.currentIdx -= 1
-                self.queued_frames = []
-        else:
-            if inputStatus is InputStatus.SINGLE_PRESS:
-                self.callbacks["toggle_display"]()
-            elif inputStatus is InputStatus.ENCODER_INCREASE:
-                self.callbacks["switch_next_app"]()
-            elif inputStatus is InputStatus.ENCODER_DECREASE:
-                self.callbacks["switch_prev_app"]()
-
-        if self.lastGenerateCall is None:
-            self.lastGenerateCall = time.time()
-        if time.time() - self.lastGenerateCall >= self.cycle_duration_in_seconds:
-            self.is_on_cycle = not self.is_on_cycle
-            self.lastGenerateCall = time.time()
-
-        frame = self.theme_list[self.currentIdx % len(self.theme_list)]()
-
-        if self.selectMode:
-            draw = ImageDraw.Draw(frame)
-            draw.rectangle(
-                (0, 0, Board.led_cols - 1, Board.led_rows - 1), outline=white
+        if self.status == ServiceStatus.ERROR_APP_CONFIG:
+            logging.error(
+                f"[{self.__class__.__name__}] Application configuration errors, please check the configuration before restarting."
             )
+            return
 
-        return frame
+        self.status = ServiceStatus.RUNNING
+        logging.info(f"[{self.__class__.__name__}] Running.")
+
+    def generate(self, is_horizontal: bool, encoder_input_status: InputStatus) -> Image:
+        """
+        Generate the frame for the MainScreen app.
+
+        :param is_horizontal: bool: Whether the screen is horizontal.
+        :param encoder_input_status: InputStatus: The status of the encoder input.
+        :return: Image: The generated frame.
+        """
+        super().generate(is_horizontal, encoder_input_status)
+        try:
+            if encoder_input_status == InputStatus.LONG_PRESS:
+                self.selectMode = not self.selectMode
+
+            if self.selectMode:
+                if encoder_input_status is InputStatus.ENCODER_INCREASE:
+                    self.currentIdx += 1
+                    self.queued_frames = []
+                elif encoder_input_status is InputStatus.ENCODER_DECREASE:
+                    self.currentIdx -= 1
+                    self.queued_frames = []
+            else:
+                if encoder_input_status is InputStatus.SINGLE_PRESS:
+                    self.callbacks["toggle_display"]()
+                elif encoder_input_status is InputStatus.ENCODER_INCREASE:
+                    self.callbacks["switch_next_app"]()
+                elif encoder_input_status is InputStatus.ENCODER_DECREASE:
+                    self.callbacks["switch_prev_app"]()
+
+            if self.lastGenerateCall is None:
+                self.lastGenerateCall = time.time()
+            if time.time() - self.lastGenerateCall >= self.cycle_duration_in_seconds:
+                self.is_on_cycle = not self.is_on_cycle
+                self.lastGenerateCall = time.time()
+
+            frame = self.theme_list[self.currentIdx % len(self.theme_list)]()
+
+            if self.selectMode:
+                draw = ImageDraw.Draw(frame)
+                draw.rectangle(
+                    (0, 0, Board.led_cols - 1, Board.led_rows - 1), outline=white
+                )
+
+            return frame
+        except Exception as e:
+            self.status = ServiceStatus.ERROR_APP_INTERNAL
+            logging.error(f"[MainScreen App] Error generating frame: {e}")
+            return self.generate_on_error()
 
     def generate_sakura_bg(self):
         current_time = datetime.now(tz=tz.tzlocal())
@@ -184,20 +189,20 @@ class MainScreen:
             draw.text((23, 6), day_abbreviation, dark_pink, font=self.font)
 
         # notifications
-        noti_list = self.modules["notifications"].get_notification_list()
-        if noti_list is not None:
-            counts = notification_count_dictionary(noti_list)
+        # noti_list = self.modules["notifications"].get_notification_list()
+        # if noti_list is not None:
+        #     counts = notification_count_dictionary(noti_list)
 
-            if counts["Discord"] > 0:
-                draw.rectangle((37, 26, 38, 27), fill=discordColor)
-            if counts["SMS"] > 0:
-                draw.rectangle((34, 26, 35, 27), fill=smsColor)
-            if counts["Snapchat"] > 0:
-                draw.rectangle((34, 29, 35, 30), fill=snapchatColor)
-            if counts["Messenger"] > 0:
-                draw.rectangle((37, 29, 38, 30), fill=messengerColor)
+        #     if counts["Discord"] > 0:
+        #         draw.rectangle((37, 26, 38, 27), fill=discordColor)
+        #     if counts["SMS"] > 0:
+        #         draw.rectangle((34, 26, 35, 27), fill=smsColor)
+        #     if counts["Snapchat"] > 0:
+        #         draw.rectangle((34, 29, 35, 30), fill=snapchatColor)
+        #     if counts["Messenger"] > 0:
+        #         draw.rectangle((37, 29, 38, 30), fill=messengerColor)
 
-            self.old_noti_list = noti_list
+        #     self.old_noti_list = noti_list
 
         return frame
 
@@ -213,21 +218,21 @@ class MainScreen:
         minutes = currentTime.minute
         seconds = currentTime.second
 
-        noti_list = self.modules["notifications"].get_notification_list()
-        if noti_list is not None:
-            threading.Thread(
-                target=generateNotiFramesAsync,
-                args=(
-                    self.queued_frames,
-                    noti_list,
-                    self.old_noti_list.copy(),
-                    self.font,
-                    Board.led_cols,
-                    Board.led_rows,
-                ),
-            ).start()
+        # noti_list = self.modules["notifications"].get_notification_list()
+        # if noti_list is not None:
+        #     threading.Thread(
+        #         target=generateNotiFramesAsync,
+        #         args=(
+        #             self.queued_frames,
+        #             noti_list,
+        #             self.old_noti_list.copy(),
+        #             self.font,
+        #             Board.led_cols,
+        #             Board.led_rows,
+        #         ),
+        #     ).start()
 
-            self.old_noti_list = noti_list.copy()
+        #     self.old_noti_list = noti_list.copy()
 
         if len(self.queued_frames) == 0:
             frame = Image.new("RGBA", (Board.led_cols, Board.led_rows), washed_out_navy)
@@ -310,54 +315,54 @@ def format_to_two_digits(number):
     return f"{number:02}"
 
 
-def notification_count_dictionary(noti_list):
-    counts = {"Discord": 0, "SMS": 0, "Snapchat": 0, "Messenger": 0}
-    for noti in noti_list:
-        if noti.application in counts.keys():
-            counts[noti.application] = counts[noti.application] + 1
-    return counts
+# def notification_count_dictionary(noti_list):
+#     counts = {"Discord": 0, "SMS": 0, "Snapchat": 0, "Messenger": 0}
+#     for noti in noti_list:
+#         if noti.application in counts.keys():
+#             counts[noti.application] = counts[noti.application] + 1
+#     return counts
 
 
-def generateNotiFramesAsync(
-    queue, noti_list, old_noti_list, font, canvas_width, canvas_height
-):
-    for noti in noti_list:
-        found = False
-        for old_noti in old_noti_list:
-            if noti.noti_id == old_noti.noti_id:
-                found = True
-        if not found:
-            color = (0, 0, 0)
-            if noti.application == "Discord":
-                color = discordColor
-            elif noti.application == "SMS":
-                color = smsColor
-            elif noti.application == "Snapchat":
-                color = snapchatColor
-            elif noti.application == "Messenger":
-                color = messengerColor
+# def generateNotiFramesAsync(
+#     queue, noti_list, old_noti_list, font, canvas_width, canvas_height
+# ):
+#     for noti in noti_list:
+#         found = False
+#         for old_noti in old_noti_list:
+#             if noti.noti_id == old_noti.noti_id:
+#                 found = True
+#         if not found:
+#             color = (0, 0, 0)
+#             if noti.application == "Discord":
+#                 color = discordColor
+#             elif noti.application == "SMS":
+#                 color = smsColor
+#             elif noti.application == "Snapchat":
+#                 color = snapchatColor
+#             elif noti.application == "Messenger":
+#                 color = messengerColor
 
-            for _ in range(3):
-                queue.append(Image.new("RGB", (canvas_width, canvas_height), color))
-                queue.append(Image.new("RGB", (canvas_width, canvas_height), color))
-                queue.append(Image.new("RGB", (canvas_width, canvas_height), (0, 0, 0)))
-                queue.append(Image.new("RGB", (canvas_width, canvas_height), (0, 0, 0)))
+#             for _ in range(3):
+#                 queue.append(Image.new("RGB", (canvas_width, canvas_height), color))
+#                 queue.append(Image.new("RGB", (canvas_width, canvas_height), color))
+#                 queue.append(Image.new("RGB", (canvas_width, canvas_height), (0, 0, 0)))
+#                 queue.append(Image.new("RGB", (canvas_width, canvas_height), (0, 0, 0)))
 
-            noti_str = (
-                noti.application + " | Title: " + noti.title + " | Body: " + noti.body
-            )
-            noti_len = font.getsize(noti_str)[0]
+#             noti_str = (
+#                 noti.application + " | Title: " + noti.title + " | Body: " + noti.body
+#             )
+#             noti_len = font.getsize(noti_str)[0]
 
-            for i in range(noti_len + canvas_width):
-                noti_frame = Image.new("RGB", (canvas_width, canvas_height), color)
-                noti_draw = ImageDraw.Draw(noti_frame)
-                noti_draw.text(
-                    (canvas_width - i, 1), noti_str, orange_tinted_white, font
-                )
-                queue.append(noti_frame)
+#             for i in range(noti_len + canvas_width):
+#                 noti_frame = Image.new("RGB", (canvas_width, canvas_height), color)
+#                 noti_draw = ImageDraw.Draw(noti_frame)
+#                 noti_draw.text(
+#                     (canvas_width - i, 1), noti_str, orange_tinted_white, font
+#                 )
+#                 queue.append(noti_frame)
 
-            for _ in range(3):
-                queue.append(Image.new("RGB", (canvas_width, canvas_height), color))
-                queue.append(Image.new("RGB", (canvas_width, canvas_height), color))
-                queue.append(Image.new("RGB", (canvas_width, canvas_height), (0, 0, 0)))
-                queue.append(Image.new("RGB", (canvas_width, canvas_height), (0, 0, 0)))
+#             for _ in range(3):
+#                 queue.append(Image.new("RGB", (canvas_width, canvas_height), color))
+#                 queue.append(Image.new("RGB", (canvas_width, canvas_height), color))
+#                 queue.append(Image.new("RGB", (canvas_width, canvas_height), (0, 0, 0)))
+#                 queue.append(Image.new("RGB", (canvas_width, canvas_height), (0, 0, 0)))

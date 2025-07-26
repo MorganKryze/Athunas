@@ -1,11 +1,14 @@
 import logging
+from typing import Callable, Dict
 from board import Board
 from enums.input_status import InputStatus
 import time
 from datetime import timedelta, datetime
 from PIL import Image, ImageFont, ImageDraw
 
+from enums.service_status import ServiceStatus
 from enums.variable_importance import Importance
+from models.application import Application
 from path import PathTo
 from config import Configuration
 
@@ -13,141 +16,182 @@ from config import Configuration
 DEFAULT_FONT_SIZE = 5
 
 
-class PomodoroScreen:
-    def __init__(self, modules, callbacks):
+class PomodoroScreen(Application):
+    def __init__(self, callbacks: Dict[str, Callable]):
         """
-        Initialize the PomodoroScreen with modules and callbacks.
+        Initialize the PomodoroScreen and callbacks.
 
-        Args:
-            modules (Dict): Dictionary of modules.
-            callbacks (Dict[str, Callable]): Dictionary of callback functions.
+        :param callbacks: Dict[str, Callable]: Dictionary of callback functions.
         """
-        self.enabled = Configuration.read_variable(
-            "Apps", "Pomodoro", "enabled", Importance.REQUIRED
-        )
-        if not self.enabled:
-            logging.debug("[PomodoroScreen App] Pomodoro is disabled.")
+        super().__init__(callbacks)
+        if self.status == ServiceStatus.DISABLED:
+            logging.info(
+                f"[{self.__class__.__name__}] Stopped initialization due to disabled status."
+            )
             return
 
-        logging.debug("[PomodoroScreen App] Initializing PomodoroScreen.")
-        self.modules = modules
-        self.callbacks = callbacks
-
+        self.work_duration = timedelta(
+            minutes=Configuration.read_app_config_variable(
+                {self.__class__.__name__},
+                "work_duration_in_minutes",
+                Importance.REQUIRED,
+            )
+        )
+        if self.work_duration <= timedelta(seconds=0):
+            self.status = ServiceStatus.ERROR_APP_CONFIG
+            logging.error(
+                f"[{self.__class__.__name__}] Work duration must be greater than 0."
+            )
+        self.short_duration = timedelta(
+            minutes=Configuration.read_app_config_variable(
+                {self.__class__.__name__},
+                "break_duration_in_minutes",
+                Importance.REQUIRED,
+            )
+        )
+        if (
+            self.short_duration <= timedelta(seconds=0)
+            or self.short_duration >= self.work_duration
+        ):
+            self.status = ServiceStatus.ERROR_APP_CONFIG
+            logging.error(
+                f"[{self.__class__.__name__}] Break duration must be greater than 0 and less than work duration."
+            )
+        self.long_duration = timedelta(
+            minutes=Configuration.read_app_config_variable(
+                {self.__class__.__name__},
+                "long_break_duration_in_minutes",
+                Importance.REQUIRED,
+            )
+        )
+        if (
+            self.long_duration <= timedelta(seconds=0)
+            or self.long_duration <= self.short_duration
+        ):
+            self.status = ServiceStatus.ERROR_APP_CONFIG
+            logging.error(
+                f"[{self.__class__.__name__}] Long break duration must be greater than 0 and greater than short break duration."
+            )
         self.active = False
         self.font = ImageFont.truetype(PathTo.FONT_FILE, DEFAULT_FONT_SIZE)
         self.canvas_width = Board.led_cols
         self.canvas_height = Board.led_rows
-
-        self.work_duration = timedelta(
-            minutes=Configuration.read_variable(
-                "Apps", "Pomodoro", "work_duration", Importance.REQUIRED
-            )
-        )
-        self.short_duration = timedelta(
-            minutes=Configuration.read_variable(
-                "Apps", "Pomodoro", "break_duration", Importance.REQUIRED
-            )
-        )
-        self.long_duration = timedelta(
-            minutes=Configuration.read_variable(
-                "Apps", "Pomodoro", "long_break_duration", Importance.REQUIRED
-            )
-        )
         self.cycle_order = "WSWSWL"
         self.cycle_idx = 0
         self.status = ""
-
         self.time_left = None
         self.last_update_time = None
 
-    def generate(self, isHorizontal, inputStatus):
-        if inputStatus is InputStatus.SINGLE_PRESS:
-            self.active = not self.active
-            self.last_update_time = time.time()
-            if self.active and self.time_left is None:
-                status = self.cycle_order[self.cycle_idx]
-                if status == "W":
-                    self.status = "W"
-                    self.time_left = self.work_duration
-                elif status == "S":
-                    self.status = "S"
-                    self.time_left = self.short_duration
-                elif status == "L":
-                    self.status = "L"
-                    self.time_left = self.long_duration
-                self.cycle_idx += 1
-                if self.cycle_idx >= len(self.cycle_order):
-                    self.cycle_idx = 0
-        elif inputStatus is InputStatus.ENCODER_INCREASE:
-            self.callbacks["switch_next_app"]()
-        elif inputStatus is InputStatus.ENCODER_DECREASE:
-            self.callbacks["switch_prev_app"]()
-
-        if self.active:
-            self.time_left = self.time_left - timedelta(
-                seconds=(time.time() - self.last_update_time)
+        if self.status == ServiceStatus.ERROR_APP_CONFIG:
+            logging.error(
+                f"[{self.__class__.__name__}] Application configuration errors, please check the configuration before restarting."
             )
-            self.last_update_time = time.time()
+            return
 
-            if self.time_left <= timedelta(seconds=0):
-                print("time is up")
-                self.active = False
-                self.time_left = None
-                self.last_update_time = None
+        self.status = ServiceStatus.RUNNING
+        logging.info(f"[{self.__class__.__name__}] Running.")
 
-        # if isHorizontal:
-        #     frame = Image.new("RGB", (self.canvas_width, self.canvas_height), (0,0,0))
-        #     draw = ImageDraw.Draw(frame)
+    def generate(self, is_horizontal: bool, encoder_input_status: InputStatus) -> Image:
+        """
+        Generate the frame for the Pomodoro app.
 
-        #     if self.time_left is not None:
-        #         minutes, seconds = divmod(self.time_left.total_seconds(), 60)
-        #         time_str = str(int(round(minutes))) + "m " + str(int(round(seconds))) + "s"
-        #         draw.text((0,0), time_str, (255,255,255), font=self.font)
+        :param is_horizontal: bool: Whether the screen is horizontal.
+        :param encoder_input_status: InputStatus: The status of the encoder input.
+        :return: Image: The generated frame.
+        """
+        super().generate(is_horizontal, encoder_input_status)
+        try:
+            if encoder_input_status is InputStatus.SINGLE_PRESS:
+                self.active = not self.active
+                self.last_update_time = time.time()
+                if self.active and self.time_left is None:
+                    status = self.cycle_order[self.cycle_idx]
+                    if status == "W":
+                        self.status = "W"
+                        self.time_left = self.work_duration
+                    elif status == "S":
+                        self.status = "S"
+                        self.time_left = self.short_duration
+                    elif status == "L":
+                        self.status = "L"
+                        self.time_left = self.long_duration
+                    self.cycle_idx += 1
+                    if self.cycle_idx >= len(self.cycle_order):
+                        self.cycle_idx = 0
+            elif encoder_input_status is InputStatus.ENCODER_INCREASE:
+                self.callbacks["switch_next_app"]()
+            elif encoder_input_status is InputStatus.ENCODER_DECREASE:
+                self.callbacks["switch_prev_app"]()
 
-        #         if self.status != '':
-        #             draw.text((0,7), self.status, (255,255,255), font=self.font)
-        #     else:
-        #         if self.status != '':
-        #             draw.text((0,7), self.status + " is Over", (255,255,255), font=self.font)
-        # else:
-        bg_color = (255, 126, 109)
-        if self.status == "W":
-            bg_color = (255, 126, 109)
-        elif self.status == "S":
-            bg_color = (142, 202, 255)
-        elif self.status == "L":
-            bg_color = (43, 156, 255)
-
-        frame = Image.new("RGB", (self.canvas_height, self.canvas_width), bg_color)
-        draw = ImageDraw.Draw(frame)
-
-        if self.status != "":
-            if self.status == "W":
-                draw.text((1, 7), "Work", (255, 255, 255), font=self.font)
-            elif self.status == "S":
-                draw.text((1, 7), "Short", (255, 255, 255), font=self.font)
-                draw.text((1, 13), "Break", (255, 255, 255), font=self.font)
-            elif self.status == "L":
-                draw.text((1, 7), "Long", (255, 255, 255), font=self.font)
-                draw.text((1, 13), "Break", (255, 255, 255), font=self.font)
-
-            if self.time_left is None:
-                y_loc = 19
-                if self.status == "W":
-                    y_loc = 13
-                draw.text((1, y_loc), "Is Over", (255, 255, 255), font=self.font)
-            else:
-                minutes, seconds = divmod(self.time_left.total_seconds(), 60)
-                time_str = (
-                    str(int(round(minutes))) + "m " + str(int(round(seconds))) + "s"
+            if self.active:
+                self.time_left = self.time_left - timedelta(
+                    seconds=(time.time() - self.last_update_time)
                 )
-                draw.text((1, 1), time_str, (255, 255, 255), font=self.font)
-        else:
-            draw.text((0, 10), "POMODORO", (255, 255, 255), font=self.font)
-            draw.text((7, 26), "PRESS", (255, 255, 255), font=self.font)
-            draw.text((13, 32), "TO", (255, 255, 255), font=self.font)
-            draw.text((7, 38), "START", (255, 255, 255), font=self.font)
+                self.last_update_time = time.time()
 
-        frame = frame.rotate(90, expand=True)
+                if self.time_left <= timedelta(seconds=0):
+                    print("time is up")
+                    self.active = False
+                    self.time_left = None
+                    self.last_update_time = None
 
-        return frame
+            # if isHorizontal:
+            #     frame = Image.new("RGB", (self.canvas_width, self.canvas_height), (0,0,0))
+            #     draw = ImageDraw.Draw(frame)
+
+            #     if self.time_left is not None:
+            #         minutes, seconds = divmod(self.time_left.total_seconds(), 60)
+            #         time_str = str(int(round(minutes))) + "m " + str(int(round(seconds))) + "s"
+            #         draw.text((0,0), time_str, (255,255,255), font=self.font)
+
+            #         if self.status != '':
+            #             draw.text((0,7), self.status, (255,255,255), font=self.font)
+            #     else:
+            #         if self.status != '':
+            #             draw.text((0,7), self.status + " is Over", (255,255,255), font=self.font)
+            # else:
+            bg_color = (255, 126, 109)
+            if self.status == "W":
+                bg_color = (255, 126, 109)
+            elif self.status == "S":
+                bg_color = (142, 202, 255)
+            elif self.status == "L":
+                bg_color = (43, 156, 255)
+
+            frame = Image.new("RGB", (self.canvas_height, self.canvas_width), bg_color)
+            draw = ImageDraw.Draw(frame)
+
+            if self.status != "":
+                if self.status == "W":
+                    draw.text((1, 7), "Work", (255, 255, 255), font=self.font)
+                elif self.status == "S":
+                    draw.text((1, 7), "Short", (255, 255, 255), font=self.font)
+                    draw.text((1, 13), "Break", (255, 255, 255), font=self.font)
+                elif self.status == "L":
+                    draw.text((1, 7), "Long", (255, 255, 255), font=self.font)
+                    draw.text((1, 13), "Break", (255, 255, 255), font=self.font)
+
+                if self.time_left is None:
+                    y_loc = 19
+                    if self.status == "W":
+                        y_loc = 13
+                    draw.text((1, y_loc), "Is Over", (255, 255, 255), font=self.font)
+                else:
+                    minutes, seconds = divmod(self.time_left.total_seconds(), 60)
+                    time_str = (
+                        str(int(round(minutes))) + "m " + str(int(round(seconds))) + "s"
+                    )
+                    draw.text((1, 1), time_str, (255, 255, 255), font=self.font)
+            else:
+                draw.text((0, 10), "POMODORO", (255, 255, 255), font=self.font)
+                draw.text((7, 26), "PRESS", (255, 255, 255), font=self.font)
+                draw.text((13, 32), "TO", (255, 255, 255), font=self.font)
+                draw.text((7, 38), "START", (255, 255, 255), font=self.font)
+
+            frame = frame.rotate(90, expand=True)
+
+            return frame
+        except Exception as e:
+            self.status = ServiceStatus.ERROR_APP_INTERNAL
+            logging.error(f"[PomodoroScreen App] Error generating frame: {e}")
+            return self.generate_on_error()

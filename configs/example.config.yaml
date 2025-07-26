@@ -2,6 +2,22 @@
 # system configuration will lead to system crashes. Please be careful when editing this
 # file. Feel free to ask for help on the GitHub repository and read the documentation.
 
+# ------------------------- Metadata -----------------------
+# Metadata is used to store information about the configuration file, such as the
+# version, date of creation, and author. This information can be useful for debugging
+# and tracking changes to the configuration file.
+
+# Please do not edit this section unless you know what you are doing.
+# The metadata is automatically generated and should not be modified manually.
+
+Metadata:
+  id: 0
+  version: 0.0.0
+  created_at: 2025-01-01T12:00:00Z
+  author: author
+  is_broken: false
+  broken_reason:
+
 # ------------------ System Configuration ------------------
 # System configuration is used to declare the hardware configuration of the matrix and
 # the pinout of the connected peripherals.
@@ -14,6 +30,8 @@ System:
     led_rows: 32
     led_cols: 64
     brightness: 100
+    disable_hardware_pulsing: true
+    hardware_mapping: regular
     refresh_rate: 0.05
   Tilt-switch:
     gpio: 19
@@ -29,52 +47,139 @@ System:
 
 Modules:
   Notifications:
-    enabled: false
+    name: Notifications
+    description: Provides notification services to applications.
     app_white_list:
     websocket_url:
     retry_delay_on_error: 1000
   Weather:
-    enabled: false
+    name: Weather
+    description: Provides weather information to applications.
     token:
     latitude:
     longitude:
     temperature_unit: celcius
   Spotify:
-    enabled: false
+    name: Spotify
+    description: Provides Spotify integration to applications.
     client_id:
     client_secret:
     redirect_uri:
 
-# -------------------- App Configuration -------------------
+# -------------------- Apps Configuration ------------------
 # Apps are the applications that are available to the user. Disabled apps will not be
 # available to the user.
 
 Apps:
   MainScreen:
     enabled: true
-    use_24_hour: true
-    date_format: DD-MM
-    cycle_duration_in_seconds: 20
+    meta:
+      name: Main Screen
+      description: The main screen of the matrix, displaying time, date, and other information.
+      provides_horizontal_content: true
+      provides_vertical_content: false
+    config:
+      # horizontal_replacement_app: None # IGNORED because has horizontal content
+      vertical_replacement_app: Pomodoro
+      use_24_hour: true
+      date_format: DD-MM
+      cycle_duration_in_seconds: 20
+    dependencies:
   Pomodoro:
     enabled: true
-    work_duration: 25
-    break_duration: 5
-    long_break_duration: 15
-  GifViewer:
+    meta:
+      name: Pomodoro
+      description: A productivity timer that helps you focus on tasks.
+      provides_horizontal_content: false
+      provides_vertical_content: true
+    config:
+      horizontal_replacement_app: None
+      # vertical_replacement_app: None # IGNORED because has vertical content
+      work_duration_in_minutes: 25
+      break_duration_in_minutes: 5
+      long_break_duration_in_minutes: 15
+    dependencies:
+  GifPlayer:
     enabled: true
-    play_limit: 5
+    meta:
+      name: GIF Player
+      description: Displays animated GIFs on the matrix.
+      provides_horizontal_content: true
+      provides_vertical_content: false
+    config:
+      # horizontal_replacement_app: None # IGNORED because has horizontal content
+      vertical_replacement_app: None
+      play_limit: 5
+    dependencies:
   GameOfLife:
-    enabled: true
+    enabled: false
+    meta:
+      name: Game of Life
+      description: A cellular automaton simulation that displays patterns on the matrix.
+      provides_horizontal_content: true
+      provides_vertical_content: false
+    config:
+      # horizontal_replacement_app: None # IGNORED because has horizontal content
+      vertical_replacement_app: None
+    dependencies:
   Spotify:
     enabled: false
+    meta:
+      name: Spotify
+      description: Displays the current playing track from Spotify.
+      provides_horizontal_content: true
+      provides_vertical_content: false
+    config:
+      # horizontal_replacement_app: None # IGNORED because has horizontal content
+      vertical_replacement_app: None
+    dependencies:
+      - Spotify
   Notion:
     enabled: false
-    token_v2:
-    source:
+    meta:
+      name: Notion
+      description: Displays information from Notion databases.
+      provides_horizontal_content: true
+      provides_vertical_content: false
+    config:
+      # horizontal_replacement_app: None # IGNORED because has horizontal content
+      vertical_replacement_app: None
+      token_v2:
+      source:
+    dependencies:
   Youtube:
     enabled: false
-    key:
+    meta:
+      name: YouTube
+      description: Displays the latest videos from a YouTube channel.
+      provides_horizontal_content: true
+      provides_vertical_content: false
+    config:
+      # horizontal_replacement_app: None # IGNORED because has horizontal content
+      vertical_replacement_app: None
+      key:
+    dependencies:
   Pushbullet:
     enabled: false
+    meta:
+      name: Pushbullet
+      description: Displays notifications from Pushbullet.
+      provides_horizontal_content: true
+      provides_vertical_content: false
+    config:
+      # horizontal_replacement_app: None # IGNORED because has horizontal content
+      vertical_replacement_app: None
+    dependencies:
+      - Notifications
   Weather:
     enabled: false
+    meta:
+      name: Weather
+      description: Displays the current weather conditions.
+      provides_horizontal_content: true
+      provides_vertical_content: false
+    config:
+      # horizontal_replacement_app: None # IGNORED because has horizontal content
+      vertical_replacement_app: None
+    dependencies:
+      - Weather

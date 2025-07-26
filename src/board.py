@@ -2,9 +2,9 @@ import logging
 import sys
 import time
 from typing import Any
-from PIL import Image
 import queue
 
+from custom_frames import CustomFrames
 from enums.input_status import InputStatus
 from enums.variable_importance import Importance
 from config import Configuration
@@ -21,6 +21,9 @@ class Board:
 
     led_rows: int
     led_cols: int
+    brightness: int
+    disable_hardware_pulsing: bool
+    hardware_mapping: str
     refresh_rate: float
     encoder_clk: int
     encoder_dt: int
@@ -30,20 +33,21 @@ class Board:
     tilt_switch: int
     tilt_switch_button: Button
     tilt_switch_bounce_time: float
-    brightness: int
     is_display_on: bool = True
     encoder_queue: queue.Queue
     encoder_state: int = 0
     is_horizontal: bool = True
     encoder_input_status: InputStatus = InputStatus.NOTHING
-    black_screen: Image
+    matrix: Any
 
     @classmethod
-    def init_system(cls):
+    def init_system(cls, use_emulator: bool = False) -> None:
         """
         Initializes the system components.
         """
         cls._init_display()
+        cls.init_matrix(use_emulator=use_emulator)
+        CustomFrames.init(cls.led_rows, cls.led_cols)
         cls._init_encoder()
         cls._init_tilt_switch()
 
@@ -84,6 +88,20 @@ class Board:
             logging.critical("[Board] Exiting program.")
             sys.exit(1)
 
+        cls.disable_hardware_pulsing = Configuration.read_variable(
+            "System", "Matrix", "disable_hardware_pulsing", Importance.REQUIRED
+        )
+
+        cls.hardware_mapping = Configuration.read_variable(
+            "System", "Matrix", "hardware_mapping", Importance.REQUIRED
+        )
+        if cls.hardware_mapping not in ["regular", "adafruit-hat"]:
+            logging.critical(
+                "[Board] hardware_mapping must be either 'regular' or 'adafruit-hat'."
+            )
+            logging.critical("[Board] Exiting program.")
+            sys.exit(1)
+
         cls.refresh_rate = Configuration.read_variable(
             "System", "Matrix", "refresh_rate", Importance.REQUIRED
         )
@@ -94,7 +112,39 @@ class Board:
 
         logging.info("[Board] All display settings initialized.")
 
-        cls.black_screen = Image.new("RGB", (cls.led_cols, cls.led_rows), (0, 0, 0))
+    @classmethod
+    def init_matrix(
+        cls,
+        use_emulator: bool = False,
+    ) -> None:
+        """
+        Creates an RGBMatrix object with the specified parameters.
+
+        :param use_emulator: Whether to use the emulator (default is False).
+        """
+        if use_emulator:
+            from RGBMatrixEmulator import RGBMatrix, RGBMatrixOptions  # type: ignore
+        else:
+            from rgbmatrix import RGBMatrix, RGBMatrixOptions  # type: ignore
+
+        logging.debug(
+            f"[Config] Creating RGBMatrix options with screen height: {cls.led_rows}, screen width: {cls.led_cols}, brightness: {cls.brightness}, disable hardware pulsing: {cls.disable_hardware_pulsing}, hardware mapping: {cls.hardware_mapping}"
+        )
+        try:
+            options = RGBMatrixOptions()
+            options.rows = cls.led_rows
+            options.cols = cls.led_cols
+            options.brightness = cls.brightness
+            options.disable_hardware_pulsing = cls.disable_hardware_pulsing
+            options.hardware_mapping = cls.hardware_mapping
+            logging.debug("[Config] RGBMatrix options set.")
+
+            cls.matrix = RGBMatrix(options=options)
+            logging.debug("[Config] RGBMatrix object created.")
+        except Exception as e:
+            logging.critical(f"[Config] failed to create RGBMatrix object: {e}")
+            logging.critical("[Config] Exiting program.")
+            sys.exit(1)
 
     @classmethod
     def _init_encoder(cls):
@@ -292,46 +342,22 @@ class Board:
             return True
         return False
 
-    @staticmethod
-    def init_matrix(
-        pixel_rows: int,
-        pixel_cols: int,
-        brightness: int,
-        disable_hardware_pulsing: bool = True,
-        hardware_mapping: str = "regular",
-        use_emulator: bool = False,
-    ) -> Any:
+    @classmethod
+    def loading_animation(cls, duration_in_seconds: int = 10) -> None:
         """
-        Creates an RGBMatrix object with the specified parameters.
-
-        :param pixel_rows: The number of rows of the screen.
-        :param pixel_cols: The number of columns of the screen.
-        :param brightness: The brightness of the screen (default is 100).
-        :param disable_hardware_pulsing: Disables hardware pulsing (default is True).
-        :param hardware_mapping: The hardware mapping of the screen (default is 'regular'). For Adafruit HAT: 'adafruit-hat'.
-        :return: An RGBMatrix object.
+        Displays a loading animation on the matrix.
         """
-        if use_emulator:
-            from RGBMatrixEmulator import RGBMatrix, RGBMatrixOptions  # type: ignore
-        else:
-            from rgbmatrix import RGBMatrix, RGBMatrixOptions  # type: ignore
-
-        logging.debug(
-            f"[Config] Creating RGBMatrix options with screen height: {pixel_rows}, screen width: {pixel_cols}, brightness: {brightness}, disable hardware pulsing: {disable_hardware_pulsing}, hardware mapping: {hardware_mapping}"
-        )
-        try:
-            options = RGBMatrixOptions()
-            options.rows = pixel_rows
-            options.cols = pixel_cols
-            options.brightness = brightness
-            options.disable_hardware_pulsing = disable_hardware_pulsing
-            options.hardware_mapping = hardware_mapping
-            logging.debug("[Config] RGBMatrix options set.")
-
-            matrix = RGBMatrix(options=options)
-            logging.debug("[Config] RGBMatrix object created.")
-            return matrix
-        except Exception as e:
-            logging.critical(f"[Config] failed to create RGBMatrix object: {e}")
-            logging.critical("[Config] Exiting program.")
-            sys.exit(1)
+        if duration_in_seconds <= 0:
+            logging.warning(
+                "[Board] Duration for loading animation must be positive. Skipped."
+            )
+            return
+        logging.debug("[Board] Starting loading animation.")
+        start_time = time.time()
+        while time.time() - start_time < duration_in_seconds:
+            frame = CustomFrames.loading(int((time.time() - start_time) * 10) % 100)
+            cls.matrix.SetImage(frame)
+            time.sleep(0.1)
+        logging.debug("[Board] Loading animation completed.")
+        cls.matrix.SetImage(CustomFrames.black())
+        logging.debug("[Board] Display cleared after loading animation.")

@@ -2,9 +2,12 @@ import time
 import logging
 import argparse
 from typing import Any
+from PIL import Image
 
+from custom_frames import CustomFrames
 from enums.input_status import InputStatus
 from board import Board
+from models.application import Application
 from path import PathTo
 from logs import Logs
 from app_manager import AppManager
@@ -28,21 +31,24 @@ def main() -> None:
 
     Configuration.load()
 
-    Board.init_system()
-
-    matrix = Board.init_matrix(
-        Board.led_rows, Board.led_cols, Board.brightness, use_emulator=args.emulator
-    )
+    Board.init_system(use_emulator=args.emulator)
 
     AppManager.init_apps()
 
-    server = WebServer()
-    server.start(port=9000, debug=False)
+    # TODO: remove this when webserver is implemented with new config and workflow
+    # server = WebServer()
+    # TODO: port should be configurable
+    # server.start(port=9000, debug=args.debug)
+
+    # TODO: change back to > 0 when implemented
+    Board.loading_animation(duration_in_seconds=0)
 
     while True:
         try:
-            if server.is_user_connected():
-                matrix.SetImage(Board.black_screen)
+            # TODO: remove this check when webserver is implemented with new config and workflow
+            if False:
+                # if server.is_user_connected():
+                Board.matrix.SetImage(CustomFrames.black())
             else:
                 if not Board.encoder_queue.empty():
                     Board.encoder_state += Board.encoder_queue.get()
@@ -54,18 +60,20 @@ def main() -> None:
                     Board.encoder_input_status = InputStatus.ENCODER_DECREASE
                     Board.reset_encoder_state()
 
-                current_app = AppManager.get_current_app()
-                frame: Any = current_app.generate(
+                current_app: Application = AppManager.get_current_app()
+                frame: Image = current_app.generate(
                     Board.is_horizontal, Board.encoder_input_status
                 )
-                matrix.SetImage(frame if Board.is_display_on else Board.black_screen)
+                Board.matrix.SetImage(
+                    frame if Board.is_display_on else CustomFrames.black()
+                )
 
                 Board.reset_encoder_input_status()
 
             time.sleep(Board.refresh_rate)
         except KeyboardInterrupt:
-            logging.info("[Controller] Application stopped by user.")
-            matrix.SetImage(Board.black_screen)
+            logging.info("[Main] Program stopped by user.")
+            Board.matrix.SetImage(CustomFrames.black())
             break
 
 

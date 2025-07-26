@@ -14,12 +14,7 @@ from models.module import Module
 
 class Notifications(Module):
     def __init__(self) -> None:
-        """
-        Initialize the NotificationModule with the given configuration.
-        """
         super().__init__()
-        if not self.enabled:
-            return
 
         self.app_white_list: Dict[str, str] = Configuration.read_module_variable(
             self.__class__.__name__, "app_white_list"
@@ -41,14 +36,14 @@ class Notifications(Module):
             f"[Notifications Module] Retry delay on error set to {self.retry_delay_on_error} ms"
         )
         Notification.retry_delay_on_error = self.retry_delay_on_error
-        
+
         if not self.self_test():
             logging.error(
                 "[Notifications Module] Self-test failed, disabling the module."
             )
             self.disable_on_error()
             return
-        
+
         logging.debug("[Notifications Module] Starting websocket service")
         Thread(
             target=Notification.start_service,

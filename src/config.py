@@ -202,6 +202,87 @@ class Configuration:
         return cls.read_variable("Modules", module_name, var, importance)
 
     @classmethod
+    def read_app_variable(
+        cls,
+        app_name: str,
+        var: str,
+        importance: Importance = Importance.OPTIONAL,
+    ) -> Optional[Any]:
+        """
+        Reads a specific variable from the application's configuration.
+
+        :param app_name: The name of the application.
+        :param var: The variable key within the application.
+        :param importance: The importance level of the variable. Defaults to Importance.NORMAL.
+        :return: The value of the variable if it exists, otherwise None.
+        """
+        return cls.read_variable("Apps", app_name, var, importance)
+
+    @classmethod
+    def read_app_meta_variable(
+        cls,
+        app_name: str,
+        var: str,
+        importance: Importance = Importance.OPTIONAL,
+    ) -> Optional[Any]:
+        """
+        Reads a specific variable from the class dictionary.
+
+        :return: The value of the variable if it exists, otherwise None.
+        """
+        value = cls.data.get("Apps", {}).get(app_name, {}).get("meta").get(var)
+        if value is None:
+            logging.warning(
+                f"[Config] variable not found: Apps -> {app_name} -> meta -> {var}"
+            )
+            if importance == Importance.REQUIRED:
+                logging.critical(
+                    f"[Config] required variable not found: Apps -> {app_name} -> meta -> {var}"
+                )
+                logging.critical("[Config] Exiting program.")
+                sys.exit(1)
+            elif importance == Importance.OPTIONAL:
+                logging.info(
+                    f"[Config] optional variable not found: Apps -> {app_name} -> meta -> {var}"
+                )
+                return None
+
+        logging.info(f"[Config] variable found: Apps -> {app_name} -> meta -> {var}")
+        return value
+
+    @classmethod
+    def read_app_config_variable(
+        cls,
+        app_name: str,
+        var: str,
+        importance: Importance = Importance.OPTIONAL,
+    ) -> Optional[Any]:
+        """
+        Reads a specific variable from the class dictionary.
+
+        :return: The value of the variable if it exists, otherwise None.
+        """
+        value = cls.data.get("Apps", {}).get(app_name, {}).get("config").get(var)
+        if value is None:
+            logging.warning(
+                f"[Config] variable not found: Apps -> {app_name} -> config -> {var}"
+            )
+            if importance == Importance.REQUIRED:
+                logging.critical(
+                    f"[Config] required variable not found: Apps -> {app_name} -> config -> {var}"
+                )
+                logging.critical("[Config] Exiting program.")
+                sys.exit(1)
+            elif importance == Importance.OPTIONAL:
+                logging.info(
+                    f"[Config] optional variable not found: Apps -> {app_name} -> config -> {var}"
+                )
+                return None
+
+        logging.info(f"[Config] variable found: Apps -> {app_name} -> config -> {var}")
+        return value
+
+    @classmethod
     def update_variable(
         cls,
         category: str,
@@ -232,23 +313,6 @@ class Configuration:
         except Exception as e:
             logging.error(f"[Config] Failed to update variable: {e}")
             return False
-
-    @classmethod
-    def update_module_variable(
-        cls,
-        module_name: str,
-        var: str,
-        value: Any,
-    ) -> bool:
-        """
-        Updates a specific variable in the module's configuration.
-
-        :param module_name: The name of the module.
-        :param var: The variable key within the module.
-        :param value: The new value of the variable.
-        :return: True if the variable was updated successfully, False otherwise.
-        """
-        return cls.update_variable("Modules", module_name, var, value)
 
     @classmethod
     def get_version_from_pyproject(cls) -> str:
