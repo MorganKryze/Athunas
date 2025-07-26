@@ -3,7 +3,7 @@ import urllib.request
 import json
 from PIL import Image, ImageFont, ImageDraw
 import threading
-from enums.encoder_input_status import EncoderInputStatus
+from enums.encoder_input import EncoderInput
 from queue import LifoQueue
 from ast import literal_eval
 
@@ -38,11 +38,11 @@ class SubcountScreen:
             self.subs = self.queue.get()
             self.queue.queue.clear()
 
-        if inputStatus is EncoderInputStatus.SINGLE_PRESS:
+        if inputStatus is EncoderInput.SINGLE_PRESS:
             self.default_actions['toggle_display']()
-        elif inputStatus is EncoderInputStatus.ENCODER_INCREASE:
+        elif inputStatus is EncoderInput.ENCODER_INCREASE:
             self.default_actions['switch_next_app']()
-        elif inputStatus is EncoderInputStatus.ENCODER_DECREASE:
+        elif inputStatus is EncoderInput.ENCODER_DECREASE:
             self.default_actions['switch_prev_app']()
 
         frame = self.bg.copy()

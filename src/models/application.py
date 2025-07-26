@@ -7,7 +7,7 @@ from PIL import Image
 
 from config import Configuration
 from custom_frames import CustomFrames
-from enums.encoder_input_status import EncoderInputStatus
+from enums.encoder_input import EncoderInput
 from enums.service_status import ServiceStatus
 
 
@@ -46,7 +46,7 @@ class Application:
             self.status = ServiceStatus.DISABLED
 
     def generate(
-        self, is_horizontal: bool, encoder_input_status: EncoderInputStatus
+        self, is_horizontal: bool, encoder_input_status: EncoderInput
     ) -> Image:
         """
         Generate the frame for the app.

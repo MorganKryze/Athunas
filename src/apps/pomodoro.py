@@ -1,7 +1,7 @@
 import logging
 from typing import Callable, Dict
 from board import Board
-from enums.encoder_input_status import EncoderInputStatus
+from enums.encoder_input import EncoderInput
 import time
 from datetime import timedelta, datetime
 from PIL import Image, ImageFont, ImageDraw
@@ -91,7 +91,7 @@ class PomodoroScreen(Application):
         logging.info(f"[{self.__class__.__name__}] Running.")
 
     def generate(
-        self, is_horizontal: bool, encoder_input_status: EncoderInputStatus
+        self, is_horizontal: bool, encoder_input_status: EncoderInput
     ) -> Image:
         """
         Generate the frame for the Pomodoro app.
@@ -102,7 +102,7 @@ class PomodoroScreen(Application):
         """
         super().generate(is_horizontal, encoder_input_status)
         try:
-            if encoder_input_status is EncoderInputStatus.SINGLE_PRESS:
+            if encoder_input_status is EncoderInput.SINGLE_PRESS:
                 self.active = not self.active
                 self.last_update_time = time.time()
                 if self.active and self.time_left is None:
@@ -119,9 +119,9 @@ class PomodoroScreen(Application):
                     self.cycle_idx += 1
                     if self.cycle_idx >= len(self.cycle_order):
                         self.cycle_idx = 0
-            elif encoder_input_status is EncoderInputStatus.ENCODER_INCREASE:
+            elif encoder_input_status is EncoderInput.ENCODER_INCREASE:
                 self.callbacks["switch_next_app"]()
-            elif encoder_input_status is EncoderInputStatus.ENCODER_DECREASE:
+            elif encoder_input_status is EncoderInput.ENCODER_DECREASE:
                 self.callbacks["switch_prev_app"]()
 
             if self.active:

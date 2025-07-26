@@ -1,8 +1,8 @@
 from enum import Enum
 
-class EncoderInputStatus(Enum):
+class EncoderInput(Enum):
     """
-    Enum to represent the status of an input.
+    Enum to represent the type of an input from an encoder.
     
     Attributes:
         NOTHING (int): Represents no input.

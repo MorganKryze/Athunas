@@ -11,7 +11,7 @@ import calendar
 from board import Board
 from path import PathTo
 from config import Configuration
-from enums.encoder_input_status import EncoderInputStatus
+from enums.encoder_input import EncoderInput
 from enums.service_status import ServiceStatus
 from models.application import Application
 
@@ -107,7 +107,7 @@ class MainScreen(Application):
         logging.info(f"[{self.__class__.__name__}] Running.")
 
     def generate(
-        self, is_horizontal: bool, encoder_input_status: EncoderInputStatus
+        self, is_horizontal: bool, encoder_input_status: EncoderInput
     ) -> Image:
         """
         Generate the frame for the MainScreen app.
@@ -118,22 +118,22 @@ class MainScreen(Application):
         """
         super().generate(is_horizontal, encoder_input_status)
         try:
-            if encoder_input_status == EncoderInputStatus.LONG_PRESS:
+            if encoder_input_status == EncoderInput.LONG_PRESS:
                 self.selectMode = not self.selectMode
 
             if self.selectMode:
-                if encoder_input_status is EncoderInputStatus.ENCODER_INCREASE:
+                if encoder_input_status is EncoderInput.ENCODER_INCREASE:
                     self.currentIdx += 1
                     self.queued_frames = []
-                elif encoder_input_status is EncoderInputStatus.ENCODER_DECREASE:
+                elif encoder_input_status is EncoderInput.ENCODER_DECREASE:
                     self.currentIdx -= 1
                     self.queued_frames = []
             else:
-                if encoder_input_status is EncoderInputStatus.SINGLE_PRESS:
+                if encoder_input_status is EncoderInput.SINGLE_PRESS:
                     self.callbacks["toggle_display"]()
-                elif encoder_input_status is EncoderInputStatus.ENCODER_INCREASE:
+                elif encoder_input_status is EncoderInput.ENCODER_INCREASE:
                     self.callbacks["switch_next_app"]()
-                elif encoder_input_status is EncoderInputStatus.ENCODER_DECREASE:
+                elif encoder_input_status is EncoderInput.ENCODER_DECREASE:
                     self.callbacks["switch_prev_app"]()
 
             if self.lastGenerateCall is None:
