@@ -80,8 +80,7 @@ dev-emulator:
 clean-python:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Cleaning up Python environment...$(RESET)"
 		rm -rf .venv
-		rm -rf src/*.egg-info
-find src/ -name "*.pyc" -exec rm -f {} +
+		find src/ -name "*.pyc" -exec rm -f {} +
 	find src/ -name "__pycache__" -exec rm -rf {} +
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Python environment cleaned up.$(RESET)"
