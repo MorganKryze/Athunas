@@ -125,7 +125,7 @@ class AppManager:
         Returns:
             Any: The current application.
         """
-        return cls.enabled_apps[cls.current_app_index]
+        return cls.carousel[cls.current_app_index]
 
     @classmethod
     def switch_next_app(cls) -> bool:
@@ -135,7 +135,7 @@ class AppManager:
         :return: bool: True if the switch was successful, False otherwise.
         """
         try:
-            cls.current_app_index = (cls.current_app_index + 1) % len(cls.enabled_apps)
+            cls.current_app_index = (cls.current_app_index + 1) % len(cls.carousel)
             logging.debug("[AppManager] Switched to next app.")
             return True
         except Exception as e:
@@ -152,7 +152,7 @@ class AppManager:
         :return: bool: True if the switch was successful, False otherwise.
         """
         try:
-            cls.current_app_index = (cls.current_app_index - 1) % len(cls.enabled_apps)
+            cls.current_app_index = (cls.current_app_index - 1) % len(cls.carousel)
             logging.debug("[AppManager] Switched to previous app.")
             return True
         except Exception as e:
