@@ -30,7 +30,7 @@ System:
     led_rows: 32
     led_cols: 64
     brightness: 100
-    disable_hardware_pulsing: false
+    disable_hardware_pulsing: true
     hardware_mapping: regular
     refresh_rate: 0.05
   Tilt-switch:
@@ -79,7 +79,7 @@ Apps:
       provides_horizontal_content: true
       provides_vertical_content: false
     config:
-      # horizontal_replacement_app: None # IGNORED because has horizontal content
+      # horizontal_replacement_app:  # IGNORED because has horizontal content
       vertical_replacement_app: Pomodoro
       use_24_hour: true
       date_format: DD-MM
@@ -93,8 +93,8 @@ Apps:
       provides_horizontal_content: false
       provides_vertical_content: true
     config:
-      horizontal_replacement_app: None
-      # vertical_replacement_app: None # IGNORED because has vertical content
+      horizontal_replacement_app: 
+      # vertical_replacement_app:  # IGNORED because has vertical content
       work_duration_in_minutes: 25
       break_duration_in_minutes: 5
       long_break_duration_in_minutes: 15
@@ -107,8 +107,8 @@ Apps:
       provides_horizontal_content: true
       provides_vertical_content: false
     config:
-      # horizontal_replacement_app: None # IGNORED because has horizontal content
-      vertical_replacement_app: None
+      # horizontal_replacement_app:  # IGNORED because has horizontal content
+      vertical_replacement_app: 
       play_limit: 5
     dependencies:
   GameOfLife:
@@ -119,8 +119,8 @@ Apps:
       provides_horizontal_content: true
       provides_vertical_content: false
     config:
-      # horizontal_replacement_app: None # IGNORED because has horizontal content
-      vertical_replacement_app: None
+      # horizontal_replacement_app:  # IGNORED because has horizontal content
+      vertical_replacement_app: 
     dependencies:
   Spotify:
     enabled: false
@@ -130,8 +130,8 @@ Apps:
       provides_horizontal_content: true
       provides_vertical_content: false
     config:
-      # horizontal_replacement_app: None # IGNORED because has horizontal content
-      vertical_replacement_app: None
+      # horizontal_replacement_app:  # IGNORED because has horizontal content
+      vertical_replacement_app: 
     dependencies:
       - Spotify
   Notion:
@@ -142,8 +142,8 @@ Apps:
       provides_horizontal_content: true
       provides_vertical_content: false
     config:
-      # horizontal_replacement_app: None # IGNORED because has horizontal content
-      vertical_replacement_app: None
+      # horizontal_replacement_app:  # IGNORED because has horizontal content
+      vertical_replacement_app: 
       token_v2:
       source:
     dependencies:
@@ -155,8 +155,8 @@ Apps:
       provides_horizontal_content: true
       provides_vertical_content: false
     config:
-      # horizontal_replacement_app: None # IGNORED because has horizontal content
-      vertical_replacement_app: None
+      # horizontal_replacement_app:  # IGNORED because has horizontal content
+      vertical_replacement_app: 
       key:
     dependencies:
   Pushbullet:
@@ -167,8 +167,8 @@ Apps:
       provides_horizontal_content: true
       provides_vertical_content: false
     config:
-      # horizontal_replacement_app: None # IGNORED because has horizontal content
-      vertical_replacement_app: None
+      # horizontal_replacement_app:  # IGNORED because has horizontal content
+      vertical_replacement_app: 
     dependencies:
       - Notifications
   Weather:
@@ -179,7 +179,7 @@ Apps:
       provides_horizontal_content: true
       provides_vertical_content: false
     config:
-      # horizontal_replacement_app: None # IGNORED because has horizontal content
-      vertical_replacement_app: None
+      # horizontal_replacement_app:  # IGNORED because has horizontal content
+      vertical_replacement_app: 
     dependencies:
       - Weather
