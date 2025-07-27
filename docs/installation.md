@@ -36,22 +36,38 @@ ssh admin@athunas.local
 
 And enter the password you set earlier (`raspberry`).
 
+> [!NOTE]
+> If you want to use the installer to avoid entering all these commands manually, you can run the following command:
+>
+> ```bash
+> curl -sSL https://raw.githubusercontent.com/MorganKryze/Athunas/main/scripts/installer.sh | bash
+> ```
+>
+> This will execute the installation script, which will guide you through the setup process.
+> Then you can skip the next steps and go directly to the [`Build & Run`](#build--run) section.
+
+Update your system.
+
+```bash
+sudo apt update
+```
+
 Install `nala`, a faster alternative to `apt`.
 
 ```bash
 sudo apt install nala -y
 ```
 
-Update your system.
-
-```bash
-sudo nala update && sudo nala upgrade -y
-```
-
 Remove unnecessary packages.
 
 ```bash
 sudo nala autoremove -y
+```
+
+Then upgrade your system.
+
+```bash
+sudo nala upgrade -y
 ```
 
 Install `git`, `pip` and `make`.
@@ -90,12 +106,6 @@ Update the kernel modules.
 
 ```bash
 sudo update-initramfs -u
-```
-
-Reboot the Raspberry Pi.
-
-```bash
-sudo reboot
 ```
 
 ## Install the project
