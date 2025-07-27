@@ -8,7 +8,7 @@ RESET := $(shell tput sgr0)
 .PHONY: install
 install:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Installing system dependencies...$(RESET)"
-	@sudo apt-get install libsixel-dev python3-tk cython3 python3-pip -y ||  \
+	@sudo apt install libsixel-dev python3-tk cython3 python3-pip -y ||  \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to install system dependencies. Please check the logs for error.$(RESET)"; exit 1; }
 	
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Adding 'cap_sys_nice' capability to 'python3.11'...$(RESET)"
@@ -16,23 +16,19 @@ install:
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to set capabilities. Please check the logs for error.$(RESET)"; exit 1; }
 	
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Installing 'uv' (you may ignore their recommendation)...$(RESET)"
-	@curl -LsSf https://astral.sh/uv/install.sh | sh || \
+	@sudo pip install uv --break-system-packages || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to install 'uv'. Please check the logs for error.$(RESET)"; exit 1; }
 	
-	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Adding 'uv' to PATH...$(RESET)"
-	@echo "export PATH=\$${PATH}:\$${HOME}/.local/bin" >> ~/.bashrc || \
-		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to update PATH. Please check the logs for error.$(RESET)"; exit 1; }
-
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)System dependencies installed successfully.$(RESET)"
 
 .PHONY: build
 build:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Creating python virtual environment...$(RESET)"
-	@${HOME}/.local/bin/uv venv || \
+	@uv venv || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to create virtual environment. Please check the logs for error.$(RESET)"; exit 1; }
 
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Installing project python dependencies...$(RESET)"
-	@${HOME}/.local/bin/uv pip install . || \
+	@uv pip install . || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to install project dependencies. Please check the logs for error.$(RESET)"; exit 1; }
 
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Building 'rpi-rgb-led-matrix' library...$(RESET)"
@@ -58,29 +54,29 @@ example:
 .PHONY: run
 run:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Running project...$(RESET)"
-	@${HOME}/.local/bin/uv run src
+	@sudo uv run src
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Project stopped.$(RESET)"
 
 .PHONY: dev
 dev:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Running project with debug-level console logging...$(RESET)"
-	@${HOME}/.local/bin/uv run src --debug
+	@sudo uv run src --debug
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Project running with debug logging.$(RESET)"
 
 .PHONY: dev-emulator
 dev-emulator:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Running project with debug-level console logging in emulator mode...$(RESET)"
-	@${HOME}/.local/bin/uv run src --debug --emulator
+	@sudo uv run src --debug --emulator
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Project running in emulator mode with debug logging.$(RESET)"
 
 .PHONY: clean-python
 clean-python:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Cleaning up Python environment...$(RESET)"
-		rm -rf .venv
-		find src/ -name "*.pyc" -exec rm -f {} +
+	rm -rf .venv
+	find src/ -name "*.pyc" -exec rm -f {} +
 	find src/ -name "__pycache__" -exec rm -rf {} +
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Python environment cleaned up.$(RESET)"
@@ -100,7 +96,7 @@ clean: clean-python clean-library
 .PHONY: update
 update:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Updating 'uv'...$(RESET)"
-	${HOME}/.local/bin/uv self update || \
+	@sudo pip install --upgrade uv || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to update 'uv'. Please check the logs for error.$(RESET)"; exit 1; }
 
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Updating project repository...$(RESET)"
@@ -108,7 +104,7 @@ update:
 	git pull
 
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Updating project dependencies...$(RESET)"
-	${HOME}/.local/bin/uv pip install --upgrade .
+	@uv pip install --upgrade .
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Project and dependencies updated successfully.$(RESET)"
  
