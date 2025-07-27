@@ -44,19 +44,61 @@ class Board:
     matrix: Any
 
     @classmethod
+    def cleanup_gpio(cls) -> None:
+        """
+        Cleanup GPIO resources to prevent conflicts.
+        """
+        try:
+            if hasattr(cls, "encoder") and cls.encoder:
+                cls.encoder.close()
+                logging.debug("[Board] Encoder cleaned up.")
+        except Exception as e:
+            logging.warning(f"[Board] Error cleaning up encoder: {e}")
+
+        try:
+            if hasattr(cls, "encoder_button") and cls.encoder_button:
+                cls.encoder_button.close()
+                logging.debug("[Board] Encoder button cleaned up.")
+        except Exception as e:
+            logging.warning(f"[Board] Error cleaning up encoder button: {e}")
+
+        try:
+            if hasattr(cls, "tilt_switch_button") and cls.tilt_switch_button:
+                cls.tilt_switch_button.close()
+                logging.debug("[Board] Tilt switch button cleaned up.")
+        except Exception as e:
+            logging.warning(f"[Board] Error cleaning up tilt switch button: {e}")
+
+        try:
+            cls.factory.reset()
+            logging.debug("[Board] GPIO factory reset.")
+        except Exception as e:
+            logging.warning(f"[Board] Error resetting GPIO factory: {e}")
+
+    @classmethod
     def init_system(cls, use_emulator: bool = False) -> None:
         """
         Initializes the system components.
 
         :param use_emulator: Whether to use the emulator for the RGB matrix (default is False).
         """
+        cls.cleanup_gpio()
+
         cls._init_display()
         cls.init_matrix(use_emulator=use_emulator)
         CustomFrames.init(cls.led_rows, cls.led_cols)
-        cls._init_encoder()
-        cls._init_tilt_switch()
 
-        logging.debug("[Board] All system components initialized.")
+        try:
+            cls._init_encoder()
+            cls._init_tilt_switch()
+            logging.debug("[Board] All system components initialized.")
+        except Exception as e:
+            logging.error(f"[Board] Failed to initialize GPIO components: {e}")
+            cls.cleanup_gpio()
+            Configuration.critical_exit(
+                f"Failed to initialize GPIO components: {e}. "
+                "Please ensure no other processes are using the GPIO pins and try running with sudo."
+            )
 
     @classmethod
     def _init_display(cls) -> None:
@@ -162,16 +204,25 @@ class Board:
             )
 
         cls.encoder_queue = queue.Queue()
-        cls.encoder = RotaryEncoder(
-            cls.encoder_clk, cls.encoder_dt, pin_factory=cls.factory
-        )
-        cls.encoder.when_rotated_clockwise = lambda enc: cls.rotate_clockwise_callback(
-            enc
-        )
-        cls.encoder.when_rotated_counter_clockwise = (
-            lambda enc: cls.rotate_counter_clockwise_callback(enc)
-        )
-        logging.info("[Board] Encoder rotation initialized.")
+
+        try:
+            cls.encoder = RotaryEncoder(
+                cls.encoder_clk, cls.encoder_dt, pin_factory=cls.factory
+            )
+            cls.encoder.when_rotated_clockwise = (
+                lambda enc: cls.rotate_clockwise_callback(enc)
+            )
+            cls.encoder.when_rotated_counter_clockwise = (
+                lambda enc: cls.rotate_counter_clockwise_callback(enc)
+            )
+            logging.info("[Board] Encoder rotation initialized.")
+        except RuntimeError as e:
+            if "Failed to add edge detection" in str(e):
+                raise RuntimeError(
+                    f"GPIO pins {cls.encoder_clk} or {cls.encoder_dt} are already in use or unavailable. "
+                    "Please check if another process is using these pins or try different GPIO pins."
+                ) from e
+            raise
 
         cls.encoder_sw = Configuration.get(
             "System", "Encoder", "gpio_sw", required=True
@@ -181,13 +232,21 @@ class Board:
                 f"System.Encoder.gpio_sw must be between {cls.FIRST_GPIO_PIN} and {cls.LAST_GPIO_PIN}."
             )
 
-        cls.encoder_button = Button(
-            cls.encoder_sw, pull_up=True, bounce_time=0.1, pin_factory=cls.factory
-        )
-        cls.encoder_button.when_pressed = lambda button: cls.encoder_button_callback(
-            button
-        )
-        logging.info("[Board] Encoder button initialized.")
+        try:
+            cls.encoder_button = Button(
+                cls.encoder_sw, pull_up=True, bounce_time=0.1, pin_factory=cls.factory
+            )
+            cls.encoder_button.when_pressed = (
+                lambda button: cls.encoder_button_callback(button)
+            )
+            logging.info("[Board] Encoder button initialized.")
+        except RuntimeError as e:
+            if "Failed to add edge detection" in str(e):
+                raise RuntimeError(
+                    f"GPIO pin {cls.encoder_sw} is already in use or unavailable. "
+                    "Please check if another process is using this pin or try a different GPIO pin."
+                ) from e
+            raise
 
     @classmethod
     def _init_tilt_switch(cls) -> None:
@@ -210,15 +269,27 @@ class Board:
                 "System.Tilt-switch.bounce_time must be a non-negative number."
             )
 
-        cls.tilt_switch_button = Button(
-            cls.tilt_switch,
-            pull_up=True,
-            bounce_time=cls.tilt_switch_bounce_time,
-            pin_factory=cls.factory,
-        )
-        cls.tilt_switch_button.when_pressed = lambda button: cls.tilt_callback(button)
-        cls.tilt_switch_button.when_released = lambda button: cls.tilt_callback(button)
-        logging.debug("[Board] Tilt switch button initialized.")
+        try:
+            cls.tilt_switch_button = Button(
+                cls.tilt_switch,
+                pull_up=True,
+                bounce_time=cls.tilt_switch_bounce_time,
+                pin_factory=cls.factory,
+            )
+            cls.tilt_switch_button.when_pressed = lambda button: cls.tilt_callback(
+                button
+            )
+            cls.tilt_switch_button.when_released = lambda button: cls.tilt_callback(
+                button
+            )
+            logging.debug("[Board] Tilt switch button initialized.")
+        except RuntimeError as e:
+            if "Failed to add edge detection" in str(e):
+                raise RuntimeError(
+                    f"GPIO pin {cls.tilt_switch} is already in use or unavailable. "
+                    "Please check if another process is using this pin or try a different GPIO pin."
+                ) from e
+            raise
 
     @classmethod
     def rotate_clockwise_callback(cls, encoder: RotaryEncoder) -> None:
