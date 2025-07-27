@@ -70,7 +70,8 @@ class Board:
             logging.warning(f"[Board] Error cleaning up tilt switch button: {e}")
 
         try:
-            cls.factory.reset()
+            cls.factory.close()
+            cls.factory = RPiGPIOFactory()
             logging.debug("[Board] GPIO factory reset.")
         except Exception as e:
             logging.warning(f"[Board] Error resetting GPIO factory: {e}")
