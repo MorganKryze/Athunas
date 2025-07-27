@@ -3,6 +3,7 @@ import time
 import logging
 from typing import Any
 from gpiozero import Button, RotaryEncoder
+from gpiozero.pins.rpigpio import RPiGPIOFactory
 
 from config import Configuration
 from custom_frames import CustomFrames
@@ -13,6 +14,7 @@ from enums.tilt_input import TiltState
 class Board:
     """Class to manage the board's hardware components and their interactions."""
 
+    factory: RPiGPIOFactory = RPiGPIOFactory()
     SCREEN_RATIO: int = 16
     FIRST_GPIO_PIN: int = 0
     LAST_GPIO_PIN: int = 27
@@ -160,7 +162,9 @@ class Board:
             )
 
         cls.encoder_queue = queue.Queue()
-        cls.encoder = RotaryEncoder(cls.encoder_clk, cls.encoder_dt)
+        cls.encoder = RotaryEncoder(
+            cls.encoder_clk, cls.encoder_dt, pin_factory=cls.factory
+        )
         cls.encoder.when_rotated_clockwise = lambda enc: cls.rotate_clockwise_callback(
             enc
         )
@@ -177,7 +181,9 @@ class Board:
                 f"System.Encoder.gpio_sw must be between {cls.FIRST_GPIO_PIN} and {cls.LAST_GPIO_PIN}."
             )
 
-        cls.encoder_button = Button(cls.encoder_sw, pull_up=True, bounce_time=0.1)
+        cls.encoder_button = Button(
+            cls.encoder_sw, pull_up=True, bounce_time=0.1, pin_factory=cls.factory
+        )
         cls.encoder_button.when_pressed = lambda button: cls.encoder_button_callback(
             button
         )
@@ -205,7 +211,10 @@ class Board:
             )
 
         cls.tilt_switch_button = Button(
-            cls.tilt_switch, pull_up=True, bounce_time=cls.tilt_switch_bounce_time
+            cls.tilt_switch,
+            pull_up=True,
+            bounce_time=cls.tilt_switch_bounce_time,
+            pin_factory=cls.factory,
         )
         cls.tilt_switch_button.when_pressed = lambda button: cls.tilt_callback(button)
         cls.tilt_switch_button.when_released = lambda button: cls.tilt_callback(button)
