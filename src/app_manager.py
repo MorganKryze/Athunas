@@ -18,6 +18,7 @@ class AppManager:
     modules: Dict[str, Module]
     apps: List[Application]
     enabled_apps: List[Application]
+    carousel: List[Application]
 
     @classmethod
     def init_apps(cls) -> None:
@@ -29,6 +30,7 @@ class AppManager:
             cls.modules = cls.load_modules()
             cls.apps = cls.load_apps()
             cls.enabled_apps = [app for app in cls.apps if app.enabled]
+            cls.carousel = cls.filter_apps_for_carousel()
             logging.debug("[AppManager] All enabled app initialized.")
         except Exception as e:
             logging.critical(f"[AppManager] Failed to initialize apps: {e}")
@@ -73,6 +75,20 @@ class AppManager:
             # notion.NotionScreen(config, modules, callbacks),
             # subcount.SubcountScreen(config, modules, callbacks),
             # spotify_player.SpotifyScreen(config, modules, callbacks),
+        ]
+
+    @classmethod
+    def filter_apps_for_carousel(cls) -> List[Application]:
+        """
+        Filter the enabled applications to only include those that are in the carousel.
+
+        :return: List[Application]: A list of applications that are in the carousel.
+        """
+        return [
+            app
+            for app in cls.enabled_apps
+            if app.provides_horizontal_content is True
+            or app.horizontal_replacement_app_name is not None
         ]
 
     @classmethod
