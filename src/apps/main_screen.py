@@ -50,7 +50,7 @@ class MainScreen(Application):
             )
             return
 
-        self.use_24_hour = Configuration.read_app_config_variable(
+        self.use_24_hour = Configuration.get_from_app_config(
             self.__class__.__name__, "use_24_hour", required=True
         )
         if self.use_24_hour not in [True, False]:
@@ -58,7 +58,7 @@ class MainScreen(Application):
             logging.error(
                 "[MainScreen App] Invalid use_24_hour value. Must be True or False."
             )
-        self.date_format = Configuration.read_app_config_variable(
+        self.date_format = Configuration.get_from_app_config(
             self.__class__.__name__, "date_format", required=True
         )
         if self.date_format != "MM-DD" and self.date_format != "DD-MM":
@@ -66,7 +66,7 @@ class MainScreen(Application):
             logging.error(
                 "[MainScreen App] Invalid date format. Possible values are 'MM-DD' or 'DD-MM'."
             )
-        self.cycle_duration_in_seconds = Configuration.read_app_variable(
+        self.cycle_duration_in_seconds = Configuration.get_from_app_config(
             self.__class__.__name__, "cycle_duration_in_seconds", required=True
         )
         if self.cycle_duration_in_seconds <= 0:
