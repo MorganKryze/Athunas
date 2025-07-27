@@ -12,8 +12,8 @@ from datetime import datetime
 
 class Configuration:
     file_path: str
-    lastest_generation_id: int
-    lastest_working_generation_id: int
+    latest_generation_id: int
+    latest_working_generation_id: int
     configuration_dictionary: Dict[str, Any]
 
     @classmethod
@@ -90,8 +90,8 @@ class Configuration:
             )
             config["Metadata"]["origin"] = "user"
 
-        cls.lastest_generation_id += 1
-        cls.lastest_working_generation_id = cls.lastest_generation_id
+        cls.latest_generation_id += 1
+        cls.latest_working_generation_id = cls.latest_generation_id
         generation_file_path = os.path.join(
             PathTo.GENERATIONS_FOLDER,
             f"generation_{config['Metadata']['id']}.yaml",
@@ -311,7 +311,7 @@ class Configuration:
             except (ValueError, IndexError):
                 logging.error(f"[Config] Invalid generation file name: {file}")
 
-        cls.lastest_generation_id = latest_id
+        cls.latest_generation_id = latest_id
         return latest_id
 
     @classmethod
