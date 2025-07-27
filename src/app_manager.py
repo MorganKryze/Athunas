@@ -5,7 +5,7 @@ from typing import Callable, Dict, List
 from board import Board
 from models.application import Application
 from models.module import Module
-import apps
+from apps import main_screen, gif_viewer, life
 import modules
 
 
@@ -65,9 +65,9 @@ class AppManager:
             "get_module_by_name": AppManager.get_module_by_name,
         }
         return [
-            apps.main_screen.MainScreen(callbacks),
-            apps.gif_viewer.GifPlayer(callbacks),
-            apps.life.GameOfLifeScreen(callbacks),
+            main_screen.MainScreen(callbacks),
+            gif_viewer.GifPlayer(callbacks),
+            life.GameOfLifeScreen(callbacks),
             # weather.WeatherScreen(config, modules, callbacks),
             # notion.NotionScreen(config, modules, callbacks),
             # subcount.SubcountScreen(config, modules, callbacks),
