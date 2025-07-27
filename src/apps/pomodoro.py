@@ -16,7 +16,7 @@ from config import Configuration
 DEFAULT_FONT_SIZE = 5
 
 
-class PomodoroScreen(Application):
+class Pomodoro(Application):
     def __init__(self, callbacks: Dict[str, Callable]):
         """
         Initialize the PomodoroScreen and callbacks.

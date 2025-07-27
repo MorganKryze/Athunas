@@ -67,7 +67,7 @@ class AppManager:
         return [
             main_screen.MainScreen(callbacks),
             gif_viewer.GifPlayer(callbacks),
-            pomodoro.PomodoroScreen(callbacks),
+            pomodoro.Pomodoro(callbacks),
             # life.GameOfLifeScreen(callbacks),
             # weather.WeatherScreen(config, modules, callbacks),
             # notion.NotionScreen(config, modules, callbacks),
