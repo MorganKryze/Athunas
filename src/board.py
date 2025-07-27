@@ -1,15 +1,18 @@
-import logging
-import time
-from typing import Any
 import queue
+import time
+import logging
+from typing import Any
+from gpiozero import Button, RotaryEncoder
 
+from config import Configuration
 from custom_frames import CustomFrames
 from enums.encoder_input import EncoderInput
-from config import Configuration
-from gpiozero import Button, RotaryEncoder
+from enums.tilt_input import TiltState
 
 
 class Board:
+    """Class to manage the board's hardware components and their interactions."""
+
     SCREEN_RATIO: int = 16
     FIRST_GPIO_PIN: int = 0
     LAST_GPIO_PIN: int = 27
@@ -34,14 +37,16 @@ class Board:
     is_display_on: bool = True
     encoder_queue: queue.Queue
     encoder_state: int = 0
-    is_horizontal: bool = True
-    encoder_input_status: EncoderInput = EncoderInput.NOTHING
+    tilt_state: TiltState = TiltState.HORIZONTAL
+    encoder_input: EncoderInput = EncoderInput.NOTHING
     matrix: Any
 
     @classmethod
     def init_system(cls, use_emulator: bool = False) -> None:
         """
         Initializes the system components.
+
+        :param use_emulator: Whether to use the emulator for the RGB matrix (default is False).
         """
         cls._init_display()
         cls.init_matrix(use_emulator=use_emulator)
@@ -52,7 +57,7 @@ class Board:
         logging.debug("[Board] All system components initialized.")
 
     @classmethod
-    def _init_display(cls):
+    def _init_display(cls) -> None:
         """
         Initializes the display settings.
         """
@@ -103,10 +108,7 @@ class Board:
         logging.info("[Board] All display settings initialized.")
 
     @classmethod
-    def init_matrix(
-        cls,
-        use_emulator: bool = False,
-    ) -> None:
+    def init_matrix(cls, use_emulator: bool = False) -> None:
         """
         Creates an RGBMatrix object with the specified parameters.
 
@@ -121,7 +123,7 @@ class Board:
             f"[Config] Creating RGBMatrix options with screen height: {cls.led_rows}, screen width: {cls.led_cols}, brightness: {cls.brightness}, disable hardware pulsing: {cls.disable_hardware_pulsing}, hardware mapping: {cls.hardware_mapping}"
         )
         try:
-            options = RGBMatrixOptions()
+            options: RGBMatrixOptions = RGBMatrixOptions()
             options.rows = cls.led_rows
             options.cols = cls.led_cols
             options.brightness = cls.brightness
@@ -129,7 +131,7 @@ class Board:
             options.hardware_mapping = cls.hardware_mapping
             logging.debug("[Config] RGBMatrix options set.")
 
-            cls.matrix = RGBMatrix(options=options)
+            cls.matrix: RGBMatrix = RGBMatrix(options=options)
             logging.debug("[Config] RGBMatrix object created.")
         except Exception as e:
             Configuration.critical_exit(
@@ -137,17 +139,21 @@ class Board:
             )
 
     @classmethod
-    def _init_encoder(cls):
+    def _init_encoder(cls) -> None:
         """
         Initializes the encoder settings.
         """
-        cls.encoder_clk = Configuration.get("System", "Encoder", "gpio_clk", required=True)
+        cls.encoder_clk = Configuration.get(
+            "System", "Encoder", "gpio_clk", required=True
+        )
         if cls.encoder_clk < cls.FIRST_GPIO_PIN or cls.encoder_clk > cls.LAST_GPIO_PIN:
             Configuration.critical_exit(
                 f"System.Encoder.gpio_clk must be between {cls.FIRST_GPIO_PIN} and {cls.LAST_GPIO_PIN}."
             )
 
-        cls.encoder_dt = Configuration.get("System", "Encoder", "gpio_dt", required=True)
+        cls.encoder_dt = Configuration.get(
+            "System", "Encoder", "gpio_dt", required=True
+        )
         if cls.encoder_dt < cls.FIRST_GPIO_PIN or cls.encoder_dt > cls.LAST_GPIO_PIN:
             Configuration.critical_exit(
                 f"System.Encoder.gpio_dt must be between {cls.FIRST_GPIO_PIN} and {cls.LAST_GPIO_PIN}."
@@ -163,7 +169,9 @@ class Board:
         )
         logging.info("[Board] Encoder rotation initialized.")
 
-        cls.encoder_sw = Configuration.get("System", "Encoder", "gpio_sw", required=True)
+        cls.encoder_sw = Configuration.get(
+            "System", "Encoder", "gpio_sw", required=True
+        )
         if cls.encoder_sw < cls.FIRST_GPIO_PIN or cls.encoder_sw > cls.LAST_GPIO_PIN:
             Configuration.critical_exit(
                 f"System.Encoder.gpio_sw must be between {cls.FIRST_GPIO_PIN} and {cls.LAST_GPIO_PIN}."
@@ -176,11 +184,13 @@ class Board:
         logging.info("[Board] Encoder button initialized.")
 
     @classmethod
-    def _init_tilt_switch(cls):
+    def _init_tilt_switch(cls) -> None:
         """
         Initializes the tilt switch settings.
         """
-        cls.tilt_switch = Configuration.get("System", "Tilt-switch", "gpio", required=True)
+        cls.tilt_switch = Configuration.get(
+            "System", "Tilt-switch", "gpio", required=True
+        )
         if cls.tilt_switch < cls.FIRST_GPIO_PIN or cls.tilt_switch > cls.LAST_GPIO_PIN:
             Configuration.critical_exit(
                 f"System.Tilt-switch.gpio must be between {cls.FIRST_GPIO_PIN} and {cls.LAST_GPIO_PIN}."
@@ -202,40 +212,49 @@ class Board:
         logging.debug("[Board] Tilt switch button initialized.")
 
     @classmethod
-    def rotate_clockwise_callback(cls, encoder):
+    def rotate_clockwise_callback(cls, encoder: RotaryEncoder) -> None:
         """
         Callback function for rotating the encoder clockwise.
+
+        :param encoder: The RotaryEncoder instance.
         """
         logging.debug("[Board] Rotated clockwise: (+).")
         cls.encoder_queue.put(1)
         cls.reset_encoder(encoder)
 
     @classmethod
-    def rotate_counter_clockwise_callback(cls, encoder):
+    def rotate_counter_clockwise_callback(cls, encoder: RotaryEncoder) -> None:
         """
         Callback function for rotating the encoder counter-clockwise.
+
+        :param encoder: The RotaryEncoder instance.
         """
         logging.debug("[Board] Rotated counter-clockwise: (-).")
         cls.encoder_queue.put(-1)
         cls.reset_encoder(encoder)
 
     @classmethod
-    def tilt_callback(cls, tilt_switch):
+    def tilt_callback(cls, tilt_switch: Button) -> None:
         """
         Callback function for the tilt switch.
         Only logs when orientation actually changes.
-        """
-        new_state = tilt_switch.is_pressed
 
-        if new_state != cls.is_horizontal:
-            orientation = "horizontal" if new_state else "vertical"
-            logging.debug(f"[Board] Orientation changed to {orientation}")
-            cls.is_horizontal = new_state
+        :param tilt_switch: The Button instance for the tilt switch.
+        """
+        new_state: bool = tilt_switch.is_pressed
+
+        if new_state != cls.tilt_state:
+            cls.tilt_state = TiltState.HORIZONTAL if new_state else TiltState.VERTICAL
+            logging.debug(
+                f"[Board] Orientation changed to {cls.tilt_state.name.lower()}."
+            )
 
     @classmethod
-    def encoder_button_callback(cls, enc_button):
+    def encoder_button_callback(cls, enc_button: Button) -> None:
         """
         Callback function for the encoder button.
+
+        :param enc_button: The Button instance for the encoder button.
         """
         HOLD_TIME = 1
         DOUBLE_PRESS_TIME = 0.3
@@ -250,7 +269,7 @@ class Board:
 
         if time_diff >= HOLD_TIME:
             logging.debug("[Board] Long press detected (5).")
-            cls.encoder_input_status = EncoderInput.LONG_PRESS
+            cls.encoder_input = EncoderInput.LONG_PRESS
         else:
             enc_button.when_pressed = None
             start_time = time.time()
@@ -263,56 +282,62 @@ class Board:
                         time.sleep(SLEEP_INTERVAL)
                         if enc_button.is_pressed:
                             logging.debug("[Board] Triple press detected (3).")
-                            cls.encoder_input_status = EncoderInput.TRIPLE_PRESS
+                            cls.encoder_input = EncoderInput.TRIPLE_PRESS
                             enc_button.when_pressed = (
                                 lambda button: cls.encoder_button_callback(button)
                             )
                             return
                         logging.debug("[Board] Double press detected (2).")
-                        cls.encoder_input_status = EncoderInput.DOUBLE_PRESS
+                        cls.encoder_input = EncoderInput.DOUBLE_PRESS
                         enc_button.when_pressed = (
                             lambda button: cls.encoder_button_callback(button)
                         )
                         return
             logging.debug("[Board] Single press detected (1).")
-            cls.encoder_input_status = EncoderInput.SINGLE_PRESS
+            cls.encoder_input = EncoderInput.SINGLE_PRESS
             enc_button.when_pressed = lambda button: cls.encoder_button_callback(button)
             return
 
     @classmethod
-    def reset_encoder(cls, encoder):
+    def reset_encoder(cls, encoder: RotaryEncoder) -> None:
         """
         Resets the encoder value to 0.
+
+        :param encoder: The RotaryEncoder instance.
         """
         encoder.value = 0
 
     @classmethod
-    def reset_encoder_state(cls):
+    def reset_encoder_state(cls) -> None:
         """
         Resets the encoder state to 0.
         """
         cls.encoder_state = 0
 
     @classmethod
-    def reset_encoder_input_status(cls):
+    def reset_encoder_input_status(cls) -> None:
         """
         Resets the encoder input status to NOTHING.
         """
-        cls.encoder_input_status = EncoderInput.NOTHING
+        cls.encoder_input = EncoderInput.NOTHING
 
     @classmethod
-    def has_encoder_increased(cls):
+    def has_encoder_increased(cls) -> bool:
         """
-        Returns True if the encoder has increased, False otherwise.
+        Checks if the encoder has increased.
+
+        :returns: True if the encoder has increased, False otherwise.
         """
         if cls.encoder_state > 0:
             return True
         return False
 
     @classmethod
-    def has_encoder_decreased(cls):
+    def has_encoder_decreased(cls) -> bool:
         """
-        Returns True if the encoder has decreased, False otherwise.
+        Checks if the encoder has decreased.
+
+        :returns: True if the encoder has decreased, False otherwise.
         """
         if cls.encoder_state < 0:
             return True
@@ -322,6 +347,8 @@ class Board:
     def loading_animation(cls, duration_in_seconds: int = 10) -> None:
         """
         Displays a loading animation on the matrix.
+
+        :param duration_in_seconds: Duration of the loading animation in seconds (default is 10).
         """
         if duration_in_seconds <= 0:
             logging.warning(

@@ -9,6 +9,7 @@ from config import Configuration
 from custom_frames import CustomFrames
 from enums.encoder_input import EncoderInput
 from enums.service_status import ServiceStatus
+from enums.tilt_input import TiltState
 
 
 class Application:
@@ -45,35 +46,33 @@ class Application:
         if not self.enabled:
             self.status = ServiceStatus.DISABLED
 
-    def generate(
-        self, is_horizontal: bool, encoder_input_status: EncoderInput
-    ) -> Image:
+    def generate(self, tilt_state: TiltState, encoder_input: EncoderInput) -> Image:
         """
         Generate the frame for the app.
         This method should be extended by subclasses to implement specific frame generation logic.
 
-        :param is_horizontal: bool: Whether the screen is horizontal.
-        :param encoder_input_status: InputStatus: The status of the encoder input.
+        :param tilt_state: TiltState: The current tilt state of the device.
+        :param encoder_input: EncoderInput: The status of the encoder input.
         :return: Image: The generated frame.
         """
         if self.status != ServiceStatus.RUNNING:
             return self.generate_on_error()
 
-        if is_horizontal and not self.provides_horizontal_content:
+        if tilt_state is TiltState.HORIZONTAL and not self.provides_horizontal_content:
             replacement_app: Application = self.callbacks["get_app_by_name"](
                 self.horizontal_replacement_app_name
             )
             if replacement_app:
-                return replacement_app.generate(is_horizontal, encoder_input_status)
+                return replacement_app.generate(tilt_state, encoder_input)
             else:
                 return CustomFrames.black()
 
-        if not is_horizontal and not self.provides_vertical_content:
+        if tilt_state is TiltState.VERTICAL and not self.provides_vertical_content:
             replacement_app: Application = self.callbacks["get_app_by_name"](
                 self.vertical_replacement_app_name
             )
             if replacement_app:
-                return replacement_app.generate(is_horizontal, encoder_input_status)
+                return replacement_app.generate(tilt_state, encoder_input)
             else:
                 return CustomFrames.black()
 

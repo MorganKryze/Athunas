@@ -54,15 +54,15 @@ def main() -> None:
                     Board.encoder_state += Board.encoder_queue.get()
 
                 if Board.has_encoder_increased():
-                    Board.encoder_input_status = EncoderInput.ENCODER_INCREASE
+                    Board.encoder_input = EncoderInput.INCREASE_CLOCKWISE
                     Board.reset_encoder_state()
                 elif Board.has_encoder_decreased():
-                    Board.encoder_input_status = EncoderInput.ENCODER_DECREASE
+                    Board.encoder_input = EncoderInput.DECREASE_COUNTERCLOCKWISE
                     Board.reset_encoder_state()
 
                 current_app: Application = AppManager.get_current_app()
                 frame: Image = current_app.generate(
-                    Board.is_horizontal, Board.encoder_input_status
+                    Board.tilt_state, Board.encoder_input
                 )
                 Board.matrix.SetImage(
                     frame if Board.is_display_on else CustomFrames.black()

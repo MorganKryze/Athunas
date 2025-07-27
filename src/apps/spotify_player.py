@@ -39,9 +39,9 @@ class SpotifyScreen:
                 self.default_actions['toggle_display']()
                 self.title_animation_cnt = 0
                 self.artist_animation_cnt = 0
-            elif inputStatus is EncoderInput.ENCODER_INCREASE:
+            elif inputStatus is EncoderInput.INCREASE_CLOCKWISE:
                 self.default_actions['switch_next_app']()
-            elif inputStatus is EncoderInput.ENCODER_DECREASE:
+            elif inputStatus is EncoderInput.DECREASE_COUNTERCLOCKWISE:
                 self.default_actions['switch_prev_app']()
         else:
             if inputStatus is EncoderInput.SINGLE_PRESS:
@@ -53,9 +53,12 @@ class SpotifyScreen:
                 spotify_module.next_track()
             elif inputStatus is EncoderInput.TRIPLE_PRESS:
                 spotify_module.previous_track()
-            elif inputStatus is EncoderInput.ENCODER_INCREASE and self.is_playing:
+            elif inputStatus is EncoderInput.INCREASE_CLOCKWISE and self.is_playing:
                 spotify_module.increase_volume()
-            elif inputStatus is EncoderInput.ENCODER_DECREASE and self.is_playing:
+            elif (
+                inputStatus is EncoderInput.DECREASE_COUNTERCLOCKWISE
+                and self.is_playing
+            ):
                 spotify_module.decrease_volume()
 
         response = spotify_module.getCurrentPlayback()

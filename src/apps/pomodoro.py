@@ -7,6 +7,7 @@ from datetime import timedelta, datetime
 from PIL import Image, ImageFont, ImageDraw
 
 from enums.service_status import ServiceStatus
+from enums.tilt_input import TiltState
 from models.application import Application
 from path import PathTo
 from config import Configuration
@@ -90,19 +91,17 @@ class PomodoroScreen(Application):
         self.status = ServiceStatus.RUNNING
         logging.info(f"[{self.__class__.__name__}] Running.")
 
-    def generate(
-        self, is_horizontal: bool, encoder_input_status: EncoderInput
-    ) -> Image:
+    def generate(self, tilt_state: TiltState, encoder_input: EncoderInput) -> Image:
         """
         Generate the frame for the Pomodoro app.
 
-        :param is_horizontal: bool: Whether the screen is horizontal.
-        :param encoder_input_status: InputStatus: The status of the encoder input.
+        :param tilt_state: TiltState: The current tilt state of the device.
+        :param encoder_input: EncoderInput: The status of the encoder input.
         :return: Image: The generated frame.
         """
-        super().generate(is_horizontal, encoder_input_status)
+        super().generate(tilt_state, encoder_input)
         try:
-            if encoder_input_status is EncoderInput.SINGLE_PRESS:
+            if encoder_input is EncoderInput.SINGLE_PRESS:
                 self.active = not self.active
                 self.last_update_time = time.time()
                 if self.active and self.time_left is None:
@@ -119,9 +118,9 @@ class PomodoroScreen(Application):
                     self.cycle_idx += 1
                     if self.cycle_idx >= len(self.cycle_order):
                         self.cycle_idx = 0
-            elif encoder_input_status is EncoderInput.ENCODER_INCREASE:
+            elif encoder_input is EncoderInput.INCREASE_CLOCKWISE:
                 self.callbacks["switch_next_app"]()
-            elif encoder_input_status is EncoderInput.ENCODER_DECREASE:
+            elif encoder_input is EncoderInput.DECREASE_COUNTERCLOCKWISE:
                 self.callbacks["switch_prev_app"]()
 
             if self.active:

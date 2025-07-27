@@ -7,6 +7,7 @@ from PIL import Image, ImageSequence, ImageDraw
 from board import Board
 from enums.service_status import ServiceStatus
 from enums.encoder_input import EncoderInput
+from enums.tilt_input import TiltState
 from models.application import Application
 from path import PathTo
 from config import Configuration
@@ -61,22 +62,22 @@ class GifPlayer(Application):
         logging.info(f"[{self.__class__.__name__}] Running.")
 
     def generate(
-        self, is_horizontal: bool, encoder_input_status: EncoderInput
+        self, tilt_state: TiltState, encoder_input: EncoderInput
     ) -> Image:
         """
         Generate the frame to draw on the LED matrix.
 
-        :param is_horizontal: bool: Whether the screen is horizontal.
-        :param encoder_input_status: InputStatus: The status of the encoder input.
+        :param tilt_state: TiltState: The current tilt state of the device.
+        :param encoder_input: EncoderInput: The status of the encoder input.
         :return: Image: The generated frame.
         """
-        super().generate(is_horizontal, encoder_input_status)
+        super().generate(tilt_state, encoder_input)
         try:
-            if encoder_input_status == EncoderInput.LONG_PRESS:
+            if encoder_input == EncoderInput.LONG_PRESS:
                 logging.debug("[GifPlayer App] Toggling selection mode.")
                 self.selection_mode = not self.selection_mode
 
-            if encoder_input_status == EncoderInput.DOUBLE_PRESS:
+            if encoder_input == EncoderInput.DOUBLE_PRESS:
                 logging.debug("[GifPlayer App] Toggling auto play mode.")
                 self.auto_play_mode = not self.auto_play_mode
                 if self.auto_play_mode:
@@ -86,24 +87,24 @@ class GifPlayer(Application):
                     ) % len(self.animations)
 
             if self.selection_mode:
-                if encoder_input_status == EncoderInput.ENCODER_INCREASE:
+                if encoder_input == EncoderInput.INCREASE_CLOCKWISE:
                     logging.debug("[GifPlayer App] Switching to next GIF.")
                     self.current_animation_index = (
                         self.current_animation_index + 1
                     ) % len(self.animations)
                     self.current_frame_index = 0
-                elif encoder_input_status == EncoderInput.ENCODER_DECREASE:
+                elif encoder_input == EncoderInput.DECREASE_COUNTERCLOCKWISE:
                     logging.debug("[GifPlayer App] Switching to previous GIF.")
                     self.current_animation_index = (
                         self.current_animation_index - 1
                     ) % len(self.animations)
                     self.current_frame_index = 0
             else:
-                if encoder_input_status == EncoderInput.SINGLE_PRESS:
+                if encoder_input == EncoderInput.SINGLE_PRESS:
                     self.callbacks["toggle_display"]()
-                elif encoder_input_status == EncoderInput.ENCODER_INCREASE:
+                elif encoder_input == EncoderInput.INCREASE_CLOCKWISE:
                     self.callbacks["switch_next_app"]()
-                elif encoder_input_status == EncoderInput.ENCODER_DECREASE:
+                elif encoder_input == EncoderInput.DECREASE_COUNTERCLOCKWISE:
                     self.callbacks["switch_prev_app"]()
 
             current_gif = ImageSequence.Iterator(

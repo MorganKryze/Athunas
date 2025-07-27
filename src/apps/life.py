@@ -72,9 +72,9 @@ class GameOfLifeScreen:
                 )
             self.state = self.initial_states[self.current_state_index]()
             self.color = generate_new_color()
-        elif input_status == EncoderInput.ENCODER_INCREASE:
+        elif input_status == EncoderInput.INCREASE_CLOCKWISE:
             self.callbacks["switch_next_app"]()
-        elif input_status == EncoderInput.ENCODER_DECREASE:
+        elif input_status == EncoderInput.DECREASE_COUNTERCLOCKWISE:
             self.callbacks["switch_prev_app"]()
 
         end_time = datetime.now() + timedelta(seconds=0.1)

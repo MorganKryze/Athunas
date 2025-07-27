@@ -9,6 +9,7 @@ import threading
 import calendar
 
 from board import Board
+from enums.tilt_input import TiltState
 from path import PathTo
 from config import Configuration
 from enums.encoder_input import EncoderInput
@@ -106,34 +107,32 @@ class MainScreen(Application):
         self.status = ServiceStatus.RUNNING
         logging.info(f"[{self.__class__.__name__}] Running.")
 
-    def generate(
-        self, is_horizontal: bool, encoder_input_status: EncoderInput
-    ) -> Image:
+    def generate(self, tilt_state: TiltState, encoder_input: EncoderInput) -> Image:
         """
         Generate the frame for the MainScreen app.
 
-        :param is_horizontal: bool: Whether the screen is horizontal.
-        :param encoder_input_status: InputStatus: The status of the encoder input.
+        :param tilt_state: TiltState: The current tilt state of the device.
+        :param encoder_input: EncoderInput: The status of the encoder input.
         :return: Image: The generated frame.
         """
-        super().generate(is_horizontal, encoder_input_status)
+        super().generate(tilt_state, encoder_input)
         try:
-            if encoder_input_status == EncoderInput.LONG_PRESS:
+            if encoder_input == EncoderInput.LONG_PRESS:
                 self.selectMode = not self.selectMode
 
             if self.selectMode:
-                if encoder_input_status is EncoderInput.ENCODER_INCREASE:
+                if encoder_input is EncoderInput.INCREASE_CLOCKWISE:
                     self.currentIdx += 1
                     self.queued_frames = []
-                elif encoder_input_status is EncoderInput.ENCODER_DECREASE:
+                elif encoder_input is EncoderInput.DECREASE_COUNTERCLOCKWISE:
                     self.currentIdx -= 1
                     self.queued_frames = []
             else:
-                if encoder_input_status is EncoderInput.SINGLE_PRESS:
+                if encoder_input is EncoderInput.SINGLE_PRESS:
                     self.callbacks["toggle_display"]()
-                elif encoder_input_status is EncoderInput.ENCODER_INCREASE:
+                elif encoder_input is EncoderInput.INCREASE_CLOCKWISE:
                     self.callbacks["switch_next_app"]()
-                elif encoder_input_status is EncoderInput.ENCODER_DECREASE:
+                elif encoder_input is EncoderInput.DECREASE_COUNTERCLOCKWISE:
                     self.callbacks["switch_prev_app"]()
 
             if self.lastGenerateCall is None:

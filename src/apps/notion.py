@@ -47,9 +47,9 @@ class NotionScreen:
         if inputStatus is EncoderInput.SINGLE_PRESS:
             self.paused = not self.paused
             self.animation_cnt = [0,0,0,0,0,0,0,0,0,0]
-        elif inputStatus is EncoderInput.ENCODER_INCREASE:
+        elif inputStatus is EncoderInput.INCREASE_CLOCKWISE:
             self.default_actions['switch_next_app']()
-        elif inputStatus is EncoderInput.ENCODER_DECREASE:
+        elif inputStatus is EncoderInput.DECREASE_COUNTERCLOCKWISE:
             self.default_actions['switch_prev_app']()
 
         frame = None
