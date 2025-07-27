@@ -1,6 +1,6 @@
 import sys
 import logging
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Optional
 
 from board import Board
 from models.application import Application
@@ -76,7 +76,7 @@ class AppManager:
         ]
 
     @classmethod
-    def get_app_by_name(cls, app_name: str) -> Application:
+    def get_app_by_name(cls, app_name: str) -> Optional[Application]:
         """
         Get an application by its name.
 
@@ -86,7 +86,8 @@ class AppManager:
         for app in cls.enabled_apps:
             if app.name == app_name:
                 return app
-        raise ValueError(f"Application '{app_name}' not found.")
+        logging.error(f"[AppManager] Application '{app_name}' not found.")
+        return None
 
     @classmethod
     def get_module_by_name(cls, module_name: str) -> Module:
