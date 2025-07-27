@@ -297,7 +297,6 @@ class Configuration:
         """
         generation_files = cls.get_generation_filenames()
         if not generation_files:
-            logging.warning("[Config] No generation files found.")
             return 0
 
         latest_id = 0
@@ -322,7 +321,6 @@ class Configuration:
         """
         generation_files = cls.get_generation_filenames()
         if not generation_files:
-            logging.warning("[Config] No generation files found.")
             return 0
 
         latest_id = 0
