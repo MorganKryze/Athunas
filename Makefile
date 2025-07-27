@@ -8,7 +8,7 @@ RESET := $(shell tput sgr0)
 .PHONY: install
 install:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Installing system dependencies...$(RESET)"
-	@sudo apt install libsixel-dev python3-tk cython3 python3-pip -y ||  \
+	@sudo nala install libsixel-dev python3-tk cython3 -y ||  \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to install system dependencies. Please check the logs for error.$(RESET)"; exit 1; }
 	
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Adding 'cap_sys_nice' capability to 'python3.11'...$(RESET)"

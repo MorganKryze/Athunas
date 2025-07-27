@@ -36,22 +36,28 @@ ssh admin@athunas.local
 
 And enter the password you set earlier (`raspberry`).
 
+Install `nala`, a faster alternative to `apt`.
+
+```bash
+sudo apt install nala -y
+```
+
 Update your system.
 
 ```bash
-sudo apt update && sudo apt upgrade -y
+sudo nala update && sudo nala upgrade -y
 ```
 
 Remove unnecessary packages.
 
 ```bash
-sudo apt autoremove -y
+sudo nala autoremove -y
 ```
 
 Install `git`, `pip` and `make`.
 
 ```bash
-sudo apt install git python3-pip make -y
+sudo nala install git python3-pip make -y
 ```
 
 ### Few perfomance tweaks
