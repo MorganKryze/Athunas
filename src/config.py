@@ -26,7 +26,6 @@ class Configuration:
         cls.latest_working_generation_id = cls.get_latest_working_generation_id()
 
         if cls.latest_generation_id == 0:
-            logging.info("[Config] No generations found.")
             cls.create_new_configuration_from_template()
 
         cls.file_path = cls.get_latest_working_generation_filepath()
@@ -311,7 +310,7 @@ class Configuration:
             except (ValueError, IndexError):
                 logging.error(f"[Config] Invalid generation file name: {file}")
 
-        cls.latest_generation_id = latest_id
+        logging.debug(f"[Config] Latest generation ID found: {latest_id}")
         return latest_id
 
     @classmethod
@@ -339,6 +338,7 @@ class Configuration:
             except (ValueError, IndexError):
                 logging.error(f"[Config] Invalid generation file name: {file}")
 
+        logging.debug(f"[Config] Latest working generation ID found: {latest_id}")
         return latest_id
 
     @classmethod
