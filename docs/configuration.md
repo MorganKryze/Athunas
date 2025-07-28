@@ -14,7 +14,7 @@ If you may confider editing the configuration manually, please be aware of the f
 - The configuration file is divided into sections, each section containing specific configuration options. Each section will be explained in detail below.
 - The project uses a single configuration file to manage all aspects of the system, including system configuration, module configuration, and application configuration.
 - The configuration file is located in the `configs/generations/` folder of the repository and is named following the pattern `generation_<id>.yaml`, where `<id>` is the generation number.
-- Broken configurations files follow the naming pattern `generation_<id>.broken.yaml`, where `<id>` is the generation number. These files are created when the configuration file is not valid and cannot be loaded by the system or has produced a critical error during the runtime. These files will be ignored when the system will try to load the latest configuration.
+- Broken configurations files follow the naming pattern `generation_<id>.broken.yaml`. These files are created when the configuration file is not valid and cannot be loaded by the system or has produced a critical error during the runtime. These files will be ignored when the system will try to load the latest configuration.
 - When using the web editor and saving the new configuration, the system will automatically create a new generation of the configuration file, incrementing the generation number. The previous generation will remain unaltered.
 
 ## Variables
