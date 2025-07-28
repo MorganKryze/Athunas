@@ -388,7 +388,12 @@ class Configuration:
 
             original_path = cls.file_path
             broken_path = original_path.replace(".yaml", ".broken.yaml")
-
+            if cls.latest_generation_id == 1:
+                os.remove(original_path)
+                logging.debug(
+                    "[Config] Deleting first generation, will be rebuilt from template in the next boot."
+                )
+                return
             if not cls.save(cls.configuration_dictionary, is_broken=True):
                 logging.error(
                     f"[Config] Failed to save broken configuration to {broken_path}"
