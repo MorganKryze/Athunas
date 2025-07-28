@@ -18,9 +18,11 @@ echo "Installing required packages..."
 sudo nala install git python3-pip python3-venv make -y
 
 echo "Adding performance tweaks..."
-echo "isolcpus=3" | sudo tee -a /boot/firmware/cmdline.txt
-echo "blacklist snd_bcm2835" | sudo tee -a /etc/modprobe.d/blacklist-rgb-matrix.conf
+echo " isolcpus=3" | sudo tee -a /boot/firmware/cmdline.txt
+echo "blacklist snd_bcm2835" | sudo tee /etc/modprobe.d/blacklist-rgb-matrix.conf
 sudo update-initramfs -u
 
 echo "Installing the repository..."
 git clone --recurse-submodules https://github.com/MorganKryze/Athunas.git && cd Athunas
+
+echo "Done. Please follow the next steps in the documentation to complete the setup."
