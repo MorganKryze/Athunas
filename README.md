@@ -28,7 +28,7 @@ Find here the index of the project documentation:
 
 - [Wiring](./docs/wiring.md)
 - [Installation](./docs/installation.md)
-- ...
+- [Configuration](./docs/configuration.md)
 
 For documentation about the `rpi-rgb-led-matrix` library, check their detailed [official documentation](https://github.com/hzeller/rpi-rgb-led-matrix/blob/f0e95d3557dfc60759a290300c184074e9ec5874/README.md).
 

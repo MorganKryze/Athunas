@@ -14,7 +14,7 @@ Metadata:
   id: 0
   version: 0.0.0
   created_at: 2025-01-01 12:00
-  author: author
+  origin: author
   is_broken: false
   broken_reason:
 
