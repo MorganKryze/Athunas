@@ -59,7 +59,7 @@ The front Pi pinout is as follows:
 |          - |  3  |  4  | -          |
 |          - |  5  |  6  | -          |
 |    **STB** |  7  |  8  | -          |
-|          - |  9  | 10  | **E**      |
+|          - |  9  | 10  | -          |
 |    **CLK** | 11  | 12  | **OE-**    |
 |     **G0** | 13  | 14  | -          |
 |      **A** | 15  | 16  | **B**      |
@@ -115,4 +115,4 @@ Here is the encoder pinout:
 
 ## Conclusion
 
-Now that you have connected the Raspberry Pi to the led matrix, you can move on to the installation guide.
+Now that you have connected the Raspberry Pi to the led matrix, you can move on to the [installation](./installation.md) guide.
