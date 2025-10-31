@@ -23,13 +23,16 @@ dependencies = [
     "yfinance==0.2.65",
 ]
 
+# TODO: think of a better way to manage different builds
 [project.optional-dependencies]
 prod = ["gpiozero==2.0.1"]
 dev = ["RGBMatrixEmulator==0.11.6"]
 
 
 [project.urls]
+# TODO: update as soon as a website is created
 Homepage = "https://github.com/MorganKryze/Athunas"
+# TODO: update as soon as the documentation is published
 Documentation = "https://github.com/MorganKryze/Athunas/docs"
 Repository = "https://github.com/MorganKryze/Athunas.git"
 Issues = "https://github.com/MorganKryze/Athunas/issues"
