@@ -1,22 +1,36 @@
 [project]
 name = "Athunas"
 version = "0.0.0"
-description = "RGB led matrix controller, providing apps and modules for various purposes."
+description = "RGB led matrix dashboard, providing apps for various purposes."
 readme = "README.md"
+license = "GPL-3.0-only"
+license-files = ["LICEN[CS]E*"]
+authors = [
+    { name = "Yann M. Vidamment", email = "contact@libresoftware.cloud" },
+]
 requires-python = ">=3.11"
 dependencies = [
-    "flask>=3.1.0",
-    "gpiozero==2.0.1",
-    "numpy==2.0.0",
+    "flask==3.1.1",
+    "numpy==2.3.2",
     "pyyaml==6.0.2",
-    "Pillow==10.4.0",
+    "Pillow==11.3.0",
     "pyowm==3.3.0",
     "python-dateutil==2.9.0.post0",
     "requests==2.32.4",
-    "RGBMatrixEmulator==0.11.6",
-    # "RPi.GPIO==0.7.1",
     "spotipy==2.25.1",
-    "scipy==1.14.0",
+    "scipy==1.16.1",
     "websocket==0.2.1",
-    "yfinance==0.2.40",
+    "yfinance==0.2.65",
 ]
+
+[project.optional-dependencies]
+prod = ["gpiozero==2.0.1"]
+dev = ["RGBMatrixEmulator==0.11.6"]
+
+
+[project.urls]
+Homepage = "https://github.com/MorganKryze/Athunas"
+Documentation = "https://github.com/MorganKryze/Athunas/docs"
+Repository = "https://github.com/MorganKryze/Athunas.git"
+Issues = "https://github.com/MorganKryze/Athunas/issues"
+Changelog = "https://github.com/MorganKryze/Athunas/tree/main/.github/CHANGELOG"
