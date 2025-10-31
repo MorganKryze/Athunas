@@ -11,23 +11,19 @@ authors = [
 requires-python = ">=3.11"
 dependencies = [
     "flask==3.1.1",
+    "gpiozero==2.0.1",
     "numpy==2.3.2",
     "pyyaml==6.0.2",
     "Pillow==11.3.0",
     "pyowm==3.3.0",
     "python-dateutil==2.9.0.post0",
     "requests==2.32.4",
+    "RGBMatrixEmulator==0.11.6",
     "spotipy==2.25.1",
     "scipy==1.16.1",
     "websocket==0.2.1",
-    "yfinance==0.2.65",
+    "yfinance==0.2.65"
 ]
-
-# TODO: think of a better way to manage different builds
-[project.optional-dependencies]
-prod = ["gpiozero==2.0.1"]
-dev = ["RGBMatrixEmulator==0.11.6"]
-
 
 [project.urls]
 # TODO: update as soon as a website is created
