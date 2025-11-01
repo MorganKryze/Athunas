@@ -113,7 +113,7 @@ function install_docker() {
     sudo apt-get update
     
     info "Installing Docker Engine, CLI, and Containerd..."
-    sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
     info "Setting up Docker permissions..."
 
@@ -124,6 +124,9 @@ function install_docker() {
         sudo usermod -aG docker $USER
         info "You may need to log out and log back in for the changes to take effect."
     fi
+
+    info "Verifying Docker installation..."
+    sudo systemctl status docker
 
     success "Docker installation complete."
     sleep $LOW_DELAY
