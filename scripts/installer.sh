@@ -26,11 +26,8 @@ function cleanup() {
     return $exit_code
 }
 
-function load_toolbox() {
+function load_logging_toolbox() {
     if ! source <(curl -s --connect-timeout 10 "$TOOLBOX_URL"); then
-        echo "Error: Failed to load bash toolbox. Check your internet connection."
-        echo "Using fallback basic functions..."
-
         GREEN='\033[0;32m'
         BLUE='\033[0;34m'
         RED='\033[0;31m'
@@ -47,6 +44,8 @@ function load_toolbox() {
             return 1
         }
         function success() { txt "[${GREEN} SUCCESS ${RESET}] ${GREEN}$1${RESET}"; }
+
+        warning "Failed to load logging toolbox. Falling back to self-defined functions."
     fi
 }
 
@@ -175,7 +174,7 @@ function display_next_steps() {
 # ===== Main script execution =====
 
 function main() {
-    load_toolbox
+    load_logging_toolbox
 
     display_header
 
