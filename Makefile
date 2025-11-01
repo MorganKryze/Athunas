@@ -7,30 +7,14 @@ RESET := $(shell tput sgr0)
 
 .PHONY: install
 install:
-	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Installing system dependencies...$(RESET)"
-	@sudo nala install libsixel-dev python3-tk cython3 -y ||  \
-		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to install system dependencies. Please check the logs for error.$(RESET)"; exit 1; }
-	
-	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Adding 'cap_sys_nice' capability to 'python3.11'...$(RESET)"
-	@sudo setcap 'cap_sys_nice=eip' /usr/bin/python3.11 || \
-		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to set capabilities. Please check the logs for error.$(RESET)"; exit 1; }
-	
-	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Installing 'uv' (you may ignore their recommendation)...$(RESET)"
-	@sudo pip install uv --break-system-packages || \
-		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to install 'uv'. Please check the logs for error.$(RESET)"; exit 1; }
-	
-	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)System dependencies installed successfully.$(RESET)"
+	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Installing project python dependencies...$(RESET)"
+	@pip install --break-system-packages --no-cache-dir -e . || \
+		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to install project dependencies. Please check the logs for error.$(RESET)"; exit 1; }
+
+	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Project dependencies installed successfully.$(RESET)"
 
 .PHONY: build
 build:
-	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Creating python virtual environment...$(RESET)"
-	@uv venv || \
-		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to create virtual environment. Please check the logs for error.$(RESET)"; exit 1; }
-
-	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Installing project python dependencies...$(RESET)"
-	@uv pip install . || \
-		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to install project dependencies. Please check the logs for error.$(RESET)"; exit 1; }
-
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Building 'rpi-rgb-led-matrix' library...$(RESET)"
 	@make -C ./rpi-rgb-led-matrix/examples-api-use
 	@make -C ./rpi-rgb-led-matrix build-python
@@ -54,28 +38,27 @@ example:
 .PHONY: run
 run:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Running project...$(RESET)"
-	@sudo uv run src
+	@sudo python src
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Project stopped.$(RESET)"
 
 .PHONY: dev
 dev:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Running project with debug-level console logging...$(RESET)"
-	@sudo uv run src --debug
+	@sudo python src --debug
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Project running with debug logging.$(RESET)"
 
 .PHONY: dev-emulator
 dev-emulator:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Running project with debug-level console logging in emulator mode...$(RESET)"
-	@sudo uv run src --debug --emulator
+	@sudo python --debug --emulator
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Project running in emulator mode with debug logging.$(RESET)"
 
 .PHONY: clean-python
 clean-python:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Cleaning up Python environment...$(RESET)"
-	rm -rf .venv
 	find src/ -name "*.pyc" -exec rm -f {} +
 	find src/ -name "__pycache__" -exec rm -rf {} +
 
@@ -95,16 +78,12 @@ clean: clean-python clean-library
 
 .PHONY: update
 update:
-	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Updating 'uv'...$(RESET)"
-	@sudo pip install --upgrade uv || \
-		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to update 'uv'. Please check the logs for error.$(RESET)"; exit 1; }
-
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Updating project repository...$(RESET)"
 	git submodule update --remote --merge
 	git pull
 
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Updating project dependencies...$(RESET)"
-	@uv pip install --upgrade .
+	@pip install --upgrade -e .
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Project and dependencies updated successfully.$(RESET)"
  
