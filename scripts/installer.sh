@@ -6,8 +6,8 @@ LOW_DELAY=0.5
 HIGH_DELAY=15
 TOOLBOX_URL="https://raw.githubusercontent.com/MorganKryze/bash-toolbox/main/src/prefix.sh"
 PROJECT_URL="https://github.com/MorganKryze/Athunas"
-REPO_NAME="Carousel"
-REPO_URL="https://github.com/MorganKryze/Athunas.git"
+REPOSITORY_NAME="Athunas"
+REPOSITORY_URL="https://github.com/MorganKryze/Athunas.git"
 ISSUES_URL="https://github.com/MorganKryze/Athunas/issues"
 
 
@@ -65,7 +65,7 @@ function display_header() {
 
     sleep $LOW_DELAY
     txt
-    txt "Open-source Carousel led matrix dashboard setup script v${VERSION}."
+    txt "Open-source $REPOSITORY_NAME led matrix dashboard setup script v${VERSION}."
     sleep $LOW_DELAY
     txt "This script will setup the environement on the target device, setup docker and install the project."
     sleep $LOW_DELAY
@@ -150,8 +150,8 @@ function setup_project() {
     info "Setting up the project..."
 
     info "Cloning the repository..."
-    git clone --recurse-submodules "$REPO_URL"
-    cd Athunas
+    git clone --recurse-submodules "$REPOSITORY_URL"
+    cd $REPOSITORY_NAME
 
     success "Project setup complete."
     sleep $LOW_DELAY
@@ -161,9 +161,9 @@ function display_next_steps() {
     txt
     txt "Next steps:"
     txt "1. After the device reboots, log back in."
-    txt "2. Navigate to the project directory: ${BLUE}cd ~/Athunas${RESET}"
+    txt "2. Navigate to the project directory: ${BLUE}cd ~/$REPOSITORY_NAME${RESET}"
     txt "3. Build and start the Docker containers: ${BLUE}docker compose up --build -d${RESET}"
-    txt "4. Access the Carousel dashboard via your web browser at: ${LINK}${UNDERLINE}http://<device-ip>:8000${RESET}"
+    txt "4. Access the $REPOSITORY_NAME dashboard via your web browser at: ${LINK}${UNDERLINE}http://<device-ip>:8000${RESET}"
     txt
 
     sleep $LOW_DELAY
@@ -187,7 +187,7 @@ function main() {
 
     setup_project
 
-    success "Carousel setup complete!"
+    success "$REPOSITORY_NAME setup complete!"
     sleep $LOW_DELAY
 
     display_next_steps
