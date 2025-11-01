@@ -15,8 +15,10 @@ install:
 
 .PHONY: build
 build:
-	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Building 'rpi-rgb-led-matrix' library...$(RESET)"
+	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Building 'rpi-rgb-led-matrix' library api examples...$(RESET)"
 	@make -C ./rpi-rgb-led-matrix/examples-api-use
+
+	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Building 'rpi-rgb-led-matrix' Python bindings...$(RESET)"
 	@make -C ./rpi-rgb-led-matrix build-python
 	
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Project built successfully.$(RESET)"
