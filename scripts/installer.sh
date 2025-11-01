@@ -10,10 +10,9 @@ REPOSITORY_NAME="Athunas"
 REPOSITORY_URL="https://github.com/MorganKryze/Athunas.git"
 ISSUES_URL="https://github.com/MorganKryze/Athunas/issues"
 
-
 # ===== Error handling =====
-set -o errexit  # Exit on errorC
-set -o pipefail # Exit if any command in a pipe fails
+set -o errexit
+set -o pipefail
 trap cleanup EXIT
 
 # ===== Function definitions =====
@@ -22,7 +21,6 @@ function cleanup() {
     if [ $exit_code -ne 0 ]; then
         echo "Script exited with error code $exit_code."
     fi
-    # TODO: Add any cleanup commands here if needed
     return $exit_code
 }
 
@@ -66,9 +64,9 @@ function display_header() {
     txt
     txt "Open-source $REPOSITORY_NAME led matrix dashboard setup script v${VERSION}."
     sleep $LOW_DELAY
-    txt "This script will setup the environement on the target device, setup docker and install the project."
+    txt "This script will setup the environement, docker and the project on the target device."
     sleep $LOW_DELAY
-    txt "If you encounter any issues, please report them at ${LINK}${UNDERLINE}${ISSUES_URL}${RESET}."
+    txt "Please report any issue at ${LINK}${UNDERLINE}${ISSUES_URL}${RESET}."
     sleep $LOW_DELAY
     txt "Licensed under the GNU GPL v3 License, Yann M. Vidamment © 2025."
     sleep $LOW_DELAY
@@ -81,52 +79,103 @@ function display_header() {
 }
 
 function setup_os() {
-    info "Setting up the os packages..."
+    info "Setting up the OS packages..."
 
-    info "Updating and upgrading packages..."
+    info "Updating package list..."
     sudo apt-get update
+
+    info "Checking for upgradable packages..."
+    local upgradable=$(apt list --upgradable 2>/dev/null | grep -c upgradable || true)
+    if [ "$upgradable" -gt 1 ]; then
+        info "Upgrading $((upgradable - 1)) packages..."
     sudo apt-get upgrade -y
+    else
+        info "System is up to date."
+    fi
 
     info "Installing required packages..."
-    sudo apt-get install -y --no-install-recommends git python3-pip python3-venv make build-essential libsixel-dev python3-tk cython3 libcap2-bin
+    local packages="git python3-pip python3-venv make build-essential libsixel-dev python3-tk cython3 libcap2-bin"
+    local to_install=""
+    
+    for pkg in $packages; do
+        if ! dpkg -l | grep -q "^ii  $pkg "; then
+            to_install="$to_install $pkg"
+        fi
+    done
+    
+    if [ -n "$to_install" ]; then
+        sudo apt-get install -y --no-install-recommends $to_install
     sudo apt-get clean
+        success "Installed packages:$to_install"
+    else
+        info "All required packages already installed."
+    fi
 
     success "OS setup complete."
     sleep $LOW_DELAY
 }
 
 function install_docker() {
-    info "Installing Docker..."
+    info "Checking Docker installation..."
 
-    info "Adding Docker's official GPG key and repository..."
+    if command -v docker >/dev/null 2>&1; then
+        local docker_version=$(docker --version)
+        info "Docker already installed: $docker_version"
+        
+        if docker compose version >/dev/null 2>&1; then
+            info "Docker Compose plugin already installed."
+        else
+            warning "Docker Compose plugin not found, will install..."
+        fi
+    else
+        info "Docker not found. Installing Docker..."
 
-    sudo apt-get install ca-certificates curl
+        info "Installing prerequisites..."
+        sudo apt-get update
+        sudo apt-get install -y ca-certificates curl
+        
+        info "Adding Docker's official GPG key..."
     sudo install -m 0755 -d /etc/apt/keyrings
+        if [ ! -f /etc/apt/keyrings/docker.asc ]; then
     sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
     sudo chmod a+r /etc/apt/keyrings/docker.asc
+        else
+            info "Docker GPG key already exists."
+        fi
 
     info "Adding Docker repository to APT sources..."
+        if [ ! -f /etc/apt/sources.list.d/docker.list ]; then
     echo \
       "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
       $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
       sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
     sudo apt-get update
+        else
+            info "Docker repository already configured."
+        fi
     
     info "Installing Docker Engine, CLI, and Containerd..."
     sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    fi
 
     info "Setting up Docker permissions..."
-
-    if groups $USER | grep &>/dev/null '\bdocker\b'; then
+    if groups $USER | grep -q '\bdocker\b'; then
         info "User '$USER' is already in the 'docker' group."
     else
         info "Adding user '$USER' to the 'docker' group..."
         sudo usermod -aG docker $USER
-        info "You may need to log out and log back in for the changes to take effect."
+        warning "Group changes will take effect after logout/login or system reboot."
     fi
 
-    info "Verifying Docker installation..."
-    sudo systemctl status docker
+    info "Ensuring Docker service is enabled and running..."
+    sudo systemctl enable docker
+    sudo systemctl start docker
+    
+    if sudo systemctl is-active --quiet docker; then
+        success "Docker service is running."
+    else
+        warning "Docker service is not running. Check with: sudo systemctl status docker"
+    fi
 
     success "Docker installation complete."
     sleep $LOW_DELAY
@@ -135,35 +184,39 @@ function install_docker() {
 function performance_tweaks() {
     info "Applying performance tweaks..."
 
-    # Isolate CPU core 3
-    info "Modifying cmdline.txt to isolate CPU core 3..."
-    local cmdline_file="/boot/firmware/cmdline.txt"
+    info "Checking CPU isolation configuration..."
+    local cmdline_file=""
+    
+    if [ -f /boot/firmware/cmdline.txt ]; then
+        cmdline_file="/boot/firmware/cmdline.txt"
+    elif [ -f /boot/cmdline.txt ]; then
+        cmdline_file="/boot/cmdline.txt"
+    else
+        warning "cmdline.txt not found. Skipping CPU isolation."
+    fi
     
     if [ -n "$cmdline_file" ]; then
-        # Check if isolcpus is already set
-        if grep -q "isolcpus=" "$cmdline_file"; then
-            info "CPU isolation already configured in $cmdline_file"
+        if grep -q "isolcpus=3" "$cmdline_file"; then
+            info "CPU core 3 already isolated in $cmdline_file"
         else
-            # Backup original file
+            info "Isolating CPU core 3..."
             sudo cp "$cmdline_file" "${cmdline_file}.bak.$(date +%Y%m%d_%H%M%S)"
-            # Append to the end of the line (no newline in cmdline.txt)
-            sudo sed -i '$ s/$/ isolcpus=3/' "/boot/firmware/cmdline.txt"
-            success "CPU core 3 isolated in $cmdline_file"
+            sudo sed -i '$ s/$/ isolcpus=3/' "$cmdline_file"
+            success "CPU core 3 isolated in $cmdline_file (requires reboot)"
         fi
     fi
 
-    # Blacklist sound module
-    info "Blacklisting snd_bcm2835 module to free up resources..."
+    info "Checking sound module blacklist..."
     local blacklist_file="/etc/modprobe.d/blacklist-rgb-matrix.conf"
     
     if [ -f "$blacklist_file" ] && grep -q "blacklist snd_bcm2835" "$blacklist_file"; then
         info "snd_bcm2835 already blacklisted"
     else
+        info "Blacklisting snd_bcm2835 module..."
         echo "blacklist snd_bcm2835" | sudo tee "$blacklist_file" > /dev/null
-        success "snd_bcm2835 module blacklisted"
+        success "snd_bcm2835 module blacklisted (requires reboot)"
     fi
 
-    # Update initramfs
     info "Updating initramfs..."
     if command -v update-initramfs >/dev/null 2>&1; then
         sudo update-initramfs -u
@@ -179,9 +232,38 @@ function performance_tweaks() {
 function setup_project() {
     info "Setting up the project..."
 
+    local project_dir="$HOME/$REPOSITORY_NAME"
+    
+    if [ -d "$project_dir" ]; then
+        info "Project directory already exists at $project_dir"
+        info "Updating repository..."
+        cd "$project_dir"
+        
+        if [ -d .git ]; then
+            git fetch origin
+            local_commit=$(git rev-parse HEAD)
+            remote_commit=$(git rev-parse origin/main 2>/dev/null || git rev-parse origin/master 2>/dev/null)
+            
+            if [ "$local_commit" = "$remote_commit" ]; then
+                info "Repository is already up to date."
+            else
+                warning "Local repository differs from remote. Run 'git pull' manually to update."
+            fi
+            
+            if [ -f .gitmodules ]; then
+                info "Updating submodules..."
+                git submodule update --init --recursive
+            fi
+        else
+            warning "Directory exists but is not a git repository. Skipping update."
+        fi
+    else
     info "Cloning the repository..."
+        cd "$HOME"
     git clone --recurse-submodules "$REPOSITORY_URL"
-    cd $REPOSITORY_NAME
+        cd "$REPOSITORY_NAME"
+        success "Repository cloned to $project_dir"
+    fi
 
     success "Project setup complete."
     sleep $LOW_DELAY
