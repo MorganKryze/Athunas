@@ -243,6 +243,24 @@ function performance_tweaks() {
         warning "update-initramfs not found, skipping..."
     fi
 
+    info "Setting capabilities for Python interpreter..."
+    local python_path=$(readlink -f /usr/bin/python3)
+    if [ -n "$python_path" ] && [ -f "$python_path" ]; then
+        local python_version=$($python_path --version 2>&1 | awk '{print $2}')
+
+        info "Found Python at: $python_path (version $python_version)"
+
+        if getcap "$python_path" | grep -q "cap_sys_nice"; then
+            info "Capabilities already set for $python_path"
+        else
+            info "Setting capabilities for $python_path..."
+            sudo setcap 'cap_sys_nice=eip' "$python_path"
+            success "Capabilities set for $python_path"
+        fi
+    else
+        warning "Python interpreter not found, skipping setcap..."
+    fi
+
     success "Performance tweaks applied."
     sleep $LOW_DELAY
 }
