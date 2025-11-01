@@ -79,11 +79,10 @@ function display_header() {
 }
 
 function setup_os() {
-    info "Setting up the OS packages..."
+    info "Setting up the OS before installations..."
 
     info "Updating package list..."
     sudo apt-get update
-    sudo apt autoremove -y
 
     info "Checking for upgradable packages..."
     local upgradable=$(apt list --upgradable 2>/dev/null | grep -c upgradable || true)
@@ -95,7 +94,7 @@ function setup_os() {
     fi
 
     info "Installing required packages..."
-    local packages="git python3-pip python3-venv make build-essential libsixel-dev python3-tk cython3 libcap2-bin"
+    local packages="git python3-pip python3-venv make build-essential libsixel-dev python3-tk cython3 libcap2-bin fastfetch"
     local to_install=""
     
     for pkg in $packages; do
@@ -110,6 +109,24 @@ function setup_os() {
         success "Installed packages:$to_install"
     else
         info "All required packages already installed."
+    fi
+
+    info "Cleaning up unused packages..."
+    sudo apt autoremove -y
+
+    info "Setting up bash environment..."
+    if ! grep -q "fastfetch" "$HOME/.bashrc"; then
+        echo -e "\n# Display system information on terminal launch\nfastfetch" >> "$HOME/.bashrc"
+        success "Added fastfetch to .bashrc"
+    else
+        info "fastfetch already configured in .bashrc"
+    fi
+
+    if [ ! -f "$HOME/.hushlogin" ]; then
+        touch "$HOME/.hushlogin"
+        success "Created .hushlogin to disable login messages"
+    else
+        info ".hushlogin already exists"
     fi
 
     success "OS setup complete."
@@ -271,17 +288,16 @@ function setup_project() {
 }
 
 function display_next_steps() {
-    txt
     txt "Next steps:"
     txt "1. After the device reboots, log back in."
     txt "2. Navigate to the project directory: ${BLUE}cd ~/$REPOSITORY_NAME${RESET}"
     txt "3. Build and start the Docker containers: ${BLUE}docker compose up --build -d${RESET}"
     txt "4. Access the $REPOSITORY_NAME dashboard via your web browser at: ${LINK}${UNDERLINE}http://<device-ip>:8000${RESET}"
-    txt
 
     sleep $LOW_DELAY
     warning "The device will reboot in $HIGH_DELAY seconds. Keep this terminal open to continue with the next steps after reboot."
     sleep $HIGH_DELAY
+    success "Rebooting now... Bye!"
     sudo reboot now
 }
 
