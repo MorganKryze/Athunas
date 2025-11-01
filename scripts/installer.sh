@@ -83,6 +83,7 @@ function setup_os() {
 
     info "Updating package list..."
     sudo apt-get update
+    sudo apt autoremove -y
 
     info "Checking for upgradable packages..."
     local upgradable=$(apt list --upgradable 2>/dev/null | grep -c upgradable || true)
