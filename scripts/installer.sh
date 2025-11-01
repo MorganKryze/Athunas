@@ -135,14 +135,42 @@ function install_docker() {
 function performance_tweaks() {
     info "Applying performance tweaks..."
 
+    # Isolate CPU core 3
     info "Modifying cmdline.txt to isolate CPU core 3..."
-    echo " isolcpus=3" | sudo tee -a /boot/firmware/cmdline.txt
+    local cmdline_file="/boot/firmware/cmdline.txt"
+    
+    if [ -n "$cmdline_file" ]; then
+        # Check if isolcpus is already set
+        if grep -q "isolcpus=" "$cmdline_file"; then
+            info "CPU isolation already configured in $cmdline_file"
+        else
+            # Backup original file
+            sudo cp "$cmdline_file" "${cmdline_file}.bak.$(date +%Y%m%d_%H%M%S)"
+            # Append to the end of the line (no newline in cmdline.txt)
+            sudo sed -i '$ s/$/ isolcpus=3/' "/boot/firmware/cmdline.txt"
+            success "CPU core 3 isolated in $cmdline_file"
+        fi
+    fi
 
+    # Blacklist sound module
     info "Blacklisting snd_bcm2835 module to free up resources..."
-    echo "blacklist snd_bcm2835" | sudo tee /etc/modprobe.d/blacklist-rgb-matrix.conf
+    local blacklist_file="/etc/modprobe.d/blacklist-rgb-matrix.conf"
+    
+    if [ -f "$blacklist_file" ] && grep -q "blacklist snd_bcm2835" "$blacklist_file"; then
+        info "snd_bcm2835 already blacklisted"
+    else
+        echo "blacklist snd_bcm2835" | sudo tee "$blacklist_file" > /dev/null
+        success "snd_bcm2835 module blacklisted"
+    fi
 
+    # Update initramfs
     info "Updating initramfs..."
-    sudo update-initramfs -u
+    if command -v update-initramfs >/dev/null 2>&1; then
+        sudo update-initramfs -u
+        success "initramfs updated"
+    else
+        warning "update-initramfs not found, skipping..."
+    fi
 
     success "Performance tweaks applied."
     sleep $LOW_DELAY
