@@ -10,6 +10,8 @@ from custom_frames import CustomFrames
 from enums.encoder_input import EncoderInput
 from enums.tilt_input import TiltState
 
+# TODO: separate the Matrix from the IO, rename the calss to IO and create a Matrix class for example
+
 
 class Board:
     """Class to manage the board's hardware components and their interactions."""
