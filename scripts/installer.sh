@@ -309,8 +309,10 @@ function display_next_steps() {
     txt "Next steps:"
     txt "1. After the device reboots, log back in."
     txt "2. Navigate to the project directory: ${BLUE}cd ~/$REPOSITORY_NAME${RESET}"
-    txt "3. Build and start the Docker containers: ${BLUE}docker compose up --build -d${RESET}"
-    txt "4. Access the $REPOSITORY_NAME dashboard via your web browser at: ${LINK}${UNDERLINE}http://<device-ip>:8000${RESET}"
+    txt "3. Prepare the python environment and install dependencies: ${BLUE}make install${RESET}"
+    txt "4. Build the led interface library: ${BLUE}make build${RESET}"
+    txt "5. Test the library: ${BLUE}make test${RESET}"
+    txt "6. Finally, run the project: ${BLUE}make run${RESET}"
 
     sleep $LOW_DELAY
     warning "The device will reboot in $HIGH_DELAY seconds. Keep this terminal open to continue with the next steps after reboot."
