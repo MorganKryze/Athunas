@@ -16,8 +16,8 @@ install:
 .PHONY: build
 build:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Building 'rpi-rgb-led-matrix' library...$(RESET)"
-	@make -C ./rpi-rgb-led-matrix build-python
 	@make -C ./rpi-rgb-led-matrix/examples-api-use
+	@make -C ./rpi-rgb-led-matrix build-python
 	
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Project built successfully.$(RESET)"
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)If you did the wiring, you may test the library: run 'make example' or 'make run' to run the entire project.$(RESET)"
