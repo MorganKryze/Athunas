@@ -15,11 +15,13 @@ install:
 
 .PHONY: build
 build:
+	@echo "[(ORANGE)  WARN   $(RESET)] $(ORANGE)Building the 'rpi-rgb-led-matrix' will take several minutes. Please be patient. Warnings can be safely ignored.$(RESET)"
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Building 'rpi-rgb-led-matrix' library api examples...$(RESET)"
 	@make -C ./rpi-rgb-led-matrix/examples-api-use
 
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Building 'rpi-rgb-led-matrix' Python bindings...$(RESET)"
 	@make -C ./rpi-rgb-led-matrix build-python
+	@sudo make -C ./rpi-rgb-led-matrix install-python
 	
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Project built successfully.$(RESET)"
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)If you did the wiring, you may test the library: run 'make example' or 'make run' to run the entire project.$(RESET)"
