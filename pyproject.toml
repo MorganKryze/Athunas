@@ -14,7 +14,7 @@ dependencies = [
     "gpiozero==2.0.1",
     "numpy==2.3.2",
     "pyyaml==6.0.2",
-    "Pillow==11.3.0",
+    "Pillow==10.4.0",
     "pyowm==3.3.0",
     "python-dateutil==2.9.0.post0",
     "requests==2.32.4",
