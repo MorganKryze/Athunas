@@ -8,7 +8,7 @@ RESET := $(shell tput sgr0)
 .PHONY: install
 install:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Installing project python dependencies...$(RESET)"
-	@pip install --break-system-packages --no-cache-dir -e . || \
+	@sudo pip install --break-system-packages --no-cache-dir --ignore-installed -e . || \
 		{ echo "[$(RED)  ERROR  $(RESET)] $(RED)Failed to install project dependencies. Please check the logs for error.$(RESET)"; exit 1; }
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Project dependencies installed successfully.$(RESET)"
