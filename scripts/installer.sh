@@ -94,7 +94,7 @@ function setup_os() {
     fi
 
     info "Installing required packages..."
-    local packages="git python3-pip python3-venv make build-essential libsixel-dev python3-tk cython3 libcap2-bin fastfetch"
+    local packages="git make python3-pip build-essential libsixel-dev python3-tk cython3 libcap2-bin python3-setuptools python3-dev fastfetch"
     local to_install=""
     
     for pkg in $packages; do
