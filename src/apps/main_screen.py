@@ -74,24 +74,38 @@ class MainScreen(Application):
             logging.error(
                 "[MainScreen App] Invalid cycle duration in seconds. Must be greater than 0."
             )
-        self.font = ImageFont.truetype(PathTo.FONT_FILE, FONT_SIZE)
+        try:
+            self.font = ImageFont.truetype(PathTo.FONT_FILE, FONT_SIZE)
+            logging.info("[MainScreen App] Font loaded successfully.")
+        except Exception as e:
+            self.status = ServiceStatus.ERROR_APP_CONFIG
+            logging.error(f"[MainScreen App] Failed to load font: {e}")
+
         self.lastGenerateCall = None
         self.is_on_cycle = True
         self.currentIdx = 0
         self.selectMode = False
         # self.old_noti_list = []
         self.queued_frames = []
-        self.backgrounds = {
-            "sakura": Image.open(
-                os.path.join(PathTo.MAIN_SCREEN_BACKGROUND_FOLDER, "sakura-bg.png")
-            ).convert("RGB"),
-            "cloud": Image.open(
-                os.path.join(PathTo.MAIN_SCREEN_BACKGROUND_FOLDER, "cloud-bg-clear.png")
-            ).convert("RGBA"),
-            "forest": Image.open(
-                os.path.join(PathTo.MAIN_SCREEN_BACKGROUND_FOLDER, "forest-bg.png")
-            ).convert("RGB"),
-        }
+
+        try:
+            self.backgrounds = {
+                "sakura": Image.open(
+                    os.path.join(PathTo.MAIN_SCREEN_BACKGROUND_FOLDER, "sakura-bg.png")
+                ).convert("RGB"),
+                "cloud": Image.open(
+                    os.path.join(
+                        PathTo.MAIN_SCREEN_BACKGROUND_FOLDER, "cloud-bg-clear.png"
+                    )
+                ).convert("RGBA"),
+                "forest": Image.open(
+                    os.path.join(PathTo.MAIN_SCREEN_BACKGROUND_FOLDER, "forest-bg.png")
+                ).convert("RGB"),
+            }
+        except Exception as e:
+            self.status = ServiceStatus.ERROR_APP_CONFIG
+            logging.error(f"[MainScreen App] Failed to load backgrounds: {e}")
+
         self.theme_list = [
             self.generate_sakura_bg,
             self.generate_cloud_bg,
