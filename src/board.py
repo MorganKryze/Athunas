@@ -73,12 +73,12 @@ class Board:
         except Exception as e:
             logging.warning(f"[Board] Error cleaning up tilt switch button: {e}")
 
-        try:
-            cls.factory.close()
-            cls.factory = RPiGPIOFactory()
-            logging.debug("[Board] GPIO factory reset.")
-        except Exception as e:
-            logging.warning(f"[Board] Error resetting GPIO factory: {e}")
+        # try:
+        #     cls.factory.close()
+        #     cls.factory = RPiGPIOFactory()
+        #     logging.debug("[Board] GPIO factory reset.")
+        # except Exception as e:
+        #     logging.warning(f"[Board] Error resetting GPIO factory: {e}")
 
     @classmethod
     def init_system(cls, use_emulator: bool = False) -> None:
