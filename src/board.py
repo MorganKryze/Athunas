@@ -2,23 +2,20 @@ import queue
 import time
 import logging
 from typing import Any
-from gpiozero import Button, RotaryEncoder, Device
-from gpiozero.pins.rpigpio import RPiGPIOFactory
+from gpiozero import Button, RotaryEncoder
+from gpiozero.pins.pigpio import PiGPIOFactory
 
 from config import Configuration
 from custom_frames import CustomFrames
 from enums.encoder_input import EncoderInput
 from enums.tilt_input import TiltState
 
-# Force gpiozero to use RPi.GPIO instead of lgpio
-# Device.pin_factory = RPiGPIOFactory()
-
 # TODO: separate the Matrix from the IO, rename the calss to IO and create a Matrix class for example
 
 class Board:
     """Class to manage the board's hardware components and their interactions."""
 
-    factory: RPiGPIOFactory = RPiGPIOFactory()
+    factory: PiGPIOFactory = PiGPIOFactory()
     SCREEN_RATIO: int = 16
     FIRST_GPIO_PIN: int = 0
     LAST_GPIO_PIN: int = 27

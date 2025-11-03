@@ -19,7 +19,7 @@ dependencies = [
     "python-dateutil==2.9.0.post0",
     "requests==2.32.4",
     "RGBMatrixEmulator==0.11.6",
-    "RPi.GPIO>=0.7.0",
+    "pigpio>=1.78",
     "spotipy==2.25.1",
     "scipy==1.16.1",
     "websocket==0.2.1",
