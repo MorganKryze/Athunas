@@ -42,21 +42,21 @@ example:
 .PHONY: run
 run:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Running project...$(RESET)"
-	@sudo python src
+	@cd $(shell pwd) && sudo python src
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Project stopped.$(RESET)"
 
 .PHONY: dev
 dev:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Running project with debug-level console logging...$(RESET)"
-	@sudo python src --debug
+	@cd $(shell pwd) && sudo python src --debug
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Project running with debug logging.$(RESET)"
 
 .PHONY: dev-emulator
 dev-emulator:
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Running project with debug-level console logging in emulator mode...$(RESET)"
-	@sudo python --debug --emulator
+	@cd $(shell pwd) && sudo python src --debug --emulator
 
 	@echo "[$(GREEN) SUCCESS $(RESET)] $(GREEN)Project running in emulator mode with debug logging.$(RESET)"
 
