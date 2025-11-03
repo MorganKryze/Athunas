@@ -12,7 +12,7 @@ from enums.tilt_input import TiltState
 
 # Force gpiozero to use RPi.GPIO instead of lgpio
 Device.pin_factory = RPiGPIOFactory()
-logging.info(f"[Board] Pin factory set to: {Device.pin_factory}")
+print(f"DEBUG: Pin factory set to: {Device.pin_factory}")
 
 # TODO: separate the Matrix from the IO, rename the calss to IO and create a Matrix class for example
 
@@ -211,6 +211,8 @@ class Board:
 
         cls.encoder_queue = queue.Queue()
 
+        logging.debug(f"[Board] About to create RotaryEncoder on pins CLK={cls.encoder_clk}, DT={cls.encoder_dt}")
+        logging.debug(f"[Board] Current pin factory: {Device.pin_factory}")
         try:
             cls.encoder = RotaryEncoder(
                 cls.encoder_clk,
