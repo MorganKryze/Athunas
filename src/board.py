@@ -11,15 +11,14 @@ from enums.encoder_input import EncoderInput
 from enums.tilt_input import TiltState
 
 # Force gpiozero to use RPi.GPIO instead of lgpio
-Device.pin_factory = RPiGPIOFactory()
-print(f"DEBUG: Pin factory set to: {Device.pin_factory}")
+# Device.pin_factory = RPiGPIOFactory()
 
 # TODO: separate the Matrix from the IO, rename the calss to IO and create a Matrix class for example
 
 class Board:
     """Class to manage the board's hardware components and their interactions."""
 
-    # factory: RPiGPIOFactory = RPiGPIOFactory()
+    factory: RPiGPIOFactory = RPiGPIOFactory()
     SCREEN_RATIO: int = 16
     FIRST_GPIO_PIN: int = 0
     LAST_GPIO_PIN: int = 27
@@ -74,12 +73,12 @@ class Board:
         except Exception as e:
             logging.warning(f"[Board] Error cleaning up tilt switch button: {e}")
 
-        # try:
-        #     cls.factory.close()
-        #     cls.factory = RPiGPIOFactory()
-        #     logging.debug("[Board] GPIO factory reset.")
-        # except Exception as e:
-        #     logging.warning(f"[Board] Error resetting GPIO factory: {e}")
+        try:
+            cls.factory.close()
+            cls.factory = RPiGPIOFactory()
+            logging.debug("[Board] GPIO factory reset.")
+        except Exception as e:
+            logging.warning(f"[Board] Error resetting GPIO factory: {e}")
 
     @classmethod
     def init_system(cls, use_emulator: bool = False) -> None:
@@ -211,13 +210,15 @@ class Board:
 
         cls.encoder_queue = queue.Queue()
 
-        logging.debug(f"[Board] About to create RotaryEncoder on pins CLK={cls.encoder_clk}, DT={cls.encoder_dt}")
+        logging.debug(
+            f"[Board] About to create RotaryEncoder on pins CLK={cls.encoder_clk}, DT={cls.encoder_dt}"
+        )
         logging.debug(f"[Board] Current pin factory: {Device.pin_factory}")
         try:
             cls.encoder = RotaryEncoder(
                 cls.encoder_clk,
                 cls.encoder_dt,
-                # pin_factory=cls.factory,
+                pin_factory=cls.factory,
             )
             cls.encoder.when_rotated_clockwise = (
                 lambda enc: cls.rotate_clockwise_callback(enc)
@@ -247,7 +248,7 @@ class Board:
                 cls.encoder_sw,
                 pull_up=True,
                 bounce_time=0.1,
-                # pin_factory=cls.factory,
+                pin_factory=cls.factory,
             )
             cls.encoder_button.when_pressed = (
                 lambda button: cls.encoder_button_callback(button)
@@ -287,7 +288,7 @@ class Board:
                 cls.tilt_switch,
                 pull_up=True,
                 bounce_time=cls.tilt_switch_bounce_time,
-                # pin_factory=cls.factory,
+                pin_factory=cls.factory,
             )
             cls.tilt_switch_button.when_pressed = lambda button: cls.tilt_callback(
                 button
