@@ -19,6 +19,7 @@ class Board:
     """Class to manage the board's hardware components and their interactions."""
 
     factory: RPiGPIOFactory = RPiGPIOFactory()
+    print(f"DEBUG: Factory created at class level: {factory}")
     SCREEN_RATIO: int = 16
     FIRST_GPIO_PIN: int = 0
     LAST_GPIO_PIN: int = 27
@@ -87,6 +88,10 @@ class Board:
 
         :param use_emulator: Whether to use the emulator for the RGB matrix (default is False).
         """
+        if not hasattr(cls, 'factory') or cls.factory is None:
+            cls.factory = RPiGPIOFactory()
+            logging.debug("[Board] GPIO factory initialized.")
+        
         cls.cleanup_gpio()
 
         cls._init_display()
