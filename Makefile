@@ -15,7 +15,7 @@ install:
 
 .PHONY: build
 build:
-	@echo "[(ORANGE)  WARN   $(RESET)] $(ORANGE)Building the 'rpi-rgb-led-matrix' will take several minutes. Please be patient. Warnings can be safely ignored.$(RESET)"
+	@echo "[$(ORANGE)  WARN   $(RESET)] $(ORANGE)Building the 'rpi-rgb-led-matrix' will take several minutes. Please be patient. Warnings can be safely ignored.$(RESET)"
 	@echo "[$(BLUE)  INFO   $(RESET)] $(BLUE)Building 'rpi-rgb-led-matrix' library api examples...$(RESET)"
 	@make -C ./rpi-rgb-led-matrix/examples-api-use
 
