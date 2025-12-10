@@ -30,7 +30,7 @@ System:
     led_rows: 32
     led_cols: 64
     brightness: 100
-    disable_hardware_pulsing: true
+    disable_hardware_pulsing: false
     hardware_mapping: regular
     refresh_rate: 0.05
   Tilt-switch:
