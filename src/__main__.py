@@ -1,22 +1,23 @@
-import time
-import logging
 import argparse
+import logging
+import time
 from typing import Any
+
 from PIL import Image
 
+from app_manager import AppManager
+from board import Board
+from config import Configuration
 from custom_frames import CustomFrames
 from enums.encoder_input import EncoderInput
-from board import Board
+from logs import Logs
 from models.application import Application
 from path import PathTo
-from logs import Logs
-from app_manager import AppManager
-from config import Configuration
 from webserver import WebServer
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Athunas LED matrix controller")
+    parser = argparse.ArgumentParser(description="Carousel LED matrix controller")
     parser.add_argument("--debug", action="store_true", help="Run with debug console")
     parser.add_argument("--emulator", action="store_true", help="Run in emulator mode")
     args = parser.parse_args()

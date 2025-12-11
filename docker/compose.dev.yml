@@ -1,10 +1,10 @@
 services:
-  athunas:
-    container_name: athunas_dev
+  Carousel:
+    container_name: Carousel_dev
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    command: python -m athunas --debug
+    command: python -m carousel --debug
     restart: unless-stopped
     user: root
     privileged: true

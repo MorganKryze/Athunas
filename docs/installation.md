@@ -14,7 +14,7 @@ After pressing "Next", you will be prompted to edit the settings. Click on `Edit
 
 Under the `General` tab, set up as follows:
 
-- **Hostname**: `athunas`
+- **Hostname**: `Carousel`
 - **Username**: `admin`
 - **Password**: `raspberry` (you can change it later)
 - **SSID**: `your_ssid` (this is your Wi-Fi network name)
@@ -31,7 +31,7 @@ Finally, click on `Save` and `Yes` to write the image to the SD card. Once the p
 Power up your Pi, wait for one minute or two, then connect to your Pi via SSH from your PC terminal (be sure to be connected to the same network) **or** using a monitor + keyboard.
 
 ```bash
-ssh admin@athunas.local
+ssh admin@Carousel.local
 ```
 
 And enter the password you set earlier (`raspberry`).
@@ -40,7 +40,7 @@ And enter the password you set earlier (`raspberry`).
 > If you want to use the installer to avoid entering all these commands manually, you can run the following command:
 >
 > ```bash
-> curl -sSL https://raw.githubusercontent.com/MorganKryze/Athunas/main/scripts/installer.sh | bash
+> curl -sSL https://raw.githubusercontent.com/MorganKryze/Carousel/main/scripts/installer.sh | bash
 > ```
 >
 > This will execute the installation script, which will guide you through the setup process.
@@ -113,7 +113,7 @@ sudo update-initramfs -u
 Clone the repository.
 
 ```bash
-git clone --recurse-submodules https://github.com/MorganKryze/Athunas.git && cd Athunas
+git clone --recurse-submodules https://github.com/MorganKryze/Carousel.git && cd Carousel
 ```
 
 ## Build & Run

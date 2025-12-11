@@ -2,7 +2,7 @@
 
 ## Overview
 
-> Athunas is a matrix led project, controlled by a Raspberry Pi zero.
+> Carousel is a matrix led project, controlled by a Raspberry Pi zero.
 
 The purpose of the project is to provide a framework to add apps and functionality to the "product" (the matrix led + raspberry & accessories).
 
@@ -32,7 +32,7 @@ Find here the index of the project documentation:
 
 For documentation about the `rpi-rgb-led-matrix` library, check their detailed [official documentation](https://github.com/hzeller/rpi-rgb-led-matrix/blob/f0e95d3557dfc60759a290300c184074e9ec5874/README.md).
 
-For any other information, feel free to [open an issue](https://github.com/MorganKryze/Athunas/issues) on the repository.
+For any other information, feel free to [open an issue](https://github.com/MorganKryze/Carousel/issues) on the repository.
 
 ## Key features
 
@@ -83,7 +83,7 @@ Once everything is set up, we can follow the [installation guide](./docs/install
 
 For any issues related to the wiring, check the [wiring](./docs/wiring.md) guide or the guide from the [rpi-rgb-led-matrix repository](https://github.com/hzeller/rpi-rgb-led-matrix/blob/master/wiring.md).
 
-For any other issues, feel free to [open an issue](https://github.com/MorganKryze/Athunas/issues) on the repository.
+For any other issues, feel free to [open an issue](https://github.com/MorganKryze/Carousel/issues) on the repository.
 
 ## Contributing
 

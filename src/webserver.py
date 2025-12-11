@@ -11,7 +11,7 @@ from path import PathTo
 
 
 class WebServer:
-    """Web server for configuring Athunas settings"""
+    """Web server for configuring Carousel settings"""
 
     def __init__(self):
         """Initialize the web server"""

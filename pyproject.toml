@@ -1,5 +1,5 @@
 [project]
-name = "Athunas"
+name = "Carousel"
 version = "0.0.0"
 description = "RGB led matrix dashboard, providing apps for various purposes."
 readme = "README.md"
@@ -28,9 +28,9 @@ dependencies = [
 
 [project.urls]
 # TODO: update as soon as a website is created
-Homepage = "https://github.com/MorganKryze/Athunas"
+Homepage = "https://github.com/MorganKryze/Carousel"
 # TODO: update as soon as the documentation is published
-Documentation = "https://github.com/MorganKryze/Athunas/docs"
-Repository = "https://github.com/MorganKryze/Athunas.git"
-Issues = "https://github.com/MorganKryze/Athunas/issues"
-Changelog = "https://github.com/MorganKryze/Athunas/tree/main/.github/CHANGELOG"
+Documentation = "https://github.com/MorganKryze/Carousel/docs"
+Repository = "https://github.com/MorganKryze/Carousel.git"
+Issues = "https://github.com/MorganKryze/Carousel/issues"
+Changelog = "https://github.com/MorganKryze/Carousel/tree/main/.github/CHANGELOG"

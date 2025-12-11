@@ -5,10 +5,10 @@ VERSION="0.0.0"
 LOW_DELAY=0.5
 HIGH_DELAY=15
 TOOLBOX_URL="https://raw.githubusercontent.com/MorganKryze/bash-toolbox/main/src/prefix.sh"
-PROJECT_URL="https://github.com/MorganKryze/Athunas"
-REPOSITORY_NAME="Athunas"
-REPOSITORY_URL="https://github.com/MorganKryze/Athunas.git"
-ISSUES_URL="https://github.com/MorganKryze/Athunas/issues"
+PROJECT_URL="https://github.com/MorganKryze/Carousel"
+REPOSITORY_NAME="Carousel"
+REPOSITORY_URL="https://github.com/MorganKryze/Carousel.git"
+ISSUES_URL="https://github.com/MorganKryze/Carousel/issues"
 
 # ===== Error handling =====
 set -o errexit
@@ -169,7 +169,7 @@ function install_pigpiod() {
         rm -rf "$temp_dir"
 
         info "Setting up pigpiod service..."
-        local service_url="https://raw.githubusercontent.com/MorganKryze/Athunas/main/scripts/pigpiod.service"
+        local service_url="https://raw.githubusercontent.com/MorganKryze/Carousel/main/scripts/pigpiod.service"
         sudo curl -fsSL "$service_url" -o /etc/systemd/system/pigpiod.service || {
             warning "Failed to download service file from $service_url"
         }
