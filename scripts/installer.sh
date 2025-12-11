@@ -52,7 +52,7 @@ function get_project_latest_version() {
     if [ -z "$latest_version" ]; then
         latest_version="0.0.0"
     fi
-    return $latest_version
+    echo "$latest_version"
 }
 
 function display_header() {
