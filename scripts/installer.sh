@@ -8,6 +8,7 @@ PROJECT_URL="https://github.com/MorganKryze/Carousel"
 REPOSITORY_NAME="Carousel"
 REPOSITORY_URL="https://github.com/MorganKryze/Carousel.git"
 ISSUES_URL="https://github.com/MorganKryze/Carousel/issues"
+PIGPIOD_SERVICE_URL="https://raw.githubusercontent.com/MorganKryze/Carousel/main/scripts/pigpiod.service"
 
 # ===== Error handling =====
 set -o errexit
@@ -176,12 +177,11 @@ function install_pigpiod() {
 
         info "Removing temporary files..."
         cd - >/dev/null
-        rm -rf "$temp_dir"
+        sudo rm -rf "$temp_dir"
 
         info "Setting up pigpiod service..."
-        local service_url="https://raw.githubusercontent.com/MorganKryze/Carousel/main/scripts/pigpiod.service"
-        sudo curl -fsSL "$service_url" -o /etc/systemd/system/pigpiod.service || {
-            warning "Failed to download service file from $service_url"
+        sudo curl -fsSL "$PIGPIOD_SERVICE_URL" -o /etc/systemd/system/pigpiod.service || {
+            warning "Failed to download service file from $PIGPIOD_SERVICE_URL"
         }
         sudo systemctl daemon-reload
 
