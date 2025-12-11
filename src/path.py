@@ -20,11 +20,11 @@ class PathTo:
     STATIC_FOLDER: str = "../resources/web/static"
 
     @classmethod
-    def set_base_directory(cls, base_dir_name: str = "Athunas") -> None:
+    def set_base_directory(cls, base_dir_name: str = "Carousel") -> None:
         """
         Sets the base directory for the script to the specified directory name.
 
-        :param base_dir_name: The name of the base directory (default is 'Athunas').
+        :param base_dir_name: The name of the base directory (default is 'Carousel').
         """
         current_script_path = os.path.abspath(inspect.getfile(inspect.currentframe()))
         current_script_dir = os.path.dirname(current_script_path)
