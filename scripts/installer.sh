@@ -50,7 +50,6 @@ function load_logging_toolbox() {
 function get_project_latest_version() {
     local latest_version=$(curl -s https://api.github.com/repos/MorganKryze/Carousel/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
     if [ -z "$latest_version" ]; then
-        warning "Could not fetch the latest stable version from GitHub. Using default 0.0.0."
         latest_version="0.0.0"
     fi
     return $latest_version
