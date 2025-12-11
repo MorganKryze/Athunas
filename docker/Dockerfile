@@ -26,6 +26,13 @@ RUN apt-get update && \
 
 WORKDIR /app
 
+# Copy dependency files first for better layer caching
+COPY pyproject.toml ./
+
+# Install Python dependencies first (includes Pillow with headers needed for building)
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -e .
+
 # Copy all application code
 COPY . .
 
@@ -34,10 +41,6 @@ RUN if [ ! -f ./rpi-rgb-led-matrix/Makefile ]; then \
         rm -rf ./rpi-rgb-led-matrix && \
         git clone https://github.com/hzeller/rpi-rgb-led-matrix.git ./rpi-rgb-led-matrix; \
     fi
-
-# Install Python dependencies
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -e .
 
 # Build rpi-rgb-led-matrix library (examples and Python bindings)
 RUN make -C ./rpi-rgb-led-matrix/examples-api-use && \
