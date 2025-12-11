@@ -2,37 +2,7 @@
 
 ## Overview
 
-> Carousel is a matrix led project, controlled by a Raspberry Pi zero.
-
-The purpose of the project is to provide a framework to add apps and functionality to the "product" (the matrix led + raspberry & accessories).
-
-## Getting Started
-
-- [Overview](#overview)
-- [Getting Started](#getting-started)
-- [Documentation](#documentation)
-- [Key features](#key-features)
-  - [Apps](#apps)
-  - [Functionalities](#functionalities)
-- [Setting up](#setting-up)
-  - [Prerequisites](#prerequisites)
-  - [Install](#install)
-  - [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
-- [Acknowledgments](#acknowledgments)
-- [License](#license)
-
-## Documentation
-
-Find here the index of the project documentation:
-
-- [Wiring](./docs/wiring.md)
-- [Installation](./docs/installation.md)
-- [Configuration](./docs/configuration.md)
-
-For documentation about the `rpi-rgb-led-matrix` library, check their detailed [official documentation](https://github.com/hzeller/rpi-rgb-led-matrix/blob/f0e95d3557dfc60759a290300c184074e9ec5874/README.md).
-
-For any other information, feel free to [open an issue](https://github.com/MorganKryze/Carousel/issues) on the repository.
+Carousel is a Raspberry Pi Zero-powered LED matrix display framework designed to support custom applications and extensible functionality.
 
 ## Key features
 
@@ -59,31 +29,20 @@ For any other information, feel free to [open an issue](https://github.com/Morga
 - [ ] CAD files for 3D printing
 - [ ] ...
 
-## Setting up
+## Documentation
 
-### Prerequisites
+Comprehensive guides to help you get started:
 
-- Matrix led (price, link, etc.);
-- Raspberry Pi zero
-- Power supply
-- SD card
-- Raspberry pi imager
-- Encoder
-- ...
+- [Wiring Guide](./docs/wiring.md)
+- [Installation Guide](./docs/installation.md)
+- [Configuration Guide](./docs/configuration.md)
+- [rpi-rgb-led-matrix Library Documentation](https://github.com/hzeller/rpi-rgb-led-matrix/blob/f0e95d3557dfc60759a290300c184074e9ec5874/README.md)
 
-Overall budget: **~$xyz** / **xyz€**
+## Troubleshooting
 
-### Install
+If you encounter wiring-related issues, please consult the [Wiring Guide](./docs/wiring.md) or the official [rpi-rgb-led-matrix wiring documentation](https://github.com/hzeller/rpi-rgb-led-matrix/blob/master/wiring.md).
 
-First, follow the wiring instructions in the [wiring](./docs/wiring.md) guide.
-
-Once everything is set up, we can follow the [installation guide](./docs/installation.md).
-
-### Troubleshooting
-
-For any issues related to the wiring, check the [wiring](./docs/wiring.md) guide or the guide from the [rpi-rgb-led-matrix repository](https://github.com/hzeller/rpi-rgb-led-matrix/blob/master/wiring.md).
-
-For any other issues, feel free to [open an issue](https://github.com/MorganKryze/Carousel/issues) on the repository.
+For other technical issues or questions, please [submit an issue](https://github.com/MorganKryze/Carousel/issues) on the repository.
 
 ## Contributing
 
