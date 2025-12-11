@@ -17,23 +17,20 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-# Copy dependency files first for better layer caching
-COPY pyproject.toml ./
+# Copy all application code
+COPY . .
+
+# Initialize and update git submodules
+RUN git submodule update --init --recursive || true
 
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -e .
 
-# Copy the rpi-rgb-led-matrix library
-COPY rpi-rgb-led-matrix ./rpi-rgb-led-matrix
-
 # Build rpi-rgb-led-matrix library (examples and Python bindings)
 RUN make -C ./rpi-rgb-led-matrix/examples-api-use && \
     make -C ./rpi-rgb-led-matrix build-python && \
     make -C ./rpi-rgb-led-matrix install-python
-
-# Copy application code
-COPY . .
 
 # Set capabilities for real-time priority
 RUN setcap 'cap_sys_nice=eip' /usr/local/bin/python3.11
