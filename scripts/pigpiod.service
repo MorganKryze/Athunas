@@ -5,6 +5,8 @@ After=network.target
 [Service]
 Type=forking
 ExecStart=/usr/local/bin/pigpiod
+ExecStop=/usr/bin/killall pigpiod
+TimeoutStopSec=5
 Restart=on-failure
 RestartSec=5
 
