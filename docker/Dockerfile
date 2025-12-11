@@ -11,6 +11,7 @@ RUN apt-get update && \
         libcap2-bin \
         python3-dev \
         python3-pil \
+        python3-pil.imagetk \
         python3-setuptools && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
