@@ -20,8 +20,11 @@ WORKDIR /app
 # Copy all application code
 COPY . .
 
-# Initialize and update git submodules
-RUN git submodule update --init --recursive || true
+# Clone rpi-rgb-led-matrix if not present (for CI/CD builds without submodules)
+RUN if [ ! -f ./rpi-rgb-led-matrix/Makefile ]; then \
+        rm -rf ./rpi-rgb-led-matrix && \
+        git clone https://github.com/hzeller/rpi-rgb-led-matrix.git ./rpi-rgb-led-matrix; \
+    fi
 
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip && \
