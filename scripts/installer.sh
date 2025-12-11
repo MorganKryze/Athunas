@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # ===== Constants =====
-VERSION="0.0.0"
 LOW_DELAY=0.5
 HIGH_DELAY=15
 TOOLBOX_URL="https://raw.githubusercontent.com/MorganKryze/bash-toolbox/main/src/prefix.sh"
@@ -47,7 +46,18 @@ function load_logging_toolbox() {
     fi
 }
 
+function get_project_latest_version() {
+    local latest_version=$(curl -s https://api.github.com/repos/MorganKryze/Carousel/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
+    if [ -z "$latest_version" ]; then
+        warning "Could not fetch the latest stable version from GitHub. Using default 0.0.0."
+        latest_version="0.0.0"
+    fi
+    return $latest_version
+}
+
 function display_header() {
+    local latest_version=$(get_project_latest_version)
+
     txt '                                                                                                                                    '
     txt '    ,o888888o.           .8.          8 888888888o.      ,o888888o.     8 8888      88    d888888o.   8 8888888888   8 8888         '
     txt '   8888     `88.        .888.         8 8888    `88.  . 8888     `88.   8 8888      88  .`8888:'"'"' `88. 8 8888         8 8888         '
@@ -62,7 +72,7 @@ function display_header() {
 
     sleep $LOW_DELAY
     txt
-    txt "Open-source $REPOSITORY_NAME led matrix dashboard setup script v${VERSION}."
+    txt "Open-source $REPOSITORY_NAME led matrix dashboard setup script v$latest_version"
     sleep $LOW_DELAY
     txt "This script will setup the environement, docker and the project on the target device."
     sleep $LOW_DELAY
