@@ -133,6 +133,65 @@ function setup_os() {
     sleep $LOW_DELAY
 }
 
+function install_pigpiod() {
+    info "Installing pigpiod..."
+
+    if command -v pigpiod >/dev/null 2>&1; then
+        local pigpiod_version=$(pigpiod -v 2>&1 | head -n1)
+        info "pigpiod already installed: $pigpiod_version"
+    else
+        info "Installing required build dependencies..."
+        sudo apt-get install -y --no-install-recommends wget unzip
+
+        info "Downloading pigpiod..."
+        local temp_dir=$(mktemp -d)
+        wget -q --show-progress https://github.com/joan2937/pigpio/archive/master.zip -O "$temp_dir/pigpio.zip" || {
+            error "Failed to download pigpiod"
+            rm -rf "$temp_dir"
+            return 1
+        }
+        
+        info "Extracting archive..."
+        unzip -q "$temp_dir/pigpio.zip" -d "$temp_dir/"
+
+        info "Building and installing pigpiod..."
+        cd "$temp_dir/pigpio-master"
+        make -j$(nproc) || {
+            error "Failed to build pigpiod"
+            cd - >/dev/null
+            rm -rf "$temp_dir"
+            return 1
+        }
+        sudo make install
+
+        info "Removing temporary files..."
+        cd - >/dev/null
+        rm -rf "$temp_dir"
+
+        info "Setting up pigpiod service..."
+        local service_url="https://raw.githubusercontent.com/MorganKryze/Athunas/main/scripts/pigpiod.service"
+        sudo curl -fsSL "$service_url" -o /etc/systemd/system/pigpiod.service || {
+            warning "Failed to download service file from $service_url"
+        }
+        sudo systemctl daemon-reload
+
+        success "pigpiod installed."
+    fi
+
+    info "Enabling and starting pigpiod service..."
+    sudo systemctl enable pigpiod.service
+    sudo systemctl start pigpiod.service
+
+    if sudo systemctl is-active --quiet pigpiod; then
+        success "pigpiod service is running."
+    else
+        warning "pigpiod service is not running. Check with: sudo systemctl status pigpiod"
+    fi
+
+    success "pigpiod installation complete."
+    sleep $LOW_DELAY
+}
+
 function install_docker() {
     info "Checking Docker installation..."
 
@@ -329,6 +388,8 @@ function main() {
     display_header
 
     setup_os
+
+    install_pigpiod
 
     install_docker
 
