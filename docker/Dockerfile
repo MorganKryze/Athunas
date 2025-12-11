@@ -5,6 +5,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         build-essential \
         git \
+        make \
         libsixel-dev \
         python3-tk \
         cython3 \
@@ -12,7 +13,14 @@ RUN apt-get update && \
         python3-dev \
         python3-pil \
         python3-pil.imagetk \
-        python3-setuptools && \
+        python3-setuptools \
+        libjpeg-dev \
+        zlib1g-dev \
+        libfreetype6-dev \
+        liblcms2-dev \
+        libopenjp2-7-dev \
+        libtiff-dev \
+        libwebp-dev && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
