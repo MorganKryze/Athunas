@@ -370,7 +370,7 @@ function display_next_steps() {
     txt "2. Navigate to the project directory: ${BLUE}cd ~/$REPOSITORY_NAME${RESET}"
     txt "3. Prepare the python environment and install dependencies: ${BLUE}make install${RESET}"
     txt "4. Build the led interface library: ${BLUE}make build${RESET}"
-    txt "5. Test the library: ${BLUE}make test${RESET}"
+    txt "5. Test the library: ${BLUE}make example${RESET}"
     txt "6. Finally, run the project: ${BLUE}make run${RESET}"
 
     sleep $LOW_DELAY

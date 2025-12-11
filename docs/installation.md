@@ -31,92 +31,20 @@ Finally, click on `Save` and `Yes` to write the image to the SD card. Once the p
 Power up your Pi, wait for one minute or two, then connect to your Pi via SSH from your PC terminal (be sure to be connected to the same network) **or** using a monitor + keyboard.
 
 ```bash
-ssh admin@Carousel.local
+ssh admin@carousel.local
 ```
 
 And enter the password you set earlier (`raspberry`).
 
-> [!NOTE]
-> If you want to use the installer to avoid entering all these commands manually, you can run the following command:
->
-> ```bash
-> curl -sSL https://raw.githubusercontent.com/MorganKryze/Carousel/main/scripts/installer.sh | bash
-> ```
->
-> This will execute the installation script, which will guide you through the setup process.
-> Then you can skip the next steps and go directly to the [`Build & Run`](#build--run) section.
-
-Update your system.
-
-```bash
-sudo apt update
-```
-
-Install `nala`, a faster alternative to `apt`.
-
-```bash
-sudo apt install nala -y
-```
-
-Remove unnecessary packages.
-
-```bash
-sudo nala autoremove -y
-```
-
-Then upgrade your system.
-
-```bash
-sudo nala upgrade -y
-```
-
-Install `git`, `pip` and `make`.
-
-```bash
-sudo nala install git python3-pip make -y
-```
-
-### Few perfomance tweaks
-
-#### Improve performance for Matrix
-
-Add a small flag at the end of the line to add better results:
-
-```bash
-sudo nano /boot/firmware/cmdline.txt
-```
-
-```plaintext
-isolcpus=3
-```
-
-#### Disable sound module
-
-Edit the file `/etc/modprobe.d/raspi-blacklist.conf` and add the following line:
-
-```bash
-sudo nano /etc/modprobe.d/blacklist-rgb-matrix.conf
-```
-
-```bash
-blacklist snd_bcm2835
-```
-
-Update the kernel modules.
-
-```bash
-sudo update-initramfs -u
-```
-
 ## Install the project
 
-Clone the repository.
+Simply run the following command to download and execute the installation script.
 
 ```bash
-git clone --recurse-submodules https://github.com/MorganKryze/Carousel.git && cd Carousel
+curl -sSL https://raw.githubusercontent.com/MorganKryze/Carousel/main/scripts/installer.sh | bash
 ```
 
-## Build & Run
+### Build & Run
 
 We use our `Makefile` to install the project dependencies. If you encounter any issue at this point, please check that `git` `pip` and `make` are installed correctly.
 
