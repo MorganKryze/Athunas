@@ -1,6 +1,6 @@
 FROM python:3.11-slim-bookworm
 
-# Install system dependencies
+# Install system dependencies (excluding python3-pil to avoid conflicts with pip Pillow)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         build-essential \
@@ -11,8 +11,6 @@ RUN apt-get update && \
         cython3 \
         libcap2-bin \
         python3-dev \
-        python3-pil \
-        python3-pil.imagetk \
         python3-setuptools \
         libjpeg-dev \
         zlib1g-dev \
