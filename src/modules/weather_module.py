@@ -1,12 +1,14 @@
+import time
+from queue import LifoQueue
+from threading import Thread
+from typing import Any, Dict, Optional
+
+from loguru import logger
 from pyowm.owm import OWM
 from pyowm.weatherapi25.weather_manager import WeatherManager
-from threading import Thread
-from queue import LifoQueue
-import time
-import logging
+
 from config import Configuration
 from enums.variable_importance import Importance
-from typing import Optional, Dict, Any
 
 # Constants
 UPDATE_INTERVAL_SECONDS = 600
@@ -21,10 +23,10 @@ class WeatherModule:
             "Modules", "Weather", "enabled", Importance.REQUIRED
         )
         if not self.enabled:
-            logging.info("[Weather Module] Disabled")
+            logger.info("[Weather Module] Disabled")
             return
 
-        logging.debug("[Weather Module] Initializing")
+        logger.debug("[Weather Module] Initializing")
         self.current_weather: Optional[Dict[str, Any]] = None
         self.weather_queue: LifoQueue = LifoQueue()
 
@@ -41,7 +43,7 @@ class WeatherModule:
             "Modules", "Weather", "temperature_unit", Importance.REQUIRED
         )
         if self.temperature_unit not in ["celsius", "fahrenheit"]:
-            logging.error(
+            logger.error(
                 "[Weather Module] Invalid temperature unit. Must be 'celsius' or 'fahrenheit'."
             )
             self.enabled = False
@@ -59,9 +61,9 @@ class WeatherModule:
                 ),
             )
             self.update_thread.start()
-            logging.info("[Weather Module] Initialized")
+            logger.info("[Weather Module] Initialized")
         except Exception as e:
-            logging.error(f"[Weather Module] Initialization error: {e}")
+            logger.error(f"[Weather Module] Initialization error: {e}")
             self.enabled = False
 
     def get_weather(self) -> Optional[Dict[str, Any]]:
@@ -118,4 +120,6 @@ def update_weather(
                 weather_queue.put(weather_manager.one_call(lat=latitude, lon=longitude))
                 last_update_time = current_time
             except Exception as e:
-                logging.error(f"[Weather Module] Error updating weather: {e}")
+                logger.error(f"[Weather Module] Error updating weather: {e}")
+            except Exception as e:
+                logger.error(f"[Weather Module] Error updating weather: {e}")

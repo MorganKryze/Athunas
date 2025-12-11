@@ -1,16 +1,17 @@
-import logging
-from typing import Callable, Dict
-from board import Board
-from enums.encoder_input import EncoderInput
 import time
-from datetime import timedelta, datetime
-from PIL import Image, ImageFont, ImageDraw
+from datetime import timedelta
+from typing import Callable, Dict
 
+from loguru import logger
+from PIL import Image, ImageDraw, ImageFont
+
+from board import Board
+from config import Configuration
+from enums.encoder_input import EncoderInput
 from enums.service_status import ServiceStatus
 from enums.tilt_input import TiltState
 from models.application import Application
 from path import PathTo
-from config import Configuration
 
 # Constants
 DEFAULT_FONT_SIZE = 5
@@ -25,7 +26,7 @@ class Pomodoro(Application):
         """
         super().__init__(callbacks)
         if self.status == ServiceStatus.DISABLED:
-            logging.info(
+            logger.info(
                 f"[{self.__class__.__name__}] Stopped initialization due to disabled status."
             )
             return
@@ -39,7 +40,7 @@ class Pomodoro(Application):
         )
         if self.work_duration <= timedelta(seconds=0):
             self.status = ServiceStatus.ERROR_APP_CONFIG
-            logging.error(
+            logger.error(
                 f"[{self.__class__.__name__}] Work duration must be greater than 0."
             )
         self.short_duration = timedelta(
@@ -54,7 +55,7 @@ class Pomodoro(Application):
             or self.short_duration >= self.work_duration
         ):
             self.status = ServiceStatus.ERROR_APP_CONFIG
-            logging.error(
+            logger.error(
                 f"[{self.__class__.__name__}] Break duration must be greater than 0 and less than work duration."
             )
         self.long_duration = timedelta(
@@ -69,7 +70,7 @@ class Pomodoro(Application):
             or self.long_duration <= self.short_duration
         ):
             self.status = ServiceStatus.ERROR_APP_CONFIG
-            logging.error(
+            logger.error(
                 f"[{self.__class__.__name__}] Long break duration must be greater than 0 and greater than short break duration."
             )
         self.active = False
@@ -83,13 +84,13 @@ class Pomodoro(Application):
         self.last_update_time = None
 
         if self.status == ServiceStatus.ERROR_APP_CONFIG:
-            logging.error(
+            logger.error(
                 f"[{self.__class__.__name__}] Application configuration errors, please check the configuration before restarting."
             )
             return
 
         self.status = ServiceStatus.RUNNING
-        logging.info(f"[{self.__class__.__name__}] Running.")
+        logger.info(f"[{self.__class__.__name__}] Running.")
 
     def generate(self, tilt_state: TiltState, encoder_input: EncoderInput) -> Image:
         """
@@ -193,5 +194,6 @@ class Pomodoro(Application):
             return frame
         except Exception as e:
             self.status = ServiceStatus.ERROR_APP_INTERNAL
-            logging.error(f"[PomodoroScreen App] Error generating frame: {e}")
+            logger.error(f"[PomodoroScreen App] Error generating frame: {e}")
+            return self.generate_on_error()
             return self.generate_on_error()

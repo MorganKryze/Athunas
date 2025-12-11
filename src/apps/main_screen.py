@@ -1,20 +1,20 @@
-import logging
-import os
-from typing import Callable, Dict
-from PIL import Image, ImageFont, ImageDraw
-from datetime import datetime
-from dateutil import tz
-import time
-import threading
 import calendar
+import os
+import time
+from datetime import datetime
+from typing import Callable, Dict
+
+from dateutil import tz
+from loguru import logger
+from PIL import Image, ImageDraw, ImageFont
 
 from board import Board
-from enums.tilt_input import TiltState
-from path import PathTo
 from config import Configuration
 from enums.encoder_input import EncoderInput
 from enums.service_status import ServiceStatus
+from enums.tilt_input import TiltState
 from models.application import Application
+from path import PathTo
 
 light_pink = (255, 219, 218)
 dark_pink = (219, 127, 142)
@@ -45,7 +45,7 @@ class MainScreen(Application):
         """
         super().__init__(callbacks)
         if self.status == ServiceStatus.DISABLED:
-            logging.info(
+            logger.info(
                 f"[{self.__class__.__name__}] Stopped initialization due to disabled status."
             )
             return
@@ -55,7 +55,7 @@ class MainScreen(Application):
         )
         if self.use_24_hour not in [True, False]:
             self.status = ServiceStatus.ERROR_APP_CONFIG
-            logging.error(
+            logger.error(
                 "[MainScreen App] Invalid use_24_hour value. Must be True or False."
             )
         self.date_format = Configuration.get_from_app_config(
@@ -63,7 +63,7 @@ class MainScreen(Application):
         )
         if self.date_format != "MM-DD" and self.date_format != "DD-MM":
             self.status = ServiceStatus.ERROR_APP_CONFIG
-            logging.error(
+            logger.error(
                 "[MainScreen App] Invalid date format. Possible values are 'MM-DD' or 'DD-MM'."
             )
         self.cycle_duration_in_seconds = Configuration.get_from_app_config(
@@ -71,15 +71,15 @@ class MainScreen(Application):
         )
         if self.cycle_duration_in_seconds <= 0:
             self.status = ServiceStatus.ERROR_APP_CONFIG
-            logging.error(
+            logger.error(
                 "[MainScreen App] Invalid cycle duration in seconds. Must be greater than 0."
             )
         try:
             self.font = ImageFont.truetype(PathTo.FONT_FILE, FONT_SIZE)
-            logging.info("[MainScreen App] Font loaded successfully.")
+            logger.info("[MainScreen App] Font loaded successfully.")
         except Exception as e:
             self.status = ServiceStatus.ERROR_APP_CONFIG
-            logging.error(f"[MainScreen App] Failed to load font: {e}")
+            logger.error(f"[MainScreen App] Failed to load font: {e}")
 
         self.lastGenerateCall = None
         self.is_on_cycle = True
@@ -104,7 +104,7 @@ class MainScreen(Application):
             }
         except Exception as e:
             self.status = ServiceStatus.ERROR_APP_CONFIG
-            logging.error(f"[MainScreen App] Failed to load backgrounds: {e}")
+            logger.error(f"[MainScreen App] Failed to load backgrounds: {e}")
 
         self.theme_list = [
             self.generate_sakura_bg,
@@ -113,13 +113,13 @@ class MainScreen(Application):
         ]
 
         if self.status == ServiceStatus.ERROR_APP_CONFIG:
-            logging.error(
+            logger.error(
                 f"[{self.__class__.__name__}] Application configuration errors, please check the configuration before restarting."
             )
             return
 
         self.status = ServiceStatus.RUNNING
-        logging.info(f"[{self.__class__.__name__}] Running.")
+        logger.info(f"[{self.__class__.__name__}] Running.")
 
     def generate(self, tilt_state: TiltState, encoder_input: EncoderInput) -> Image:
         """
@@ -166,7 +166,7 @@ class MainScreen(Application):
             return frame
         except Exception as e:
             self.status = ServiceStatus.ERROR_APP_INTERNAL
-            logging.error(f"[MainScreen App] Error generating frame: {e}")
+            logger.error(f"[MainScreen App] Error generating frame: {e}")
             return self.generate_on_error()
 
     def generate_sakura_bg(self):
@@ -383,5 +383,6 @@ def format_to_two_digits(number):
 #             for _ in range(3):
 #                 queue.append(Image.new("RGB", (canvas_width, canvas_height), color))
 #                 queue.append(Image.new("RGB", (canvas_width, canvas_height), color))
+#                 queue.append(Image.new("RGB", (canvas_width, canvas_height), (0, 0, 0)))
 #                 queue.append(Image.new("RGB", (canvas_width, canvas_height), (0, 0, 0)))
 #                 queue.append(Image.new("RGB", (canvas_width, canvas_height), (0, 0, 0)))

@@ -1,16 +1,17 @@
-import logging
 import os
 import random
-import numpy as np
 from datetime import datetime, timedelta
+
+import numpy as np
+from loguru import logger
 from PIL import Image, ImageDraw
 from scipy.signal import convolve2d
 
 from board import Board
-from enums.variable_importance import Importance
-from enums.encoder_input import EncoderInput
-from path import PathTo
 from config import Configuration
+from enums.encoder_input import EncoderInput
+from enums.variable_importance import Importance
+from path import PathTo
 
 
 class GameOfLifeScreen:
@@ -27,10 +28,10 @@ class GameOfLifeScreen:
             "Apps", "GameOfLife", "enabled", Importance.REQUIRED
         )
         if not self.enabled:
-            logging.debug("[GameOfLife] GameOfLife is disabled.")
+            logger.debug("[GameOfLife] GameOfLife is disabled.")
             return
 
-        logging.debug("[GameOfLife] Initializing GameOfLifeScreen.")
+        logger.debug("[GameOfLife] Initializing GameOfLifeScreen.")
         self.modules = modules
         self.callbacks = callbacks
         self.color = (255, 255, 255)
@@ -49,7 +50,7 @@ class GameOfLifeScreen:
         self.current_state_index = 0
         self.state = self.initial_states[self.current_state_index]()
         
-        logging.debug("[GameOfLife] GameOfLifeScreen initialized.")
+        logger.debug("[GameOfLife] GameOfLifeScreen initialized.")
 
     def generate(self, is_horizontal: bool, input_status: EncoderInput) -> Image.Image:
         """
@@ -188,4 +189,5 @@ def convert_image(location: str):
     image_array = np.array(image.convert("RGB"), dtype=int)
     np.save(
         location + ".npy", (image_array[0:height, 0:width, 0] // 255).astype("int32")
+    )
     )

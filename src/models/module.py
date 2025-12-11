@@ -1,6 +1,6 @@
 """Module model class."""
 
-import logging
+from loguru import logger
 
 from config import Configuration
 from enums.service_status import ServiceStatus
@@ -11,14 +11,14 @@ class Module:
 
     def __init__(self):
         self.status: ServiceStatus = ServiceStatus.INITIALIZING
-        logging.debug(f"[{self.__class__.__name__}] Initializing metadata...")
+        logger.debug(f"[{self.__class__.__name__}] Initializing metadata...")
         self.name: str = Configuration.get_from_module(
             self.__class__.__name__, "name", required=True
         )
         self.description: str = Configuration.get_from_module(
             self.__class__.__name__, "description", required=True
         )
-        logging.debug(f"[{self.__class__.__name__}] Initializing configuration...")
+        logger.debug(f"[{self.__class__.__name__}] Initializing configuration...")
 
     def self_test(self) -> None:
         """

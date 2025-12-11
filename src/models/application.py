@@ -1,9 +1,9 @@
 """App model class."""
 
-import logging
 from typing import Callable, Dict
-from PIL import Image
 
+from loguru import logger
+from PIL import Image
 
 from config import Configuration
 from custom_frames import CustomFrames
@@ -17,7 +17,7 @@ class Application:
 
     def __init__(self, callbacks: Dict[str, Callable]):
         self.status: ServiceStatus = ServiceStatus.INITIALIZING
-        logging.debug(f"[{self.__class__.__name__}] Initializing metadata...")
+        logger.debug(f"[{self.__class__.__name__}] Initializing metadata...")
         self.enabled = Configuration.get_from_app(
             self.__class__.__name__, "enabled", required=True
         )
@@ -34,7 +34,7 @@ class Application:
             self.__class__.__name__, "provides_vertical_content", required=True
         )
 
-        logging.debug(f"[{self.__class__.__name__}] Initializing configuration...")
+        logger.debug(f"[{self.__class__.__name__}] Initializing configuration...")
         self.callbacks = callbacks
         self.horizontal_replacement_app_name = Configuration.get_from_app_config(
             self.__class__.__name__, "horizontal_replacement_app"

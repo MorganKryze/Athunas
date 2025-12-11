@@ -1,8 +1,7 @@
 import argparse
-import logging
 import time
-from typing import Any
 
+from loguru import logger
 from PIL import Image
 
 from app_manager import AppManager
@@ -25,8 +24,8 @@ def main() -> None:
     PathTo.set_base_directory()
     PathTo.add_library_to_path()
 
-    file_level = logging.DEBUG
-    console_level = logging.DEBUG if args.debug else logging.WARNING
+    file_level = "DEBUG"
+    console_level = "DEBUG" if args.debug else "WARNING"
 
     Logs.start(file_level=file_level, console_level=console_level)
 
@@ -73,7 +72,7 @@ def main() -> None:
 
             time.sleep(Board.refresh_rate)
         except KeyboardInterrupt:
-            logging.info("[Main] Program stopped by user.")
+            logger.info("[Main] Program stopped by user.")
             Board.matrix.SetImage(CustomFrames.black())
             break
 

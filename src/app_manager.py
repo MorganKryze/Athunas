@@ -1,12 +1,12 @@
 import sys
-import logging
 from typing import Callable, Dict, List, Optional
 
+from loguru import logger
+
+from apps import gif_viewer, main_screen, pomodoro
 from board import Board
 from models.application import Application
 from models.module import Module
-from apps import main_screen, gif_viewer, pomodoro
-import modules
 
 
 class AppManager:
@@ -25,16 +25,16 @@ class AppManager:
         """
         Initialize the applications.
         """
-        logging.debug("[AppManager] Initializing apps.")
+        logger.debug("[AppManager] Initializing apps.")
         try:
             cls.modules = cls.load_modules()
             cls.apps = cls.load_apps()
             cls.enabled_apps = [app for app in cls.apps if app.enabled]
             cls.carousel = cls.filter_apps_for_carousel()
-            logging.debug("[AppManager] All enabled app initialized.")
+            logger.debug("[AppManager] All enabled app initialized.")
         except Exception as e:
-            logging.critical(f"[AppManager] Failed to initialize apps: {e}")
-            logging.critical("[AppManager] Exiting program.")
+            logger.critical(f"[AppManager] Failed to initialize apps: {e}")
+            logger.critical("[AppManager] Exiting program.")
             sys.exit(1)
 
     @staticmethod
@@ -102,7 +102,7 @@ class AppManager:
         for app in cls.enabled_apps:
             if app.name == app_name:
                 return app
-        logging.error(f"[AppManager] Application '{app_name}' not found.")
+        logger.error(f"[AppManager] Application '{app_name}' not found.")
         return None
 
     @classmethod
@@ -136,12 +136,12 @@ class AppManager:
         """
         try:
             cls.current_app_index = (cls.current_app_index + 1) % len(cls.carousel)
-            logging.debug("[AppManager] Switched to next app.")
+            logger.debug("[AppManager] Switched to next app.")
             return True
         except Exception as e:
-            logging.error(f"[AppManager] Failed to switch to next app: {e}")
+            logger.error(f"[AppManager] Failed to switch to next app: {e}")
             cls.current_app_index = 0
-            logging.debug("[AppManager] Resetting to first app.")
+            logger.debug("[AppManager] Resetting to first app.")
             return False
 
     @classmethod
@@ -153,12 +153,12 @@ class AppManager:
         """
         try:
             cls.current_app_index = (cls.current_app_index - 1) % len(cls.carousel)
-            logging.debug("[AppManager] Switched to previous app.")
+            logger.debug("[AppManager] Switched to previous app.")
             return True
         except Exception as e:
-            logging.error(f"[AppManager] Failed to switch to previous app: {e}")
+            logger.error(f"[AppManager] Failed to switch to previous app: {e}")
             cls.current_app_index = 0
-            logging.debug("[AppManager] Resetting to first app.")
+            logger.debug("[AppManager] Resetting to first app.")
             return False
 
     @staticmethod
@@ -170,14 +170,14 @@ class AppManager:
         """
         try:
             Board.is_display_on = not Board.is_display_on
-            logging.debug(
+            logger.debug(
                 f"[Controller] Display set to: {'on' if Board.is_display_on else 'off'}"
             )
             return True
         except Exception as e:
-            logging.error(f"[Controller] Failed to toggle display: {e}")
+            logger.error(f"[Controller] Failed to toggle display: {e}")
             Board.is_display_on = True
-            logging.debug("[Controller] Display turned off due to error.")
+            logger.debug("[Controller] Display turned off due to error.")
             return False
 
     @staticmethod
@@ -193,12 +193,12 @@ class AppManager:
                 Board.BRIGHTNESS_MAX,
                 Board.brightness + Board.BRIGHTNESS_STEP,
             )
-            logging.debug(f"[Controller] Brightness increased to {Board.brightness}")
+            logger.debug(f"[Controller] Brightness increased to {Board.brightness}")
             return True
         except Exception as e:
-            logging.error(f"[Controller] Failed to increase brightness: {e}")
+            logger.error(f"[Controller] Failed to increase brightness: {e}")
             Board.brightness = initial_value
-            logging.debug(
+            logger.debug(
                 f"[Controller] Brightness reset to default: {Board.brightness}"
             )
             return False
@@ -216,12 +216,12 @@ class AppManager:
                 Board.BRIGHTNESS_MIN,
                 Board.brightness - Board.BRIGHTNESS_STEP,
             )
-            logging.debug(f"[Controller] Brightness decreased to {Board.brightness}")
+            logger.debug(f"[Controller] Brightness decreased to {Board.brightness}")
             return True
         except Exception as e:
-            logging.error(f"[Controller] Failed to decrease brightness: {e}")
+            logger.error(f"[Controller] Failed to decrease brightness: {e}")
             Board.brightness = initial_value
-            logging.debug(
+            logger.debug(
                 f"[Controller] Brightness reset to default: {Board.brightness}"
             )
             return False

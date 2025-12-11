@@ -1,10 +1,11 @@
-import threading
-import logging
-import subprocess
 import socket
-from typing import Dict, Any
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+import subprocess
+import threading
 import time
+from typing import Any, Dict
+
+from flask import Flask, jsonify, redirect, render_template, request, url_for
+from loguru import logger
 
 from config import Configuration
 from path import PathTo
@@ -155,7 +156,7 @@ class WebServer:
 
     def restart_system(self):
         """Restart the Raspberry Pi to apply configuration changes"""
-        logging.info("System restart requested from web interface")
+        logger.info("System restart requested from web interface")
 
         def restart():
             time.sleep(1)  # Brief delay to allow response to be sent
@@ -186,7 +187,7 @@ class WebServer:
         self.server_thread.daemon = True
         self.server_thread.start()
 
-        logging.info(f"Web server started on port {port}")
+        logger.info(f"Web server started on port {port}")
         return self.server_thread
 
     @staticmethod
@@ -208,4 +209,5 @@ class WebServer:
                 socket.create_connection((CLOUDFLARE_DNS, DNS_PORT), timeout=TIMEOUT)
                 return True
             except OSError:
+                return False
                 return False

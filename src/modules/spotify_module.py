@@ -1,9 +1,11 @@
-import spotipy
 import os
-import logging
+from typing import Any, Dict, Optional, Tuple
+
+import spotipy
+from loguru import logger
+
 from config import Configuration
 from enums.variable_importance import Importance
-from typing import Optional, Tuple, Dict, Any
 
 # Constants
 REQUESTS_TIMEOUT = 10
@@ -19,10 +21,10 @@ class SpotifyModule:
             "Modules", "Spotify", "enabled", Importance.REQUIRED
         )
         if not self.enabled:
-            logging.info("[Spotify Module] Disabled")
+            logger.info("[Spotify Module] Disabled")
             return
 
-        logging.debug("[Spotify Module] Initializing")
+        logger.debug("[Spotify Module] Initializing")
 
         client_id: str = Configuration.read_variable(
             "Modules", "Spotify", "client_id", Importance.REQUIRED
@@ -42,7 +44,7 @@ class SpotifyModule:
             self.auth_manager = spotipy.SpotifyOAuth(
                 scope="user-read-currently-playing, user-read-playback-state, user-modify-playback-state"
             )
-            logging.info(
+            logger.info(
                 f"[Spotify Module] Authorization URL: {self.auth_manager.get_authorize_url()}"
             )
             self.sp = spotipy.Spotify(
@@ -50,9 +52,9 @@ class SpotifyModule:
             )
             self.isPlaying: bool = False
 
-            logging.info("[Spotify Module] Initialized")
+            logger.info("[Spotify Module] Initialized")
         except Exception as e:
-            logging.error(f"[Spotify Module] Initialization error: {e}")
+            logger.error(f"[Spotify Module] Initialization error: {e}")
             self.enabled = False
 
     def getCurrentPlayback(self) -> Optional[Tuple[str, str, str, bool, int, int]]:
@@ -63,7 +65,7 @@ class SpotifyModule:
             Optional[Tuple[str, str, str, bool, int, int]]: A tuple containing artist, title, art_url, is_playing, progress_ms, and duration_ms.
         """
         if not self.enabled:
-            logging.warning("[Spotify Module] Module is disabled")
+            logger.warning("[Spotify Module] Module is disabled")
             return None
 
         try:
@@ -84,10 +86,10 @@ class SpotifyModule:
                     track["item"]["duration_ms"],
                 )
             else:
-                logging.info("[Spotify Module] No track is currently playing")
+                logger.info("[Spotify Module] No track is currently playing")
                 return None
         except Exception as e:
-            logging.error(f"[Spotify Module] Error getting current playback: {e}")
+            logger.error(f"[Spotify Module] Error getting current playback: {e}")
             return None
 
     def resume_playback(self) -> None:
@@ -98,7 +100,7 @@ class SpotifyModule:
             try:
                 self.sp.start_playback()
             except spotipy.exceptions.SpotifyException:
-                logging.warning(
+                logger.warning(
                     "[Spotify Module] No active device, trying specific device"
                 )
                 devices = self.sp.devices()
@@ -106,11 +108,11 @@ class SpotifyModule:
                     try:
                         self.sp.start_playback(device_id=devices["devices"][0]["id"])
                     except Exception as e:
-                        logging.error(
+                        logger.error(
                             f"[Spotify Module] Error resuming playback on specific device: {e}"
                         )
             except Exception as e:
-                logging.error(f"[Spotify Module] Error resuming playback: {e}")
+                logger.error(f"[Spotify Module] Error resuming playback: {e}")
 
     def pause_playback(self) -> None:
         """
@@ -120,9 +122,9 @@ class SpotifyModule:
             try:
                 self.sp.pause_playback()
             except spotipy.exceptions.SpotifyException:
-                logging.warning("[Spotify Module] Problem pausing playback")
+                logger.warning("[Spotify Module] Problem pausing playback")
             except Exception as e:
-                logging.error(f"[Spotify Module] Error pausing playback: {e}")
+                logger.error(f"[Spotify Module] Error pausing playback: {e}")
 
     def next_track(self) -> None:
         """
@@ -132,14 +134,14 @@ class SpotifyModule:
             try:
                 self.sp.next_track()
             except spotipy.exceptions.SpotifyException:
-                logging.warning(
+                logger.warning(
                     "[Spotify Module] No active device, trying specific device"
                 )
                 devices = self.sp.devices()
                 if "devices" in devices and len(devices["devices"]) > 0:
                     self.sp.next_track(device_id=devices["devices"][0]["id"])
             except Exception as e:
-                logging.error(f"[Spotify Module] Error skipping to next track: {e}")
+                logger.error(f"[Spotify Module] Error skipping to next track: {e}")
 
     def previous_track(self) -> None:
         """
@@ -149,14 +151,14 @@ class SpotifyModule:
             try:
                 self.sp.previous_track()
             except spotipy.exceptions.SpotifyException:
-                logging.warning(
+                logger.warning(
                     "[Spotify Module] No active device, trying specific device"
                 )
                 devices = self.sp.devices()
                 if "devices" in devices and len(devices["devices"]) > 0:
                     self.sp.previous_track(device_id=devices["devices"][0]["id"])
             except Exception as e:
-                logging.error(f"[Spotify Module] Error going to previous track: {e}")
+                logger.error(f"[Spotify Module] Error going to previous track: {e}")
 
     def increase_volume(self) -> None:
         """
@@ -168,7 +170,7 @@ class SpotifyModule:
                 curr_volume: int = devices["devices"][0]["volume_percent"]
                 self.sp.volume(min(100, curr_volume + VOLUME_INCREMENT))
             except Exception as e:
-                logging.error(f"[Spotify Module] Error increasing volume: {e}")
+                logger.error(f"[Spotify Module] Error increasing volume: {e}")
 
     def decrease_volume(self) -> None:
         """
@@ -180,4 +182,6 @@ class SpotifyModule:
                 curr_volume: int = devices["devices"][0]["volume_percent"]
                 self.sp.volume(max(0, curr_volume - VOLUME_INCREMENT))
             except Exception as e:
-                logging.error(f"[Spotify Module] Error decreasing volume: {e}")
+                logger.error(f"[Spotify Module] Error decreasing volume: {e}")
+            except Exception as e:
+                logger.error(f"[Spotify Module] Error decreasing volume: {e}")

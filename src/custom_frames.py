@@ -1,6 +1,5 @@
-import logging
-from PIL import Image, ImageFont, ImageDraw
-
+from loguru import logger
+from PIL import Image, ImageDraw, ImageFont
 
 from enums.service_status import ServiceStatus
 from path import PathTo
@@ -26,7 +25,7 @@ class CustomFrames:
 
         cls.led_rows = led_rows
         cls.led_cols = led_cols
-        logging.debug("[CustomFrames] Custom frames initialized.")
+        logger.debug("[CustomFrames] Custom frames initialized.")
 
     @classmethod
     def loading(cls, percentage: int) -> Image:
@@ -61,7 +60,7 @@ class CustomFrames:
             error_status == ServiceStatus.INITIALIZING
             or error_status == ServiceStatus.RUNNING
         ):
-            logging.error(
+            logger.error(
                 f"[{cls.__name__}] The app is not going under availability issue. status: {error_status.name}"
             )
             return cls.black()
