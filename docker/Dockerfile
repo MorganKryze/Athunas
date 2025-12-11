@@ -41,10 +41,13 @@ RUN if [ ! -f ./rpi-rgb-led-matrix/Makefile ]; then \
     fi
 
 # Build rpi-rgb-led-matrix library (examples and Python bindings)
-# Add Pillow include directory to CFLAGS so gcc can find Imaging.h
-RUN export PILLOW_INCLUDE=$(python -c "import PIL; import os; print(os.path.dirname(PIL.__file__))") && \
-    export CFLAGS="-I${PILLOW_INCLUDE}" && \
-    make -C ./rpi-rgb-led-matrix/examples-api-use && \
+# Download Imaging.h headers to the build location (workaround for pip-installed Pillow)
+RUN make -C ./rpi-rgb-led-matrix/examples-api-use && \
+    cd rpi-rgb-led-matrix/bindings/python/rgbmatrix/shims && \
+    curl -O https://raw.githubusercontent.com/python-pillow/Pillow/master/src/libImaging/Imaging.h && \
+    curl -O https://raw.githubusercontent.com/python-pillow/Pillow/master/src/libImaging/ImagingUtils.h && \
+    curl -O https://raw.githubusercontent.com/python-pillow/Pillow/master/src/libImaging/ImPlatform.h && \
+    cd /app && \
     make -C ./rpi-rgb-led-matrix build-python && \
     make -C ./rpi-rgb-led-matrix install-python
 
