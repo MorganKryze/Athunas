@@ -437,7 +437,7 @@ class Board:
         return False
 
     @classmethod
-    def loading_animation(cls, duration_in_seconds: int = 5) -> None:
+    def loading_animation(cls, duration_in_seconds: int = 4) -> None:
         """
         Displays a loading animation on the matrix.
 
@@ -471,4 +471,5 @@ class Board:
         black_frame = CustomFrames.black()
         if black_frame is not None:
             cls.matrix.SetImage(black_frame)
+            time.sleep(0.5)
         logger.debug("[Board] Display cleared after loading animation.")
