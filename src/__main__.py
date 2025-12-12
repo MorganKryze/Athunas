@@ -40,8 +40,7 @@ def main() -> None:
     # TODO: port should be configurable
     # server.start(port=9000, debug=args.debug)
 
-    # TODO: change back to > 0 when implemented
-    Board.loading_animation(duration_in_seconds=0)
+    Board.loading_animation(duration_in_seconds=15)
 
     while True:
         try:

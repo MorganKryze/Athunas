@@ -10,6 +10,8 @@ FONT_SIZE = 5
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
+GRAY = (128, 128, 128)
+GREEN = (0, 255, 0)
 
 
 class CustomFrames:
@@ -35,8 +37,31 @@ class CustomFrames:
         :param percentage: The loading percentage.
         :return: Image: The loading frame.
         """
-        # TODO: Implement loading frame depending on the percentage
-        pass
+        frame = cls.black()
+        draw = ImageDraw.Draw(frame)
+        bar_width = cls.led_cols - 20
+        bar_height = 10
+        filled_width = int((percentage / 100) * bar_width)
+        draw.rectangle(
+            (
+                10,
+                cls.led_rows // 2 - bar_height // 2,
+                10 + filled_width,
+                cls.led_rows // 2 + bar_height // 2,
+            ),
+            fill=GREEN,
+        )
+        draw.rectangle(
+            (
+                10,
+                cls.led_rows // 2 - bar_height // 2,
+                10 + bar_width,
+                cls.led_rows // 2 + bar_height // 2,
+            ),
+            outline=GRAY,
+            width=1,
+        )
+        return frame
 
     @classmethod
     def black(cls) -> Image:
