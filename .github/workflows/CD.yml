@@ -35,7 +35,7 @@ jobs:
         id: meta
         run: |
           if [ "${{ github.ref_name }}" = "main" ]; then
-            echo "platforms=linux/amd64,linux/arm64" >> $GITHUB_OUTPUT
+            echo "platforms=linux/arm64" >> $GITHUB_OUTPUT
             echo "tags=ghcr.io/morgankryze/carousel:stable,ghcr.io/morgankryze/carousel:latest" >> $GITHUB_OUTPUT
           else
             echo "platforms=linux/arm64" >> $GITHUB_OUTPUT
