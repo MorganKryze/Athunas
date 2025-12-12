@@ -33,14 +33,14 @@ def main() -> None:
 
     Board.init_system(use_emulator=args.emulator)
 
+    Board.loading_animation()
+
     AppManager.init_apps()
 
     # TODO: remove this when webserver is implemented with new config and workflow
     # server = WebServer()
     # TODO: port should be configurable
     # server.start(port=9000, debug=args.debug)
-
-    Board.loading_animation(duration_in_seconds=10)
 
     while True:
         try:

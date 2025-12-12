@@ -459,6 +459,7 @@ class Board:
                 break
             cls.matrix.SetImage(frame)
             time.sleep(0.1)
+        time.sleep(0.5)
         logger.debug("[Board] Loading animation completed.")
         black_frame = CustomFrames.black()
         if black_frame is not None:
