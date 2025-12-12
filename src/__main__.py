@@ -14,7 +14,7 @@ from models.application import Application
 from path import PathTo
 from webserver import WebServer
 
-
+@logger.catch
 def main() -> None:
     parser = argparse.ArgumentParser(description="Carousel LED matrix controller")
     parser.add_argument("--debug", action="store_true", help="Run with debug console")
