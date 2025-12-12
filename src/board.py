@@ -451,7 +451,9 @@ class Board:
         logger.debug("[Board] Starting loading animation.")
         start_time = time.time()
         while time.time() - start_time < duration_in_seconds:
-            frame = CustomFrames.loading(int((time.time() - start_time) * 10) % 100)
+            elapsed = time.time() - start_time
+            percentage = min(100, int((elapsed / duration_in_seconds) * 100))
+            frame = CustomFrames.loading(percentage)
             if frame is None:
                 logger.error(
                     "[Board] CustomFrames.loading() returned None. Ensure CustomFrames.init() was called."
@@ -459,7 +461,12 @@ class Board:
                 break
             cls.matrix.SetImage(frame)
             time.sleep(0.1)
-        time.sleep(0.5)
+
+        final_frame = CustomFrames.loading(100)
+        if final_frame is not None:
+            cls.matrix.SetImage(final_frame)
+            time.sleep(0.3)
+
         logger.debug("[Board] Loading animation completed.")
         black_frame = CustomFrames.black()
         if black_frame is not None:
