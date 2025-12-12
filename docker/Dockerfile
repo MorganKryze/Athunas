@@ -1,6 +1,14 @@
 FROM python:3.11-slim-bookworm
 
-# Install system dependencies (excluding python3-pil to avoid conflicts with pip Pillow)
+WORKDIR /app
+
+# Copy dependency files first for better layer caching
+COPY pyproject.toml ./
+
+# Copy all application code
+COPY . .
+
+# Install dependencies, build library, and cleanup in one layer to reduce image size
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         build-essential \
@@ -20,30 +28,13 @@ RUN apt-get update && \
         libopenjp2-7-dev \
         libtiff-dev \
         libwebp-dev && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
-
-# Copy dependency files first for better layer caching
-COPY pyproject.toml ./
-
-# Install Python dependencies first (includes Pillow with headers needed for building)
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -e .
-
-# Copy all application code
-COPY . .
-
-# Clone rpi-rgb-led-matrix if not present (for CI/CD builds without submodules)
-RUN if [ ! -f ./rpi-rgb-led-matrix/Makefile ]; then \
+    pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -e . && \
+    if [ ! -f ./rpi-rgb-led-matrix/Makefile ]; then \
         rm -rf ./rpi-rgb-led-matrix && \
         git clone https://github.com/hzeller/rpi-rgb-led-matrix.git ./rpi-rgb-led-matrix; \
-    fi
-
-# Build rpi-rgb-led-matrix library (examples and Python bindings)
-# Download all Pillow libImaging headers to the build location (workaround for pip-installed Pillow)
-RUN make -C ./rpi-rgb-led-matrix/examples-api-use && \
+    fi && \
+    make -C ./rpi-rgb-led-matrix/examples-api-use && \
     cd rpi-rgb-led-matrix/bindings/python/rgbmatrix/shims && \
     for file in Imaging.h ImagingUtils.h ImPlatform.h Mode.h Arrow.h Access.h Quant.h QuantHash.h QuantHeap.h QuantOctree.h QuantPngQuant.h QuantTypes.h Storage.h Except.h Palette.h TkImaging.h; do \
         curl -O https://raw.githubusercontent.com/python-pillow/Pillow/master/src/libImaging/$file || true; \
@@ -51,8 +42,16 @@ RUN make -C ./rpi-rgb-led-matrix/examples-api-use && \
     cd /app && \
     make -C ./rpi-rgb-led-matrix build-python && \
     make -C ./rpi-rgb-led-matrix install-python && \
-    rm -rf ./rpi-rgb-led-matrix/examples-api-use ./rpi-rgb-led-matrix/.git ./rpi-rgb-led-matrix/bindings/python/build && \
-    apt-get purge -y --auto-remove build-essential git curl && \
+    rm -rf ./rpi-rgb-led-matrix/examples-api-use \
+           ./rpi-rgb-led-matrix/.git \
+           ./rpi-rgb-led-matrix/bindings/python/build \
+           /root/.cache && \
+    apt-get purge -y --auto-remove \
+        build-essential \
+        git \
+        curl \
+        python3-dev && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Set capabilities for real-time priority
