@@ -42,13 +42,12 @@ RUN if [ ! -f ./rpi-rgb-led-matrix/Makefile ]; then \
     fi
 
 # Build rpi-rgb-led-matrix library (examples and Python bindings)
-# Download Imaging.h headers to the build location (workaround for pip-installed Pillow)
+# Download all Pillow libImaging headers to the build location (workaround for pip-installed Pillow)
 RUN make -C ./rpi-rgb-led-matrix/examples-api-use && \
     cd rpi-rgb-led-matrix/bindings/python/rgbmatrix/shims && \
-    curl -O https://raw.githubusercontent.com/python-pillow/Pillow/master/src/libImaging/Imaging.h && \
-    curl -O https://raw.githubusercontent.com/python-pillow/Pillow/master/src/libImaging/ImagingUtils.h && \
-    curl -O https://raw.githubusercontent.com/python-pillow/Pillow/master/src/libImaging/ImPlatform.h && \
-    curl -O https://raw.githubusercontent.com/python-pillow/Pillow/master/src/libImaging/Mode.h && \
+    for file in Imaging.h ImagingUtils.h ImPlatform.h Mode.h Arrow.h Access.h Quant.h QuantHash.h QuantHeap.h QuantOctree.h QuantPngQuant.h QuantTypes.h Storage.h Except.h Palette.h TkImaging.h; do \
+        curl -O https://raw.githubusercontent.com/python-pillow/Pillow/master/src/libImaging/$file || true; \
+    done && \
     cd /app && \
     make -C ./rpi-rgb-led-matrix build-python && \
     make -C ./rpi-rgb-led-matrix install-python
