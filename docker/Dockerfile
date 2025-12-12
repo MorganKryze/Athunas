@@ -50,7 +50,10 @@ RUN make -C ./rpi-rgb-led-matrix/examples-api-use && \
     done && \
     cd /app && \
     make -C ./rpi-rgb-led-matrix build-python && \
-    make -C ./rpi-rgb-led-matrix install-python
+    make -C ./rpi-rgb-led-matrix install-python && \
+    rm -rf ./rpi-rgb-led-matrix/examples-api-use ./rpi-rgb-led-matrix/.git ./rpi-rgb-led-matrix/bindings/python/build && \
+    apt-get purge -y --auto-remove build-essential git curl && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set capabilities for real-time priority
 RUN setcap 'cap_sys_nice=eip' /usr/local/bin/python3.11
