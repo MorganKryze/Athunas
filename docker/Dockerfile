@@ -6,6 +6,7 @@ RUN apt-get update && \
         build-essential \
         git \
         make \
+        curl \
         libsixel-dev \
         python3-tk \
         cython3 \
