@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - dev
 
 permissions:
   contents: read
@@ -30,16 +31,25 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set build metadata
+        id: meta
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "platforms=linux/amd64,linux/arm64" >> $GITHUB_OUTPUT
+            echo "tags=ghcr.io/morgankryze/carousel:stable,ghcr.io/morgankryze/carousel:latest" >> $GITHUB_OUTPUT
+          else
+            echo "platforms=linux/arm64" >> $GITHUB_OUTPUT
+            echo "tags=ghcr.io/morgankryze/carousel:unstable,ghcr.io/morgankryze/carousel:dev" >> $GITHUB_OUTPUT
+          fi
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
           file: docker/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ steps.meta.outputs.platforms }}
           push: true
-          tags: |
-            ghcr.io/morgankryze/carousel:latest
-            ghcr.io/morgankryze/carousel:${{ github.sha }}
+          tags: ${{ steps.meta.outputs.tags }}
           build-args: |
             VERSION=${{ github.ref_name }}
             BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
