@@ -40,7 +40,7 @@ class CustomFrames:
         frame = cls.black()
         draw = ImageDraw.Draw(frame)
         bar_width = cls.led_cols - 20
-        bar_height = 10
+        bar_height = 5
         filled_width = int((percentage / 100) * bar_width)
         draw.rectangle(
             (
