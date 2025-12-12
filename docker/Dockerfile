@@ -48,6 +48,7 @@ RUN make -C ./rpi-rgb-led-matrix/examples-api-use && \
     curl -O https://raw.githubusercontent.com/python-pillow/Pillow/master/src/libImaging/Imaging.h && \
     curl -O https://raw.githubusercontent.com/python-pillow/Pillow/master/src/libImaging/ImagingUtils.h && \
     curl -O https://raw.githubusercontent.com/python-pillow/Pillow/master/src/libImaging/ImPlatform.h && \
+    curl -O https://raw.githubusercontent.com/python-pillow/Pillow/master/src/libImaging/Mode.h && \
     cd /app && \
     make -C ./rpi-rgb-led-matrix build-python && \
     make -C ./rpi-rgb-led-matrix install-python
