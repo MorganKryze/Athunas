@@ -41,21 +41,22 @@ class CustomFrames:
         draw = ImageDraw.Draw(frame)
         bar_width = cls.led_cols - 30
         bar_height = 5
+        bar_x = (cls.led_cols - bar_width) // 2
         filled_width = int((percentage / 100) * bar_width)
         draw.rectangle(
             (
-                10,
+                bar_x,
                 cls.led_rows // 2 - bar_height // 2,
-                10 + filled_width,
+                bar_x + filled_width,
                 cls.led_rows // 2 + bar_height // 2,
             ),
             fill=GREEN,
         )
         draw.rectangle(
             (
-                10,
+                bar_x,
                 cls.led_rows // 2 - bar_height // 2,
-                10 + bar_width,
+                bar_x + bar_width,
                 cls.led_rows // 2 + bar_height // 2,
             ),
             outline=GRAY,
