@@ -54,8 +54,8 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Set capabilities for real-time priority
-RUN setcap 'cap_sys_nice=eip' /usr/local/bin/python3.11
+# Set capabilities for hardware access and real-time priority
+RUN setcap 'cap_sys_rawio,cap_sys_admin,cap_ipc_lock,cap_sys_nice=eip' /usr/local/bin/python3.11
 
 # Expose Flask port (can be removed if not using Flask)
 EXPOSE 5000

@@ -4,17 +4,31 @@ services:
     container_name: carousel
     restart: unless-stopped
     user: root
-    privileged: true
+    cap_add:
+      - SYS_RAWIO
+      - SYS_ADMIN
+      - IPC_LOCK
     devices:
-      - /dev/gpiomem:/dev/gpiomem
       - /dev/mem:/dev/mem
+      - /dev/gpiomem:/dev/gpiomem
       - /dev/gpiochip0:/dev/gpiochip0
-      - /dev/spidev0.0:/dev/spidev0.0
-      - /dev/spidev0.1:/dev/spidev0.1
     volumes:
-      - /sys:/sys
-      - /sys/class/gpio:/sys/class/gpio
-      # Persistent app data
       - ../configs:/app/configs
       - ../logs:/app/logs
     network_mode: host
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+    depends_on:
+      - watchtower
+  
+  watchtower:
+    container_name: watchtower
+    image: containrrr/watchtower:latest
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command:
+      - '--interval'
+      - '86400'
+      - '--label-enable'
+      - '--cleanup'
