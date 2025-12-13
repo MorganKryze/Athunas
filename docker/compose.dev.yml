@@ -7,10 +7,7 @@ services:
     command: python src --debug
     restart: unless-stopped
     user: root
-    cap_add:
-      - SYS_RAWIO
-      - SYS_ADMIN
-      - IPC_LOCK
+    privileged: true
     devices:
       - /dev/mem:/dev/mem
       - /dev/gpiomem:/dev/gpiomem
