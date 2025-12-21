@@ -413,9 +413,8 @@ function display_next_steps() {
     txt
     txt "${GREEN}Option 2: Docker Deployment${RESET}"
     txt "1. After reboot, navigate to: ${BLUE}cd ~/$REPOSITORY_NAME${RESET}"
-    txt "2. Pull the project images: ${BLUE}make setup-docker${RESET}"
-    txt "3. Start the containers: ${BLUE}make docker-up${RESET}"
-    txt "4. View logs: ${BLUE}make docker-logs${RESET}"
+    txt "2. Start the project: ${BLUE}make docker-deploy${RESET}"
+    txt "3. View logs: ${BLUE}make docker-logs${RESET}"
 
     sleep $LOW_DELAY
     warning "The device will reboot in $HIGH_DELAY seconds. Keep this terminal open to continue with the next steps after reboot."
