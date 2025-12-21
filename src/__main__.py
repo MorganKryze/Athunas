@@ -42,6 +42,7 @@ def main() -> None:
     # TODO: port should be configurable
     # server.start(port=9000, debug=args.debug)
 
+    previous_frame: Image = CustomFrames.black()
     while True:
         try:
             # TODO: remove this check when webserver is implemented with new config and workflow
@@ -63,9 +64,12 @@ def main() -> None:
                 frame: Image = current_app.generate(
                     Board.tilt_state, Board.encoder_input
                 )
-                Board.matrix.SetImage(
-                    frame if Board.is_display_on else CustomFrames.black()
-                )
+                
+                if frame != previous_frame:
+                    previous_frame = frame
+                    Board.matrix.SetImage(
+                        frame if Board.is_display_on else CustomFrames.black()
+                    )
 
                 Board.reset_encoder_input_status()
 

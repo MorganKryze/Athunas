@@ -190,4 +190,4 @@ def convert_image(location: str):
     np.save(
         location + ".npy", (image_array[0:height, 0:width, 0] // 255).astype("int32")
     )
-    )
+    
