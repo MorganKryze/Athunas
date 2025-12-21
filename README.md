@@ -57,11 +57,6 @@ We would like to express our gratitude to the following individuals for their co
 - [Henner Zeller](https://github.com/hzeller): for the `rpi-rgb-led-matrix` library, which is the core of the communication between the Raspberry Pi and the led matrix.
 - [Milk And Espresso](https://m.twitch.tv/milkandespresso/about): for making some of the original background images.
 
-Additionally, we would like to thank the following people for their contributions to the project:
-
-- [Dimitry Siebert](https://github.com/foukouda): for bringing the project to life with his CAO expertise and PCB design skills.
-- [Yann M. Vidamment](https://github.com/MorganKryze): for adapting Allen's lab project to our needs and vision regarding the software part of the project.
-
 Finally, we would like to thank all the people who tried the project and gave us feedback to improve it.
 
 ## License
