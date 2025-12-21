@@ -72,7 +72,7 @@ function display_header() {
 
     sleep $LOW_DELAY
     txt
-    txt "Open-source $REPOSITORY_NAME led matrix dashboard setup script v$latest_version"
+    txt "Open-source $REPOSITORY_NAME led matrix dashboard setup script for v$latest_version"
     sleep $LOW_DELAY
     txt "This script will setup the environement, docker and the project on the target device."
     sleep $LOW_DELAY
