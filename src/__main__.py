@@ -15,7 +15,7 @@ from path import PathTo
 
 
 @logger.catch
-def main() -> None:
+def __main__() -> None:
     parser = argparse.ArgumentParser(description="Carousel LED matrix controller")
     parser.add_argument("--debug", action="store_true", help="Run with debug console")
     parser.add_argument("--emulator", action="store_true", help="Run in emulator mode")
@@ -77,10 +77,10 @@ def main() -> None:
 
             time.sleep(Board.refresh_rate)
         except KeyboardInterrupt:
-            logger.info("[Main] Program stopped by user.")
+            logger.info("Program stopped by user.")
             Board.matrix.SetImage(CustomFrames.black())
             break
 
 
 if __name__ == "__main__":
-    main()
+    __main__()
