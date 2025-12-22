@@ -46,16 +46,10 @@ class Logs:
 
         logger.add(
             log_file_path,
-            format="{time:YYYY-MM-DD HH:mm:ss} - {level} - {message}",
             level=file_level,
             rotation="00:00",
             retention="30 days",
             enqueue=True,
         )
 
-        logger.add(
-            sys.stdout,
-            format="{time:YYYY-MM-DD HH:mm:ss} - {level} - {message}",
-            level=console_level,
-            enqueue=True,
-        )
+        logger.add(sys.stdout, level=console_level, enqueue=True, colorize=True)

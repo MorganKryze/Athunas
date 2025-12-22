@@ -44,6 +44,7 @@ def __main__() -> None:
 
     previous_frame: Image = CustomFrames.black()
     previous_frame_bytes = previous_frame.tobytes()
+    logger.info("Entering main loop.")
     while True:
         try:
             # TODO: remove this check when webserver is implemented with new config and workflow
