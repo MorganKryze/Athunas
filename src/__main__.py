@@ -12,7 +12,7 @@ from enums.encoder_input import EncoderInput
 from logs import Logs
 from models.application import Application
 from path import PathTo
-from webserver import WebServer
+
 
 @logger.catch
 def main() -> None:
@@ -43,6 +43,7 @@ def main() -> None:
     # server.start(port=9000, debug=args.debug)
 
     previous_frame: Image = CustomFrames.black()
+    previous_frame_bytes = previous_frame.tobytes()
     while True:
         try:
             # TODO: remove this check when webserver is implemented with new config and workflow
@@ -64,9 +65,10 @@ def main() -> None:
                 frame: Image = current_app.generate(
                     Board.tilt_state, Board.encoder_input
                 )
-                
-                if frame != previous_frame:
+                frame_bytes = frame.tobytes()
+                if frame_bytes != previous_frame_bytes:
                     previous_frame = frame
+                    previous_frame_bytes = frame_bytes
                     Board.matrix.SetImage(
                         frame if Board.is_display_on else CustomFrames.black()
                     )
