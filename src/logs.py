@@ -21,12 +21,12 @@ class Logs:
             "--------------------------------------------------------------------------------------------------------------------------------"
         )
         logger.info(
-            f"[Init] Application started, version: {Configuration.get_version_from_pyproject()}, "
+            f"Application started, version: {Configuration.get_version_from_pyproject()}, "
             f"file log level: {file_level}, "
             f"console log level: {console_level}."
         )
         hostname, ip_address = Configuration.get_addresses()
-        logger.info(f"[Init] Application running on {hostname} ({ip_address}).")
+        logger.info(f"Application running on {hostname} ({ip_address}).")
 
     @classmethod
     def _create_logger(

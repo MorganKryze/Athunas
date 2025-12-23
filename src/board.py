@@ -53,30 +53,23 @@ class Board:
         try:
             if hasattr(cls, "encoder") and cls.encoder:
                 cls.encoder.close()
-                logger.debug("[Board] Encoder cleaned up.")
+                logger.debug("Encoder cleaned up.")
         except Exception as e:
-            logger.warning(f"[Board] Error cleaning up encoder: {e}")
+            logger.warning(f"Error cleaning up encoder: {e}")
 
         try:
             if hasattr(cls, "encoder_button") and cls.encoder_button:
                 cls.encoder_button.close()
-                logger.debug("[Board] Encoder button cleaned up.")
+                logger.debug("Encoder button cleaned up.")
         except Exception as e:
-            logger.warning(f"[Board] Error cleaning up encoder button: {e}")
+            logger.warning(f"Error cleaning up encoder button: {e}")
 
         try:
             if hasattr(cls, "tilt_switch_button") and cls.tilt_switch_button:
                 cls.tilt_switch_button.close()
-                logger.debug("[Board] Tilt switch button cleaned up.")
+                logger.debug("Tilt switch button cleaned up.")
         except Exception as e:
-            logger.warning(f"[Board] Error cleaning up tilt switch button: {e}")
-
-        # try:
-        #     cls.factory.close()
-        #     cls.factory = RPiGPIOFactory()
-        #     logger.debug("[Board] GPIO factory reset.")
-        # except Exception as e:
-        #     logger.warning(f"[Board] Error resetting GPIO factory: {e}")
+            logger.warning(f"Error cleaning up tilt switch button: {e}")
 
     @classmethod
     def init_system(cls, use_emulator: bool = False) -> None:
@@ -94,9 +87,9 @@ class Board:
         try:
             cls._init_encoder()
             cls._init_tilt_switch()
-            logger.debug("[Board] All system components initialized.")
+            logger.debug("All system components initialized.")
         except Exception as e:
-            logger.error(f"[Board] Failed to initialize GPIO components: {e}")
+            logger.error(f"Failed to initialize GPIO components: {e}")
             cls.cleanup_gpio()
             Configuration.critical_exit(
                 f"Failed to initialize GPIO components: {e}. "
@@ -152,7 +145,7 @@ class Board:
                 "System.Matrix.refresh_rate must be a positive number."
             )
 
-        logger.info("[Board] All display settings initialized.")
+        logger.info("All display settings initialized.")
 
     @classmethod
     def init_matrix(cls, use_emulator: bool = False) -> None:
@@ -163,12 +156,12 @@ class Board:
         """
         if use_emulator:
             from RGBMatrixEmulator import RGBMatrix  # type: ignore
-            from RGBMatrixEmulator import RGBMatrixOptions
+            from RGBMatrixEmulator import RGBMatrixOptions  # type: ignore
         else:
             from rgbmatrix import RGBMatrix, RGBMatrixOptions  # type: ignore
 
         logger.debug(
-            f"[Config] Creating RGBMatrix options with screen height: {cls.led_rows}, screen width: {cls.led_cols}, brightness: {cls.brightness}, disable hardware pulsing: {cls.disable_hardware_pulsing}, hardware mapping: {cls.hardware_mapping}"
+            f"Creating RGBMatrix options with screen height: {cls.led_rows}, screen width: {cls.led_cols}, brightness: {cls.brightness}, disable hardware pulsing: {cls.disable_hardware_pulsing}, hardware mapping: {cls.hardware_mapping}"
         )
         try:
             options: RGBMatrixOptions = RGBMatrixOptions()
@@ -177,10 +170,10 @@ class Board:
             options.brightness = cls.brightness
             options.disable_hardware_pulsing = cls.disable_hardware_pulsing
             options.hardware_mapping = cls.hardware_mapping
-            logger.debug("[Config] RGBMatrix options set.")
+            logger.debug("RGBMatrix options set.")
 
             cls.matrix: RGBMatrix = RGBMatrix(options=options)
-            logger.debug("[Config] RGBMatrix object created.")
+            logger.debug("RGBMatrix object created.")
         except Exception as e:
             Configuration.critical_exit(
                 f"Failed to create RGBMatrix object: {e}. Please check your configuration."
@@ -210,9 +203,9 @@ class Board:
         cls.encoder_queue = queue.Queue()
 
         logger.debug(
-            f"[Board] About to create RotaryEncoder on pins CLK={cls.encoder_clk}, DT={cls.encoder_dt}"
+            f"About to create RotaryEncoder on pins CLK={cls.encoder_clk}, DT={cls.encoder_dt}"
         )
-        logger.debug(f"[Board] Current pin factory: {cls.factory}")
+        logger.debug(f"Current pin factory: {cls.factory}")
         try:
             cls.encoder = RotaryEncoder(
                 cls.encoder_clk,
@@ -225,7 +218,7 @@ class Board:
             cls.encoder.when_rotated_counter_clockwise = (
                 lambda enc: cls.rotate_counter_clockwise_callback(enc)
             )
-            logger.info("[Board] Encoder rotation initialized.")
+            logger.info("Encoder rotation initialized.")
         except RuntimeError as e:
             if "Failed to add edge detection" in str(e):
                 raise RuntimeError(
@@ -252,7 +245,7 @@ class Board:
             cls.encoder_button.when_pressed = (
                 lambda button: cls.encoder_button_callback(button)
             )
-            logger.info("[Board] Encoder button initialized.")
+            logger.info("Encoder button initialized.")
         except RuntimeError as e:
             if "Failed to add edge detection" in str(e):
                 raise RuntimeError(
@@ -295,7 +288,7 @@ class Board:
             cls.tilt_switch_button.when_released = lambda button: cls.tilt_callback(
                 button
             )
-            logger.debug("[Board] Tilt switch button initialized.")
+            logger.debug("Tilt switch button initialized.")
         except RuntimeError as e:
             if "Failed to add edge detection" in str(e):
                 raise RuntimeError(
@@ -311,7 +304,7 @@ class Board:
 
         :param encoder: The RotaryEncoder instance.
         """
-        logger.debug("[Board] Rotated clockwise: (+).")
+        logger.debug("Rotated clockwise: (+).")
         cls.encoder_queue.put(1)
         cls.reset_encoder(encoder)
 
@@ -322,7 +315,7 @@ class Board:
 
         :param encoder: The RotaryEncoder instance.
         """
-        logger.debug("[Board] Rotated counter-clockwise: (-).")
+        logger.debug("Rotated counter-clockwise: (-).")
         cls.encoder_queue.put(-1)
         cls.reset_encoder(encoder)
 
@@ -339,7 +332,7 @@ class Board:
         if new_state != cls.tilt_state:
             cls.tilt_state = TiltState.HORIZONTAL if new_state else TiltState.VERTICAL
             logger.debug(
-                f"[Board] Orientation changed to {cls.tilt_state.name.lower()}."
+                f"Orientation changed to {cls.tilt_state.name.lower()}."
             )
 
     @classmethod
@@ -361,7 +354,7 @@ class Board:
             time_diff = time.time() - start_time
 
         if time_diff >= HOLD_TIME:
-            logger.debug("[Board] Long press detected (5).")
+            logger.debug("Long press detected (5).")
             cls.encoder_input = EncoderInput.LONG_PRESS
         else:
             enc_button.when_pressed = None
@@ -374,19 +367,19 @@ class Board:
                     while time.time() - new_start_time <= TRIPLE_PRESS_TIME:
                         time.sleep(SLEEP_INTERVAL)
                         if enc_button.is_pressed:
-                            logger.debug("[Board] Triple press detected (3).")
+                            logger.debug("Triple press detected (3).")
                             cls.encoder_input = EncoderInput.TRIPLE_PRESS
                             enc_button.when_pressed = (
                                 lambda button: cls.encoder_button_callback(button)
                             )
                             return
-                        logger.debug("[Board] Double press detected (2).")
+                        logger.debug("Double press detected (2).")
                         cls.encoder_input = EncoderInput.DOUBLE_PRESS
                         enc_button.when_pressed = (
                             lambda button: cls.encoder_button_callback(button)
                         )
                         return
-            logger.debug("[Board] Single press detected (1).")
+            logger.debug("Single press detected (1).")
             cls.encoder_input = EncoderInput.SINGLE_PRESS
             enc_button.when_pressed = lambda button: cls.encoder_button_callback(button)
             return
@@ -445,10 +438,10 @@ class Board:
         """
         if duration_in_seconds <= 0:
             logger.warning(
-                "[Board] Duration for loading animation must be positive. Skipped."
+                "Duration for loading animation must be positive. Skipped."
             )
             return
-        logger.debug("[Board] Starting loading animation.")
+        logger.debug("Starting loading animation.")
         start_time = time.time()
         while time.time() - start_time < duration_in_seconds:
             elapsed = time.time() - start_time
@@ -456,7 +449,7 @@ class Board:
             frame = CustomFrames.loading(percentage)
             if frame is None:
                 logger.error(
-                    "[Board] CustomFrames.loading() returned None. Ensure CustomFrames.init() was called."
+                    "CustomFrames.loading() returned None. Ensure CustomFrames.init() was called."
                 )
                 break
             cls.matrix.SetImage(frame)
@@ -467,9 +460,9 @@ class Board:
             cls.matrix.SetImage(final_frame)
             time.sleep(0.5)
 
-        logger.debug("[Board] Loading animation completed.")
+        logger.debug("Loading animation completed.")
         black_frame = CustomFrames.black()
         if black_frame is not None:
             cls.matrix.SetImage(black_frame)
             time.sleep(0.5)
-        logger.debug("[Board] Display cleared after loading animation.")
+        logger.debug("Display cleared after loading animation.")

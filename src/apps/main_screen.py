@@ -56,7 +56,7 @@ class MainScreen(Application):
         if self.use_24_hour not in [True, False]:
             self.status = ServiceStatus.ERROR_APP_CONFIG
             logger.error(
-                "[MainScreen App] Invalid use_24_hour value. Must be True or False."
+                "Invalid use_24_hour value. Must be True or False."
             )
         self.date_format = Configuration.get_from_app_config(
             self.__class__.__name__, "date_format", required=True
@@ -64,7 +64,7 @@ class MainScreen(Application):
         if self.date_format != "MM-DD" and self.date_format != "DD-MM":
             self.status = ServiceStatus.ERROR_APP_CONFIG
             logger.error(
-                "[MainScreen App] Invalid date format. Possible values are 'MM-DD' or 'DD-MM'."
+                "Invalid date format. Possible values are 'MM-DD' or 'DD-MM'."
             )
         self.cycle_duration_in_seconds = Configuration.get_from_app_config(
             self.__class__.__name__, "cycle_duration_in_seconds", required=True
@@ -72,14 +72,14 @@ class MainScreen(Application):
         if self.cycle_duration_in_seconds <= 0:
             self.status = ServiceStatus.ERROR_APP_CONFIG
             logger.error(
-                "[MainScreen App] Invalid cycle duration in seconds. Must be greater than 0."
+                "Invalid cycle duration in seconds. Must be greater than 0."
             )
         try:
             self.font = ImageFont.truetype(PathTo.FONT_FILE, FONT_SIZE)
-            logger.info("[MainScreen App] Font loaded successfully.")
+            logger.info("Font loaded successfully.")
         except Exception as e:
             self.status = ServiceStatus.ERROR_APP_CONFIG
-            logger.error(f"[MainScreen App] Failed to load font: {e}")
+            logger.error(f"Failed to load font: {e}")
 
         self.lastGenerateCall = None
         self.is_on_cycle = True
@@ -104,7 +104,7 @@ class MainScreen(Application):
             }
         except Exception as e:
             self.status = ServiceStatus.ERROR_APP_CONFIG
-            logger.error(f"[MainScreen App] Failed to load backgrounds: {e}")
+            logger.error(f"Failed to load backgrounds: {e}")
 
         self.theme_list = [
             self.generate_sakura_bg,
@@ -166,7 +166,7 @@ class MainScreen(Application):
             return frame
         except Exception as e:
             self.status = ServiceStatus.ERROR_APP_INTERNAL
-            logger.error(f"[MainScreen App] Error generating frame: {e}")
+            logger.error(f"Error generating frame: {e}")
             return self.generate_on_error()
 
     def generate_sakura_bg(self):

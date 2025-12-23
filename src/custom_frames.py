@@ -27,7 +27,7 @@ class CustomFrames:
 
         cls.led_rows = led_rows
         cls.led_cols = led_cols
-        logger.debug("[CustomFrames] Custom frames initialized.")
+        logger.debug("Custom frames initialized.")
 
     @classmethod
     def loading(cls, percentage: int) -> Image:
@@ -87,7 +87,7 @@ class CustomFrames:
             or error_status == ServiceStatus.RUNNING
         ):
             logger.error(
-                f"[{cls.__name__}] The app is not going under availability issue. status: {error_status.name}"
+                f"The app is not going under availability issue. status: {error_status.name}"
             )
             return cls.black()
 
