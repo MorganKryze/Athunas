@@ -19,16 +19,6 @@ Carousel is a Raspberry Pi Zero-powered LED matrix display framework designed to
 - [ ] Youtube subscribers count
 - [ ] ...
 
-### Functionalities
-
-- [x] Logging system
-- [x] One-file configuration
-- [x] Makefile
-- [ ] Comprehensive documentation to add new apps
-- [ ] Web interface to manage the apps
-- [ ] CAD files for 3D printing
-- [ ] ...
-
 ## Documentation
 
 Comprehensive guides to help you get started:
