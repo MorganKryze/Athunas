@@ -73,18 +73,19 @@ def __main__() -> None:
                     Board.reset_encoder_state()
 
                 current_app: Application = AppManager.get_current_app()
-                frame: Image = current_app.generate(
+                generated_frame: Image = current_app.generate(
                     Board.tilt_state, Board.encoder_input
                 )
-                frame_bytes = frame.tobytes()
+                
+                display_frame = generated_frame if Board.is_display_on else CustomFrames.black()
+                if display_frame.mode != "RGB":
+                    display_frame = display_frame.convert("RGB")
+                
+                frame_bytes = display_frame.tobytes()
+                
                 if frame_bytes != previous_frame_bytes:
-                    previous_frame = frame
+                    previous_frame = display_frame
                     previous_frame_bytes = frame_bytes
-                    display_frame = (
-                        frame if Board.is_display_on else CustomFrames.black()
-                    )
-                    if display_frame.mode != "RGB":
-                        display_frame = display_frame.convert("RGB")
                     Board.matrix.SetImage(display_frame)
 
                 Board.reset_encoder_input_status()
