@@ -2,7 +2,7 @@
 
 from loguru import logger
 
-from config import Configuration
+from core.config import Configuration
 from enums.service_status import ServiceStatus
 
 

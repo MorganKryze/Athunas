@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional, Tuple
 import spotipy
 from loguru import logger
 
-from config import Configuration
+from core.config import Configuration
 from enums.variable_importance import Importance
 
 # Constants

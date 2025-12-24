@@ -8,10 +8,10 @@ from typing import Any, Dict, List
 import websocket
 from loguru import logger
 
-from config import Configuration
+from core.config import Configuration
 from enums.service_status import ServiceStatus
 from models.module import Module
-from webserver import WebServer
+from core.webserver import WebServer
 
 
 class Notifications(Module):

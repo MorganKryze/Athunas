@@ -2,7 +2,7 @@ from loguru import logger
 from PIL import Image, ImageDraw, ImageFont
 
 from enums.service_status import ServiceStatus
-from path import PathTo
+from core.path import PathTo
 
 # Constants
 FONT_SIZE = 5

@@ -4,8 +4,8 @@ from datetime import datetime
 
 from loguru import logger
 
-from config import Configuration
-from path import PathTo
+from core.config import Configuration
+from core.path import PathTo
 
 
 class Logs:

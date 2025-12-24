@@ -8,13 +8,13 @@ from dateutil import tz
 from loguru import logger
 from PIL import Image, ImageDraw, ImageFont
 
-from board import Board
-from config import Configuration
+from core.board import Board
+from core.config import Configuration
 from enums.encoder_input import EncoderInput
 from enums.service_status import ServiceStatus
 from enums.tilt_input import TiltState
 from models.application import Application
-from path import PathTo
+from core.path import PathTo
 
 light_pink = (255, 219, 218)
 dark_pink = (219, 127, 142)

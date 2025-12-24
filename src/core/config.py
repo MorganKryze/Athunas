@@ -8,7 +8,7 @@ from typing import Any, Dict
 import yaml
 from loguru import logger
 
-from path import PathTo
+from core.path import PathTo
 
 
 class Configuration:

@@ -7,11 +7,11 @@ from loguru import logger
 from PIL import Image, ImageDraw
 from scipy.signal import convolve2d
 
-from board import Board
-from config import Configuration
+from core.board import Board
+from core.config import Configuration
 from enums.encoder_input import EncoderInput
 from enums.variable_importance import Importance
-from path import PathTo
+from core.path import PathTo
 
 
 class GameOfLifeScreen:

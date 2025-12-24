@@ -5,13 +5,13 @@ from typing import Callable, Dict
 from loguru import logger
 from PIL import Image, ImageDraw, ImageFont
 
-from board import Board
-from config import Configuration
+from core.board import Board
+from core.config import Configuration
 from enums.encoder_input import EncoderInput
 from enums.service_status import ServiceStatus
 from enums.tilt_input import TiltState
 from models.application import Application
-from path import PathTo
+from core.path import PathTo
 
 # Constants
 DEFAULT_FONT_SIZE = 5

@@ -7,7 +7,7 @@ from loguru import logger
 from pyowm.owm import OWM
 from pyowm.weatherapi25.weather_manager import WeatherManager
 
-from config import Configuration
+from core.config import Configuration
 from enums.variable_importance import Importance
 
 # Constants

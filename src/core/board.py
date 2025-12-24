@@ -6,8 +6,8 @@ from gpiozero import Button, RotaryEncoder
 from gpiozero.pins.pigpio import PiGPIOFactory
 from loguru import logger
 
-from config import Configuration
-from custom_frames import CustomFrames
+from core.config import Configuration
+from core.custom_frames import CustomFrames
 from enums.encoder_input import EncoderInput
 from enums.tilt_input import TiltState
 

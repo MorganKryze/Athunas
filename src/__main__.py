@@ -4,14 +4,14 @@ import time
 from loguru import logger
 from PIL import Image
 
-from app_manager import AppManager
-from board import Board
-from config import Configuration
-from custom_frames import CustomFrames
+from core.app_manager import AppManager
+from core.board import Board
+from core.config import Configuration
+from core.custom_frames import CustomFrames
 from enums.encoder_input import EncoderInput
-from logs import Logs
+from core.logs import Logs
 from models.application import Application
-from path import PathTo
+from core.path import PathTo
 
 
 @logger.catch

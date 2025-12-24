@@ -4,7 +4,7 @@ from typing import Callable, Dict, List, Optional
 from loguru import logger
 
 from apps import gif_viewer, main_screen, pomodoro
-from board import Board
+from core.board import Board
 from models.application import Application
 from models.module import Module
 
