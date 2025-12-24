@@ -44,18 +44,17 @@ def __main__() -> None:
     # server = WebServer()
     # TODO: port should be configurable
     # server.start(port=9000, debug=args.debug)
-
-    previous_frame: Image = CustomFrames.black()
-    previous_frame_bytes = previous_frame.tobytes()
-    logger.info("Entering main loop.")
-
+    
     profiler = None
     if args.profile:
         profiler = cProfile.Profile()
         profiler.enable()
         logger.info("Profiling enabled.")
 
+    previous_frame: Image = CustomFrames.black()
+    previous_frame_bytes = previous_frame.tobytes()
     next_tick = time.time()
+    logger.info("Entering main loop.")
     while True:
         try:
             # TODO: remove this check when webserver is implemented with new config and workflow

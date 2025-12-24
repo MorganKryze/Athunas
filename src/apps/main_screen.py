@@ -121,6 +121,10 @@ class MainScreen(Application):
         self.status = ServiceStatus.RUNNING
         logger.info(f"[{self.__class__.__name__}] Running.")
 
+        self.last_sakura_frame = None
+        self.last_sakura_time = None
+        self.last_sakura_on_cycle = None
+
     def generate(self, tilt_state: TiltState, encoder_input: EncoderInput) -> Image:
         """
         Generate the frame for the MainScreen app.
@@ -171,6 +175,16 @@ class MainScreen(Application):
 
     def generate_sakura_bg(self):
         current_time = datetime.now(tz=tz.tzlocal())
+
+        if (
+            self.last_sakura_frame is not None
+            and self.last_sakura_time is not None
+            and current_time.minute == self.last_sakura_time.minute
+            and current_time.hour == self.last_sakura_time.hour
+            and self.is_on_cycle == self.last_sakura_on_cycle
+        ):
+            return self.last_sakura_frame
+
         month = current_time.month
         day = current_time.day
         hours = current_time.hour
@@ -222,6 +236,12 @@ class MainScreen(Application):
         #         draw.rectangle((37, 29, 38, 30), fill=messengerColor)
 
         #     self.old_noti_list = noti_list
+
+        #     self.old_noti_list = noti_list
+
+        self.last_sakura_frame = frame
+        self.last_sakura_time = current_time
+        self.last_sakura_on_cycle = self.is_on_cycle
 
         return frame
 
