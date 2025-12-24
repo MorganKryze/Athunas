@@ -45,6 +45,7 @@ def __main__() -> None:
     previous_frame: Image = CustomFrames.black()
     previous_frame_bytes = previous_frame.tobytes()
     logger.info("Entering main loop.")
+    next_tick = time.time()
     while True:
         try:
             # TODO: remove this check when webserver is implemented with new config and workflow
@@ -76,7 +77,10 @@ def __main__() -> None:
 
                 Board.reset_encoder_input_status()
 
-            time.sleep(Board.refresh_rate)
+            next_tick += Board.refresh_rate
+            sleep_time = next_tick - time.time()
+            if sleep_time > 0:
+                time.sleep(sleep_time)
         except KeyboardInterrupt:
             logger.info("Program stopped by user.")
             Board.matrix.SetImage(CustomFrames.black())
