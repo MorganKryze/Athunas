@@ -10,10 +10,10 @@ from core.app_manager import AppManager
 from core.board import Board
 from core.config import Configuration
 from core.custom_frames import CustomFrames
-from enums.encoder_input import EncoderInput
 from core.logs import Logs
-from models.application import Application
 from core.path import PathTo
+from enums.encoder_input import EncoderInput
+from models.application import Application
 
 
 @logger.catch
@@ -80,9 +80,12 @@ def __main__() -> None:
                 if frame_bytes != previous_frame_bytes:
                     previous_frame = frame
                     previous_frame_bytes = frame_bytes
-                    Board.matrix.SetImage(
+                    display_frame = (
                         frame if Board.is_display_on else CustomFrames.black()
                     )
+                    if display_frame.mode != "RGB":
+                        display_frame = display_frame.convert("RGB")
+                    Board.matrix.SetImage(display_frame)
 
                 Board.reset_encoder_input_status()
 
