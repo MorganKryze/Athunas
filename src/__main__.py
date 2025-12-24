@@ -1,4 +1,6 @@
 import argparse
+import cProfile
+import pstats
 import time
 
 from loguru import logger
@@ -19,6 +21,7 @@ def __main__() -> None:
     parser = argparse.ArgumentParser(description="Carousel LED matrix controller")
     parser.add_argument("--debug", action="store_true", help="Run with debug console")
     parser.add_argument("--emulator", action="store_true", help="Run in emulator mode")
+    parser.add_argument("--profile", action="store_true", help="Enable profiling")
     args = parser.parse_args()
 
     PathTo.set_base_directory()
@@ -45,6 +48,13 @@ def __main__() -> None:
     previous_frame: Image = CustomFrames.black()
     previous_frame_bytes = previous_frame.tobytes()
     logger.info("Entering main loop.")
+
+    profiler = None
+    if args.profile:
+        profiler = cProfile.Profile()
+        profiler.enable()
+        logger.info("Profiling enabled.")
+
     next_tick = time.time()
     while True:
         try:
@@ -84,6 +94,13 @@ def __main__() -> None:
         except KeyboardInterrupt:
             logger.info("Program stopped by user.")
             Board.matrix.SetImage(CustomFrames.black())
+
+            if profiler:
+                profiler.disable()
+                stats = pstats.Stats(profiler).sort_stats("cumtime")
+                stats.print_stats(20)
+                logger.info("Profiling stats printed.")
+
             break
 
 
