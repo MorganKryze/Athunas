@@ -125,6 +125,11 @@ class MainScreen(Application):
         self.last_sakura_time = None
         self.last_sakura_on_cycle = None
 
+        self.last_cloud_frame = None
+        self.last_cloud_time = None
+
+        self.last_forest_frame = None
+
     def generate(self, tilt_state: TiltState, encoder_input: EncoderInput) -> Image:
         """
         Generate the frame for the MainScreen app.
@@ -162,6 +167,7 @@ class MainScreen(Application):
             frame = self.theme_list[self.currentIdx % len(self.theme_list)]()
 
             if self.selectMode:
+                frame = frame.copy()
                 draw = ImageDraw.Draw(frame)
                 draw.rectangle(
                     (0, 0, Board.led_cols - 1, Board.led_rows - 1), outline=white
@@ -247,6 +253,14 @@ class MainScreen(Application):
 
     def generate_cloud_bg(self):
         currentTime = datetime.now(tz=tz.tzlocal())
+
+        if (
+            self.last_cloud_frame is not None
+            and self.last_cloud_time is not None
+            and currentTime.second == self.last_cloud_time.second
+        ):
+            return self.last_cloud_frame
+
         month = currentTime.month
         day = currentTime.day
         hours = currentTime.hour
@@ -343,10 +357,16 @@ class MainScreen(Application):
                 font=self.font,
             )
 
+        self.last_cloud_frame = frame
+        self.last_cloud_time = currentTime
+
         return frame.convert("RGB")
 
     def generate_forest_bg(self):
+        if self.last_forest_frame is not None:
+            return self.last_forest_frame
         frame = self.backgrounds["forest"].copy()
+        self.last_forest_frame = frame
         return frame
 
 
